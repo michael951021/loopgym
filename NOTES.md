@@ -34,6 +34,12 @@ State for next run (<4KB). Evidence: .agent-evidence/*.log.
   (acc p·w); bwd_w 1 prog/V-tile (row loop, no atomics); f64 ok. Registered iff CUDA or
   TRITON_INTERPRET=1. GOTCHA: interpret block cap 1048576 -> C<=1024; masked V cols s=-inf;
   target-acc init -inf. strict incl. model: triton-accept2.log.
+- `kernels/token_logprobs(h,w,t,impl,chunk)->[T]`: chunked online max/LSE, bwd per-chunk
+  softmax (no [T,V] saved); impls torch, cpp. 12/12 known (0.5B==HF 1e-3, f64 gradcheck);
+  peak << 1/8 naive. Keep input dtype.
+  cpp: csrc/logprob_cpu.cpp JIT (ninja dep, .tools/build, -O3 -fopenmp), OpenMP over T
+  fwd, f32+f64; bwd = C++ logprob_bwd (chunked -g*exp(s-lse)+g@tgt; dS@w_c / dS.T@h);
+  6/6 -k cpp incl. f64 gradcheck (cppbwd-accept.log).
 
 ## RL
 - `grpo.py` group_advantages/kl_k3/policy_loss; 7/7 known.
