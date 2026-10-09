@@ -58,3 +58,7 @@
 - Goal: Toy known-answer configs
 - Approach: Cloned smoke.toml shape for the two configs, wrote the checker over metrics.jsonl train lines with OLS slope bootstrap, tested verdicts on synthetic pass/fail data, then ran the real 2-step CLI probe (46 s, exit 0, range 1-5 min written in the ticket before the run) and make check/known.
 - Blockers: none — noted observation: step-1 banana reward 0.281 exceeds the 0.2 gate start (instruct model); flagged in NOTES.md and the commit for the 60-step run to confirm or rule out per rule 5.
+## vLLM rollout backend with weight sync
+- Goal: vLLM rollout backend with weight sync
+- Approach: (no summary given)
+- Blockers: none
