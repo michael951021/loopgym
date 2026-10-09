@@ -9,12 +9,12 @@ Next-run state; evidence .agent-evidence/*.log.
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
 - `eval/run.py`: --model/--adapter | --reference; seed+idx*100+i/sample; sidecar
-  <out>.samples.jsonl resume; ref val pass@1 1.000. GOTCHA: splits.json values are
+  <out>.samples.jsonl resume. GOTCHA: splits.json values are
   dicts; loopgym src NotImplementedError.
 - `tools/check_results.py` (--only/--results-dir): baselines/benches/toy; PENDING != FAIL.
-  BASECHECK (rule 5): base05 0.0833 < 0.10 floor -> blocks done. 6 causes ruled out
-  (recompute, 36/36 regrade 0mm, split audit, trunc 0/8@1024, parse, prompt byte-audit
-  atk3). n=16 rerun (run:) TODO.md:116; range author decides.
+  BASECHECK (rule 5): base05 0.0833 < 0.10 floor -> blocks done; 6 causes ruled out
+  (metric, regrade, split, trunc, parse, prompt+proto atk3-4). n=16 rerun =
+  ticket TODO.md:116 (id basen16, unrun); range author rules.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
