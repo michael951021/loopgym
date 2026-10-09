@@ -66,8 +66,6 @@ State for next run; evidence: .agent-evidence/*.log.
   but must COLLECT at both commits (import error -> "error"); getattr-style asserts.
 - `state/verify/batch1.md`: candidates.jsonl order = score order; one unchecked step/run,
   first wins; vb1 needs all 12 verdicts. 5/12 verified (all bad 0/3, good 3/3).
-  first wins; vb1 only when all 12 have verdicts. 4/12 verified (#1-4, all
-  bad 0/3, good 3/3).
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: `find DIR -mindepth 1 -delete`,
@@ -76,4 +74,4 @@ State for next run; evidence: .agent-evidence/*.log.
 - RLIMIT_NPROC=64 counts ALL uid-1000 -> transient Cannot fork (tests /bin/sleep).
 - torch 2.14 FSDP2: fully_shard auto-inits env://; rank() pre-init 0.
 - NOTES.md: merges duplicate lines; condense.
-- .venv: no pip; `uv pip install --python .venv/bin/python P` (pandas, pyarrow).
+- .venv: no pip; `uv pip install --python .venv/bin/python P`.
