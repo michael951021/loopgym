@@ -62,7 +62,10 @@ State for next run; evidence in .agent-evidence/*.log.
   141 cands, 3/3 recall.
 - `data/verify.py`: verify(cand,check_dir) worktrees bad+good, copy hidden check to fresh
   dir, 3x/side local-runner -> verified/inverted/flaky/error, append verified.jsonl.
-  Makefile check ignores tests/hidden. draftlab-alpha verified (0/3,3/3). [draftlab] extra.
+  Makefile check ignores tests/hidden. draftlab-alpha verified (0/3,3/3).
+- `state/verify/batch1.md`: candidates 1-12 (file order of candidates.jsonl = score order,
+  mine.py sorts -lines,id; no score field). One unchecked step per run, first wins; vb1
+  milestone checks only when all 12 have verdicts.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: `find DIR -mindepth 1 -delete`,
