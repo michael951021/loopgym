@@ -24,8 +24,8 @@ Current state for the next run (keep < 4 KB).
 - `lgbox.py`: LgboxClient (httpx; retries 503 honoring Retry-After, 120 s budget) + `_http`
   runner = RUNNERS["http"] (pristine tests + solution file, pytest --junitxml=r.xml,
   outputs ["r.xml"], mem_mb 2048). runner_names() adds "http" iff LOOPGYM_LGBOX_URL set.
-  tools/lgbox_smoke.sh: release build, serve on free port, strict test_reward.py both runners
-  -> 18/18, zero server panics. FIXED pre-existing read_tail panic (lib.rs: read >=
+  tools/lgbox_smoke.sh: strict test_reward.py both runners -> 18/18. FIXED pre-existing
+  read_tail panic (lib.rs: read >=
   4 KB underflowed `chunk[TAIL-n..]` -> spurious reward 0; now `chunk[n-TAIL..n]`,
   regression test kept). 7/7 tests/test_lgbox.py (MockTransport).
   Evidence: lgboxpy-{smoke2,makecheck}.log.
@@ -42,6 +42,10 @@ Current state for the next run (keep < 4 KB).
   lgbox_runs_total{ok|nonzero|timeout|rejected}, run_seconds, queue_depth, workers_busy;
   all outcomes pre-materialized). 2/2 lib + 8/8 integration tests. Evidence: lgboxmet-*,
   lgboxpy-*.log (all exit 0).
+- `tools/bench_lgbox.py` (2026-10-09): val refs x local/http x c1/4/16 ->
+  results/lgbox_bench.json (grades/s, p50/p95, reward gate, c1 overhead<50ms); spawns
+  release server (w16 q64; --url to reuse). --quick 11.5 s, 120/120 reward 1.
+  Evidence: lgboxbench-*.log. Full run = next job lgboxbench.
 
 ## RL (w2, done 2026-10-09)
 - `rl/grpo.py`: group_advantages/kl_k3/policy_loss per CLAUDE.md; known 7/7.
