@@ -27,7 +27,7 @@ Current state for the next run (keep < 4 KB).
   tools/lgbox_smoke.sh: strict test_reward.py both runners -> 18/18. FIXED pre-existing
   read_tail panic (lib.rs: read >=
   4 KB underflowed `chunk[TAIL-n..]` -> spurious reward 0; now `chunk[n-TAIL..n]`,
-  regression test). 7/7 test_lgbox.py (MockTransport).
+  regression test). 7/7 test_lgbox.py.
   Evidence: lgboxpy-{smoke2,makecheck}.log.
 - `toy.py`: ToyTask (banana: "banana" ci in first 20 tokens; coinflip: 0.5 seeded by
   (step, index), text-blind). 12/12 test_toy.py.
