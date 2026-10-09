@@ -70,3 +70,15 @@
 - Goal: C++ CPU kernel backward
 - Approach: templated per-chunk C++ backward mirroring the fwd's chunked structure; discriminating pre-state probe (no logprob_bwd symbol) + new regression test vs naive log-softmax autograd; gradcheck f64 as known answer
 - Blockers: first regression run failed on a dropped sign (-gp written +gp); caught by the f64 1e-10 comparison, fixed in one line
+## Log-prob bench script
+- Goal: Log-prob bench script
+- Approach: Reused the f64 reference/tolerance from tests/known, probed torch profiler output to find a reliable CPU peak (function_events self sums were broken; [memory] event cumulative Total Allocated max works), benched triton-under-interpreter at T=1 with a flag since interpreter time is overhead, not kernel performance
+- Blockers: torch 2.14 kineto function_events memory accounting returned bogus peaks (negative parent self values) — worked around by parsing the exported chrome trace's cumulative allocations
+## Log-prob bench run
+- Goal: Log-prob bench run
+- Approach: compute job benchlp ran OMP_NUM_THREADS=8 .venv/bin/python tools/bench_logprob.py (exit 0)
+- Blockers: none
+## CUDA kernel source, compile-checked
+- Goal: CUDA kernel source, compile-checked
+- Approach: acceptance-first (pre-run fail logged); .venv-nvcc from pip CUDA 13.2.86 wheels (cu12 wheels ship no nvcc driver; 12.9 cannot compile on gcc15/glibc2.43); pure-CUDA fwd/bwd mirroring csrc/logprob_cpu.cpp math; torch binding + cuda_ext.py register "cuda" only where torch.cuda.is_available() (host); binding g++ -c bonus against torch headers
+- Blockers: 13.x nvcc resolves the toolkit root from argv[0] (needs <root>/bin/nvcc wrapper); nvidia-nvvm must match ptxas version or PTX is rejected

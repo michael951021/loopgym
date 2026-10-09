@@ -142,6 +142,11 @@ try:
 except Exception as _e:
     print(f"loopgym.kernels: cpp kernel not built ({_e}); torch-only", file=sys.stderr)
 
+# Triton is usable on a GPU host or in the interpreter (sandbox, CLAUDE.md rule 2).
+if os.environ.get("TRITON_INTERPRET") == "1" or torch.cuda.is_available():
+    from . import triton_logprob
+    register_impl("triton", triton_logprob.triton_impl)
+
 # "cuda" only where torch has CUDA (host, not this sandbox): JIT build, same API as cpp.
 if torch.cuda.is_available():
     try:
