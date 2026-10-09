@@ -51,8 +51,8 @@ Current state for the next run (keep < 4 KB).
   `find DIR -mindepth 1 -delete`, never `rm DIR` (EBUSY).
 - rust pin: static.rust-lang.org 404s for 1.100.0/1.101.0 (dist lag vs channel toml); 1.99.0 verified.
 - ruff 0.16 defaults drifted (adds I/EXE) — rule set pinned in [tool.ruff.lint].
-- Version probes in bootstrap.sh are format-fragile: shellcheck prints `version:` (lowercase),
-  tflint prints two lines. Fix the awk if a version bump changes output.
+- bootstrap.sh version probes are format-fragile (shellcheck prints `version:`, tflint two
+  lines); fix the awk if a version bump changes output.
 - tests/known/ has unsorted/unused imports (I001/F401) — Kevin's, read-only; left as-is.
 
 ## Data / known tests
