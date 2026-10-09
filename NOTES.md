@@ -13,9 +13,18 @@ Current state for the next run (keep < 4 KB).
 - venv: torch 2.14.1+cpu (CPU index via [tool.uv.sources]; nvidia-guard in
   tests/test_bootstrap.py), transformers 5.19.0, peft, safetensors, accelerate, numpy,
   pydantic, httpx, pytest, ruff, tomli-w. Deps locked in uv.lock (committed).
-- loopgym/ exists only with __init__.py; `make known` will fail until the real modules exist
-  (expected; boot acceptance is bootstrap+check+check_known+imports, all green).
+- loopgym/ has __init__.py + models.py; `make known` still fails until env/kernels exist (expected).
 - Evidence: .agent-evidence/boot-cleanslate.log (clean-slate, exit 0, 67s), boot-accept3.log.
+
+## Models (models — done 2026-10-09)
+- `loopgym/models.py`: fetch (snapshot_download, weights+tokenizer+min metadata), info,
+  tiny_config (2L/d64/4H/2KV/V512). CLI: `python -m loopgym.models {fetch,info}`.
+- Both models downloaded to models/ (bind mount): 0.5b 954 MB, 1.5b 3.09 GB, single
+  model.safetensors each, BF16. info: 494,032,768 / 1,543,714,304 params, vocab=151936,
+  tokenizers byte-identical, 2.3 s. Param counts == HF from_pretrained live count (0.5b).
+- GOTCHA: 151936 is config vocab_size (embedding dim); tokenizer length is 151,643. Kernel and
+  training numbers refer to 151936.
+- Evidence: .agent-evidence/models-fetch.log, models-info2.log; unit tests in tests/test_models.py.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS (shared between agents): clear with
