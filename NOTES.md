@@ -67,9 +67,9 @@ Next-run state; evidence: .agent-evidence/.
 - `data/verify.py`: worktrees bad+good + pristine check 3x/side -> verified.jsonl;
   checks may import worktree code, must COLLECT at both (import error -> "error");
   Makefile ignores tests/hidden.
-- `state/verify/batch1.md`: first unchecked step wins; vb1: all 12 verdicts;
-  8/12 verified (bad 0/3, good 3/3). draftlab data/ gitignored -> hidden checks
-  use a temp root + synthetic fixtures.
+- `state/verify/batch1.md`: first unchecked step wins; vb1: 9/12 verified.
+  draftlab data/ gitignored -> hidden checks use temp root + synthetic fixtures.
+  jaxlm checks: jax[cpu] in .venv; chi2 via jax.scipy.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: `find D -mindepth 1 -delete`,
