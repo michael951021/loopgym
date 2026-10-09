@@ -1,0 +1,20 @@
+# Trainer smoke config: tiny model, toy banana task, 3 steps.
+# Run: .venv/bin/python -m loopgym.rl.train --config configs/smoke.toml
+model = "tiny"
+lora_r = 4
+lora_alpha = 8
+lora_targets = ["q_proj", "k_proj", "v_proj", "o_proj"]
+task = "toy"
+toy_task = "banana"
+batch = 2
+group = 4
+max_new_tokens = 16
+temperature = 1.0
+lr = 0.01
+beta = 0.0
+clip = 0.2
+steps = 3
+eval_every = 1
+save_every = 1
+seed = 42
+out = "runs/smoke"
