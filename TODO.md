@@ -59,7 +59,7 @@
   why: the planted effect and null control from CLAUDE.md, ready to run as jobs.
 - [x] **Toy banana run** — (id: toybanana) (after: toycfg) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
   why: must learn the planted reward.
-- [ ] **Toy null run** — (id: toynull) (after: toycfg) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_null.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
+- [x] **Toy null run** — (id: toynull) (after: toycfg) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_null.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
   why: must not learn noise.
 - [ ] **Check toy known answers** — run `.venv/bin/python tools/toy_check.py`; write results/toy.json (both curves' first/last means, slope CIs) and 3 lines in NOTES.md. If it exits 1, do not adjust thresholds: find the bug (use tests/test_batch.py style checks on the failing piece), fix it, and add a `- [ ]` re-run line for the toy jobs. Done when `.venv/bin/python tools/toy_check.py` exits 0. (id: toyok) (after: toybanana, toynull)
   why: the gate before any real GRPO run; a trainer that fails it has a bug, not a finding.
