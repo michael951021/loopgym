@@ -55,3 +55,27 @@ def test_unknown_impl_raises():
     except KeyError:
         return
     raise AssertionError("expected KeyError")
+
+
+@pytest.mark.skipif(torch.cuda.is_available(), reason="cuda impl active with a GPU")
+def test_cuda_not_registered_without_gpu():
+    assert "cuda" not in kernels.IMPLS
+
+
+@pytest.mark.skipif("cuda" not in kernels.IMPLS, reason="cuda kernel not built")
+def test_cuda_backward_matches_reference():
+    """CUDA logprob_bwd (via autograd) == naive log-softmax autograd; f64 tight, f32 loose.
+    Host-only: the known suite does not exercise bwd_w, so this is the bwd_w correctness gate."""
+    g = torch.Generator().manual_seed(7)
+    for dt, atol in ((torch.float64, 1e-10), (torch.float32, 1e-4)):
+        h = torch.randn(9, 16, generator=g, dtype=dt, device="cuda", requires_grad=True)
+        w = torch.randn(40, 16, generator=g, dtype=dt, device="cuda", requires_grad=True)
+        t = torch.randint(0, 40, (9,), generator=g, device="cuda")
+        gh, gw = torch.autograd.grad(kernels.token_logprobs(h, w, t, impl="cuda", chunk=7).sum(),
+                                     (h, w))
+        h2 = h.detach().clone().double().cpu().requires_grad_(True)
+        w2 = w.detach().clone().double().cpu().requires_grad_(True)
+        t2 = t.cpu()
+        gh2, gw2 = torch.autograd.grad(ref(h2, w2, t2).sum(), (h2, w2))
+        assert torch.allclose(gh.double().cpu(), gh2, atol=atol), (dt, "grad_h")
+        assert torch.allclose(gw.double().cpu(), gw2, atol=atol), (dt, "grad_w")

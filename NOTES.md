@@ -28,11 +28,14 @@ Current state for next run (keep <4KB). Evidence: .agent-evidence/*.log.
 
 ## Kernel
 - `kernels/token_logprobs(h,w,t,impl,chunk)->[T]`: chunked online max/LSE, bwd per-chunk
-  softmax (no [T,V] saved); impls torch, cpp. 12/12 known (0.5B==HF 1e-3, f64 gradcheck);
-  peak << 1/8 naive. Keep input dtype.
-  cpp: csrc/logprob_cpu.cpp JIT (ninja dep, .tools/build, -O3 -fopenmp), OpenMP over T
-  fwd, f32+f64; bwd = C++ logprob_bwd (chunked -g*exp(s-lse)+g@tgt; dS@w_c / dS.T@h);
-  6/6 -k cpp incl. f64 gradcheck (cppbwd-accept.log).
+  softmax (no [T,V] saved); impls torch, cpp, cuda (host-only reg). 12/12 known
+  (0.5B==HF 1e-3, f64 gradcheck); peak << 1/8 naive. Keep input dtype.
+  cpp: csrc/logprob_cpu.cpp JIT (.tools/build, -O3 -fopenmp), OpenMP fwd, f32+f64;
+  C++ bwd (dS@w_c / dS.T@h); 6/6 -k cpp.
+  cuda: csrc/logprob_cuda* (pure CUDA + binding); bootstrap_cuda.sh
+  -> .venv-nvcc (pip CUDA 13.2.86; cu12 wheels lack nvcc; 12.9 fails
+  gcc15/glibc2.43). Reg iff torch.cuda (host); compile-checked here;
+  host gates: known + test_cuda_backward_matches_reference (bwd_w not in known).
 
 ## RL
 - `grpo.py` group_advantages/kl_k3/policy_loss; 7/7 known.

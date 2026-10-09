@@ -142,6 +142,15 @@ try:
 except Exception as _e:
     print(f"loopgym.kernels: cpp kernel not built ({_e}); torch-only", file=sys.stderr)
 
+# "cuda" only where torch has CUDA (host, not this sandbox): JIT build, same API as cpp.
+if torch.cuda.is_available():
+    try:
+        from . import cuda_ext
+        cuda_ext._load_cuda()
+        register_impl("cuda", cuda_ext._cuda_impl)
+    except Exception as _e:
+        print(f"loopgym.kernels: cuda kernel not built ({_e})", file=sys.stderr)
+
 
 def token_logprobs(hidden, weight, targets, impl="torch", chunk=8192):
     """Log-prob of each target token. hidden [T, d] (final hidden states), weight [V, d]
