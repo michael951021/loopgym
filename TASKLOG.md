@@ -82,3 +82,7 @@
 - Goal: CUDA kernel source, compile-checked
 - Approach: acceptance-first (pre-run fail logged); .venv-nvcc from pip CUDA 13.2.86 wheels (cu12 wheels ship no nvcc driver; 12.9 cannot compile on gcc15/glibc2.43); pure-CUDA fwd/bwd mirroring csrc/logprob_cpu.cpp math; torch binding + cuda_ext.py register "cuda" only where torch.cuda.is_available() (host); binding g++ -c bonus against torch headers
 - Blockers: 13.x nvcc resolves the toolkit root from argv[0] (needs <root>/bin/nvcc wrapper); nvidia-nvvm must match ptxas version or PTX is rejected
+## Eval CLI
+- Goal: Eval CLI
+- Approach: (no summary given)
+- Blockers: none
