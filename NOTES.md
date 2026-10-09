@@ -10,10 +10,10 @@ Current state for the next run (keep < 4 KB).
 - `make check` = ruff (E4/E7/E9/F, tests/known excluded) + pytest tests (minus known) +
   cargo test lgbox/ + shellcheck + hadolint + terraform init -backend=false && validate
   (last three skip until lgbox/, deploy/ exist). `make known` = check_known.sh (kevin-only
-  authors, clean worktree) + strict pytest tests/known. test_grpo 7/7 + test_reward 9/9 strict;
-  still red: {test_logprob,test_stats}.py import loopgym.rl/kernels/eval (not built yet).
+  authors, clean worktree) + strict pytest tests/known. Red: test_logprob/test_stats (need
+  loopgym.rl.kernels/eval).
 - venv: torch 2.14.1+cpu (CPU index [tool.uv.sources]), transformers 5.19.0, peft, safetensors,
-  accelerate, numpy, pydantic, httpx, pytest, ruff, tomli-w; uv.lock committed.
+  accelerate, numpy, pydantic, httpx, pytest, ruff, tomli-w.
 
 ## Models (models — done 2026-10-09)
 - `loopgym/models.py`: fetch/info CLI (`python -m loopgym.models`), tiny_config (2L/d64/4H/2KV/V512);
@@ -25,33 +25,28 @@ Current state for the next run (keep < 4 KB).
 ## Env: exercism + toy + splits (done 2026-10-09)
 - `loopgym/env/exercism.py`: Task (stub/reference/prompt/parse) + load_exercise; runner_names()=["local"]:
   fresh tmpdir, pristine tests + ONLY solution file, pytest junit XML, new process group, SIGKILL on
-  timeout; reward 1 iff tests>0, no failures/errors/skips. Evidence: .agent-evidence/exercism-{accept2,makecheck3}.log.
+  timeout; reward 1 iff tests>0, no failures/errors/skips. Evidence: .agent-evidence/exercism-*.log.
 - `loopgym/env/toy.py`: ToyTask (prompt "Name a fruit.", parse→reply.txt), load_toy("banana"|"coinflip");
   grade(task, files, step, index) → (reward, info), in-process; `env.grade` dispatches on ToyTask
   (kwargs w/ defaults, exercism path unchanged). banana = 1 iff "banana" (ci) in decode of first 20
   tokens (tokenizer cached); coinflip = 1 w.p. 0.5 from random.Random(f"...:{step}:{index}"), ignores
   text. Known: "I like Banana"=1, "apple"=0, "fig "*21+"banana"=0; coinflip 10k mean 0.4945,
-  text-independent. 12/12 test_toy.py, known reward 9/9. Evidence: .agent-evidence/toy-{makecheck2,makeknown}.log.
+  text-independent. 12/12 test_toy.py, known reward 9/9. Evidence: .agent-evidence/toy-*.log.
 - `loopgym/env/splits.py`: audit() grades ref+stub of all 142 practice exercises (4 threads, local);
   `python -m loopgym.env.splits` writes results/env_audit.json (unusable + reason) and
   results/splits.json. bucket(name) = sha1 % 100: train<70, val<85, test. 137/142 usable;
   splits 101/9/27. Unusable: alphametics, error-handling (ref=0), ledger, markdown (stub=1 — leaky
-  tests), parallel-letter-frequency (ref timeout). Evidence: .agent-evidence/splits-{accept,makecheck}.log.
+  tests), parallel-letter-frequency (ref timeout). Evidence: .agent-evidence/splits-*.log.
 
 ## Pinned sources (vsrc — done 2026-10-09)
 - `tools/fetch_src.sh`: latest stable vllm/deepspeed/trl from PyPI → read-only
   .tools/src/<name>-<version>/; pins in tools/versions.txt (vllm=0.31.0, deepspeed=0.19.7, trl=1.15.0);
   never installs into .venv; vllm wheel = aarch64, deepspeed = sdist.
-  Evidence: .agent-evidence/vsrc-{fetch,rerun,makecheck}.log (exit 0).
+  Evidence: .agent-evidence/vsrc-*.log.
 
-## RL: GRPO math (grpo — done 2026-10-09)
-- `loopgym/rl/grpo.py`: group_advantages(rewards[B,G], scale="std"|"none", eps=1e-6) = (r−mean)/
-  (sample_std+eps) per row (Bessel std; constant row → 0); kl_k3(logp,ref) = exp(d)−d−1,
-  d=ref−logp; policy_loss(logp,old,ref,adv[B],mask[B,T], clip_eps, kl_coef, agg) →
-  (loss, {clip_frac, kl, ratio_mean}): ratio=exp(logp−old), obj=min(ratio·A, clip(ratio)·A)−β·k3;
-  token-mean = −Σobj·mask/Σmask, seq-mean = per-row masked mean then row mean; clip_frac
-  sign-aware over masked tokens. 7/7 tests/known/test_grpo.py (incl. 200k-sample k3 unbiasedness);
-  make check green. Evidence: .agent-evidence/grpo-{first,known1,makecheck}.log.
+## RL (grpo — done 2026-10-09)
+- `loopgym/rl/grpo.py`: group_advantages/kl_k3/policy_loss per CLAUDE.md "Key definitions";
+  known 7/7 (tests/known/test_grpo.py). Evidence: .agent-evidence/grpo-*.log.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS (shared): clear with `find DIR -mindepth 1 -delete`, never `rm DIR` (EBUSY).
