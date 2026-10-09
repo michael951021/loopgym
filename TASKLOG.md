@@ -10,3 +10,7 @@
 - Goal: Model downloads
 - Approach: acceptance-first (info failed on missing module, then passed on real downloads); params/dtype read from safetensors headers without loading weights; unit tests pin tiny_config and the header reader
 - Blockers: none — one spec subtlety (151936 = config vocab, tokenizer length is 151643) resolved by checking config.json and noted in NOTES.md
+## Pinned third-party sources
+- Goal: Pinned third-party sources
+- Approach: curl PyPI JSON per package, python3 stdlib picks latest non-prerelease + wheel-over-sdist, unzip/tar into .tools/src, sed/append pin; verified with the two rg checks, PyPI sha256 digest, idempotent re-run, make check
+- Blockers: none
