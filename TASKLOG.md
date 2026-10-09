@@ -14,3 +14,7 @@
 - Goal: Pinned third-party sources
 - Approach: curl PyPI JSON per package, python3 stdlib picks latest non-prerelease + wheel-over-sdist, unzip/tar into .tools/src, sed/append pin; verified with the two rg checks, PyPI sha256 digest, idempotent re-run, make check
 - Blockers: none
+## Exercism tasks and local grader
+- Goal: Exercism tasks and local grader
+- Approach: read the known test for the exact API, verified the exercism layout via .meta/config.json (paasio has 2 test files), wrote the runner with start_new_session + SIGKILL process group and XML-based reward, then ran the strict known tests first (ImportError), implemented, and added unit tests for parse/prompt.
+- Blockers: none
