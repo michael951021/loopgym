@@ -9,13 +9,12 @@ Current state for the next run (keep < 4 KB).
   + hadolint + terraform validate. `make known` = kevin-only + clean worktree + strict known.
 
 ## Eval
-- `eval/stats.py` bootstrap_ci(values,groups)->(mean,lo,hi), resamples task groups.
-  `eval/passk.py` pass_at_k product form (Chen 2021) + summarize per-task + task CI. 4/4+5/5 known.
+- `bootstrap_ci(values,groups)->(mean,lo,hi)`; `pass_at_k` (Chen 2021), CI over tasks.
+  4/4+5/5 known.
 
 ## Models
-- `loopgym/models.py` fetch/info; tiny_config (2L/d64/V512); `tiny_tokenizer()` cached
-  vocab-400 byte-BPE chat tok (Qwen role tags, full byte alphabet -> no <unk>).
-  GOTCHA: config vocab 151936 (training) vs tokenizer len 151,643.
+- `tiny_config` (2L/d64/V512); `tiny_tokenizer()` vocab-400 byte-BPE, Qwen tags, full
+  byte alphabet (no <unk>). GOTCHA: config vocab 151936 (training) vs tok len 151,643.
 
 ## Env
 - `exercism.py`: fresh tmpdir, pristine tests + ONLY solution, junit XML, pgroup SIGKILL;
@@ -52,12 +51,15 @@ Current state for the next run (keep < 4 KB).
 - `dist.py` FSDP2: init_dist (env://; standalone file://), wrap_fsdp (fully_shard per layer
   + root), full_state_dict (collective), global_mean_loss. Equiv 2 ranks x b == single 2b:
   param diff 0.0.
-- `tools/fetch_src.sh`: vllm/deepspeed/trl -> read-only .tools/src/; pins versions.txt.
+- Toy gates: configs/toy_{banana,null}.toml (0.5b r16 B4 G8 24tok lr5e-5 β0 60st);
+  `tools/toy_check.py [--dir runs]`: means steps 0-4/55-59 + bootstrap slope CI; exit 1
+  unless banana <0.2->>0.8 and null CI ∋ 0. Probe 2st 46s (~21 s/step; 60st ≈ 21 min).
+  OBS: step-1 banana reward 0.281 > 0.2 gate start -> toybanana run risks start criterion.
 
 ## Data
 - tests/known/ = Kevin's (rule 1); data/raw/ = host export. `data/mine.py`: keyword fixes x
-  blame of deleted lines -> (bad,good) pairs, diff <=200 lines/4 files + 3 seeds; 141 cands,
-  3/3 recall. .gitignore: /data/ absolute.
+  blame -> (bad,good) pairs, <=200 lines/4 files + 3 seeds; 141 cands, 3/3 recall.
+  .gitignore: /data/ absolute.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: `find DIR -mindepth 1 -delete`,
