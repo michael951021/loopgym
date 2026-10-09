@@ -18,3 +18,7 @@
 - Goal: Exercism tasks and local grader
 - Approach: read the known test for the exact API, verified the exercism layout via .meta/config.json (paasio has 2 test files), wrote the runner with start_new_session + SIGKILL process group and XML-based reward, then ran the strict known tests first (ImportError), implemented, and added unit tests for parse/prompt.
 - Blockers: none
+## Exercise audit and splits
+- Goal: Exercise audit and splits
+- Approach: wrote failing acceptance first, then audit() with ThreadPoolExecutor over load_exercise/grade, pure sha1-bucket split function, and tests/test_splits.py (published sha1 value, bucket/disjointness checks, 3-fixture mini-audit graded with real pytest).
+- Blockers: none (one self-inflicted fixture bug — "bad ref" x+2 actually passed f(2)==4 — caught by the test and fixed).
