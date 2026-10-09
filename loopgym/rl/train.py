@@ -300,7 +300,7 @@ def trim_metrics(mpath: Path, step: int) -> None:
     if not mpath.is_file():
         return
     lines = mpath.read_text().splitlines(keepends=True)
-    keep = [l for l in lines if l.strip() and json.loads(l)["step"] <= step]
+    keep = [ln for ln in lines if ln.strip() and json.loads(ln)["step"] <= step]
     if len(keep) != len(lines):
         mpath.write_text("".join(keep))
         print(f"dropped {len(lines) - len(keep)} metrics rows past checkpoint step {step}")
