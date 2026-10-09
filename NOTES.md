@@ -10,8 +10,8 @@ Current state for the next run (keep < 4 KB).
 - `make check` = ruff (E4/E7/E9/F, tests/known excluded) + pytest tests (minus known) +
   cargo test lgbox/ + shellcheck + hadolint + terraform init -backend=false && validate
   (last three skip until lgbox/, deploy/ exist). `make known` = check_known.sh (kevin-only
-  authors, clean worktree) + strict pytest tests/known. Still red: {test_grpo,test_logprob,
-  test_stats}.py import loopgym.rl/kernels/eval (not built); test_reward.py 9/9 strict.
+  authors, clean worktree) + strict pytest tests/known. test_grpo 7/7 + test_reward 9/9 strict;
+  still red: {test_logprob,test_stats}.py import loopgym.rl/kernels/eval (not built yet).
 - venv: torch 2.14.1+cpu (CPU index [tool.uv.sources]), transformers 5.19.0, peft, safetensors,
   accelerate, numpy, pydantic, httpx, pytest, ruff, tomli-w; uv.lock committed.
 
@@ -43,6 +43,15 @@ Current state for the next run (keep < 4 KB).
   .tools/src/<name>-<version>/; pins in tools/versions.txt (vllm=0.31.0, deepspeed=0.19.7, trl=1.15.0);
   never installs into .venv; vllm wheel = aarch64, deepspeed = sdist.
   Evidence: .agent-evidence/vsrc-{fetch,rerun,makecheck}.log (exit 0).
+
+## RL: GRPO math (grpo — done 2026-10-09)
+- `loopgym/rl/grpo.py`: group_advantages(rewards[B,G], scale="std"|"none", eps=1e-6) = (r−mean)/
+  (sample_std+eps) per row (Bessel std; constant row → 0); kl_k3(logp,ref) = exp(d)−d−1,
+  d=ref−logp; policy_loss(logp,old,ref,adv[B],mask[B,T], clip_eps, kl_coef, agg) →
+  (loss, {clip_frac, kl, ratio_mean}): ratio=exp(logp−old), obj=min(ratio·A, clip(ratio)·A)−β·k3;
+  token-mean = −Σobj·mask/Σmask, seq-mean = per-row masked mean then row mean; clip_frac
+  sign-aware over masked tokens. 7/7 tests/known/test_grpo.py (incl. 200k-sample k3 unbiasedness);
+  make check green. Evidence: .agent-evidence/grpo-{first,known1,makecheck}.log.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS (shared): clear with `find DIR -mindepth 1 -delete`, never `rm DIR` (EBUSY).
