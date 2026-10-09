@@ -1,10 +1,11 @@
 """GRPO training loop and CLI: sample tasks, rollout, grade, one GRPO step per step.
 
-`python -m loopgym.rl.train --config configs/X.toml [--resume] [--field value ...]`
+`python -m loopgym.rl.train --config configs/X.toml [--resume | --resume-if-any] [--field value ...]`
 
 Exact resume: the checkpoint stores the step count, the LoRA adapter, the optimizer
 state, and both RNG states (task sampling and torch). A killed run resumed with
---resume continues the step counter and the data order exactly.
+--resume continues the step counter and the data order exactly. Compute jobs use
+--resume-if-any, so the same command line starts the run and continues it after a kill.
 """
 from __future__ import annotations
 
@@ -293,17 +294,37 @@ def ckpt_dir(cfg: TrainCfg) -> Path:
     return out.parent.parent / "ckpt" / out.name
 
 
-def run(cfg: TrainCfg, resume: bool) -> None:
+def trim_metrics(mpath: Path, step: int) -> None:
+    """Drop metrics rows past the checkpoint's step: a run killed between saves logged
+    steps that the resumed run will redo, and must not appear twice."""
+    if not mpath.is_file():
+        return
+    lines = mpath.read_text().splitlines(keepends=True)
+    keep = [ln for ln in lines if ln.strip() and json.loads(ln)["step"] <= step]
+    if len(keep) != len(lines):
+        mpath.write_text("".join(keep))
+        print(f"dropped {len(lines) - len(keep)} metrics rows past checkpoint step {step}")
+
+
+def run(cfg: TrainCfg, resume: bool | str) -> None:
+    """resume: False = fresh run, True = must continue a checkpoint, "auto" = continue
+    one if it exists, else start fresh (what a retried compute job needs)."""
     out, ck = Path(cfg.out), ckpt_dir(cfg)
+    mpath = metrics_path(cfg)
     have_ckpt = (ck / "state.json").is_file()
+    if resume == "auto":
+        resume = have_ckpt
+        if not have_ckpt and mpath.is_file():   # died before its first save: nothing to continue
+            mpath.rename(mpath.with_name(mpath.name + ".discarded"))
+            print(f"no checkpoint at {ck}; moved {mpath} aside and starting fresh")
     if resume and not have_ckpt:
         raise SystemExit(f"nothing to resume: no checkpoint at {ck}")
-    if not resume and (have_ckpt or metrics_path(cfg).is_file()):
-        raise SystemExit(f"{ck} or {metrics_path(cfg)} already exists; use --resume or a new out")
+    if not resume and (have_ckpt or mpath.is_file()):
+        raise SystemExit(f"{ck} or {mpath} already exists; use --resume or a new out")
     run_ = Run(cfg)
     if resume:
         run_.restore(ck)
-    mpath = metrics_path(cfg)
+        trim_metrics(mpath, run_.step)
     mpath.parent.mkdir(parents=True, exist_ok=True)
     start = run_.step + 1
     if start > cfg.steps:
@@ -332,6 +353,8 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m loopgym.rl.train")
     ap.add_argument("--config", required=True)
     ap.add_argument("--resume", action="store_true")
+    ap.add_argument("--resume-if-any", action="store_true",
+                    help="resume if a checkpoint exists, else start fresh (for retried jobs)")
     ap.add_argument("--dist", choices=("fsdp", "deepspeed"), default="fsdp")
     ap.add_argument("--dry-run", action="store_true")
     args, extra = ap.parse_known_args(argv)
@@ -340,7 +363,7 @@ def main(argv: list[str] | None = None) -> int:
     overrides = {}
     for i in range(0, len(extra), 2):
         key = extra[i].lstrip("-").replace("-", "_")
-        if not key or key in ("config", "resume", "dist", "dry_run"):
+        if not key or key in ("config", "resume", "resume_if_any", "dist", "dry_run"):
             ap.error(f"unexpected argument {extra[i]!r}")
         overrides[key] = extra[i + 1]
     if args.dry_run:
@@ -350,7 +373,9 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(_ds.engine_cfg(_ds.load_train_doc(args.config)), indent=2, sort_keys=True))
         return 0
     cfg = load_cfg(args.config, overrides)
-    run(cfg, resume=args.resume)
+    if args.resume and args.resume_if_any:
+        ap.error("--resume and --resume-if-any are exclusive")
+    run(cfg, resume="auto" if args.resume_if_any else args.resume)
     return 0
 
 
