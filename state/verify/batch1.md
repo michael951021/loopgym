@@ -23,7 +23,7 @@ NOTES.md, and stop.
 > why: each verified check turns one real agent-shipped defect into an RL task.
 
 - [x] **Check draftlab-7953937-0c66ede** — draftlab 7953937..0c66ede, files NOTES.md, README.md, REPORT.md, tools/check_report.py: Corrected REPORT: recompute all numbers from results/, run-level CIs, Corrections section. Verdict: verified (bad 0/3, good 3/3)
-- [ ] **Check harness-520444c-4b0c866** — harness 520444c..4b0c866, files ab/polyglot-review/spec.toml, lib/ab.py, lib/abreview.py: Ticket replays (ab/ticket-review): tasks may live in other projects (task project/base/scratch) and replay a real…. Verdict: (fill in)
+- [x] **Check harness-520444c-4b0c866** — harness 520444c..4b0c866, files ab/polyglot-review/spec.toml, lib/ab.py, lib/abreview.py: Ticket replays (ab/ticket-review): tasks may live in other projects (task project/base/scratch) and replay a real…. Verdict: verified (bad 0/3, good 3/3)
 - [ ] **Check draftlab-fda7335-ca4403c** — draftlab fda7335..ca4403c, files results/alpha/ngram.json: results: hold-out alpha (14 runs, run-level CIs); partial 0.5B sweep on the fixed engine…. Verdict: (fill in)
 - [ ] **Check draftlab-e8f8ebb-fe264e9** — draftlab e8f8ebb..fe264e9, files NOTES.md, results/alpha/ngram.json, results/alpha/target.json: alpha: regenerate stale results with fixed counting — alpha(T,T)=1.0000. Verdict: (fill in)
 - [ ] **Check draftlab-f14caf0-1fc3f9e** — draftlab f14caf0..1fc3f9e, files results/sweep.parquet.part-lora_dpo-8-0.0.jsonl: sweep batch2: complete lora_dpo k=8 cell; check_sweep_batch2 PASS. Verdict: (fill in)
