@@ -284,3 +284,70 @@ async fn queue_overflow_503() {
     assert_eq!(st1, 200);
     assert_eq!(http(port, "GET", "/health", None).await.0, 200);
 }
+
+/// Value of a Prometheus series (exact `name{labels}` prefix), if present.
+fn metric_val(text: &str, series: &str) -> Option<f64> {
+    text.lines()
+        .find(|l| l.starts_with(series) && !l.starts_with('#'))
+        .and_then(|l| l.split_whitespace().last())
+        .and_then(|v| v.parse().ok())
+}
+
+#[tokio::test]
+async fn metrics_counts_exact() {
+    let port = start(2, 8).await;
+
+    // run 1: ok (exit 0)
+    let b1 = run_body(vec![], vec!["/bin/echo".into(), "hi".into()], 5, 256, vec![]);
+    let (st, _, _) = http(port, "POST", "/run", Some(b1)).await;
+    assert_eq!(st, 200);
+
+    // run 2: nonzero (exit 3)
+    let b2 = run_body(
+        vec![],
+        vec!["sh".into(), "-c".into(), "exit 3".into()],
+        5,
+        256,
+        vec![],
+    );
+    let (st, _, _) = http(port, "POST", "/run", Some(b2)).await;
+    assert_eq!(st, 200);
+
+    // run 3: timeout (sleep 30 @ timeout 1)
+    let b3 = run_body(vec![], vec!["/bin/sleep".into(), "30".into()], 1, 256, vec![]);
+    let (st, _, _) = http(port, "POST", "/run", Some(b3)).await;
+    assert_eq!(st, 200);
+
+    let (st, hdrs, text) = http(port, "GET", "/metrics", None).await;
+    assert_eq!(st, 200, "metrics endpoint missing");
+    assert!(
+        hdrs
+            .get("content-type")
+            .map(|c| c.starts_with("text/plain"))
+            .unwrap_or(false),
+        "expected text/plain, got {:?}",
+        hdrs.get("content-type")
+    );
+
+    // exact outcome counts: 1/1/1, none rejected
+    assert_eq!(metric_val(&text, r#"lgbox_runs_total{outcome="ok"}"#), Some(1.0));
+    assert_eq!(
+        metric_val(&text, r#"lgbox_runs_total{outcome="nonzero"}"#),
+        Some(1.0)
+    );
+    assert_eq!(
+        metric_val(&text, r#"lgbox_runs_total{outcome="timeout"}"#),
+        Some(1.0)
+    );
+    assert_eq!(
+        metric_val(&text, r#"lgbox_runs_total{outcome="rejected"}"#),
+        Some(0.0)
+    );
+
+    // histogram observed all 3 completed runs
+    assert_eq!(metric_val(&text, "lgbox_run_seconds_count"), Some(3.0));
+
+    // gauges drained to 0 now that every response has been received
+    assert_eq!(metric_val(&text, "lgbox_queue_depth"), Some(0.0));
+    assert_eq!(metric_val(&text, "lgbox_workers_busy"), Some(0.0));
+}

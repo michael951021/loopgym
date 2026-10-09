@@ -26,3 +26,7 @@
 - Goal: lgbox server with process backend
 - Approach: std::process::Command in spawn_blocking with pre_exec setpgid+setrlimit, try_wait vs deadline then killpg(SIGKILL); mpsc(Q) queue with semaphore-capped workers; raw-HTTP integration tests on 127.0.0.1:0 covering echo, sleep-30 timeout survivors, fork bomb, 2 GB alloc, 400s, 503 count.
 - Blockers: transient shared-machine load pushed uid-1000 task count past RLIMIT_NPROC=64 so sh's fork hit EAGAIN; fixed by execing /bin/sleep directly and documenting the interaction in NOTES.md.
+## lgbox metrics
+- Goal: lgbox metrics
+- Approach: lgbox metrics ticket (id: lgboxmet) complete.
+- Blockers: none
