@@ -7,80 +7,42 @@ Current state for the next run (keep < 4 KB).
   uv 0.12.24, .venv py3.12.14, rust 1.99.0 minimal (.tools/{rust,cargo}), hadolint 2.15.1,
   shellcheck 0.11.0, terraform 1.16.5, tflint 0.64.0 in .tools/bin; evidence
   .agent-evidence/boot-cleanslate.log (exit 0).
-- `make check` = ruff (E4/E7/E9/F) + pytest (minus known) + cargo test in lgbox/ +
-  shellcheck + hadolint + terraform init -backend=false && validate (last three skip
-  until their files exist). `make known` = kevin-only worktree check + strict tests/known.
-- venv: torch 2.14.1+cpu, transformers 5.19.0, peft, safetensors, accelerate, numpy,
-  pydantic, httpx, pytest, ruff, tomli-w; uv.lock. Evidence: boot-cleanslate.log.
-- `make known` fails until rl/kernels/eval exist (pre-existing).
-- `make check` = ruff (E4/E7/E9/F, tests/known excluded) + pytest tests (minus known) +
-  cargo test lgbox/ + shellcheck + hadolint + terraform init -backend=false && validate
-  (last three skip until lgbox/, deploy/ exist). `make known` = check_known.sh (kevin-only
-  authors, clean worktree) + strict pytest tests/known. Red: test_logprob/test_stats (need
-  loopgym.rl.kernels/eval).
+- `make check` = ruff (E4/E7/E9/F, tests/known excluded) + pytest (minus known) + cargo test
+  lgbox/ + shellcheck + hadolint + terraform init -backend=false && validate (last three skip
+  until files exist). `make known` = kevin-only worktree check + strict tests/known; red until
+  loopgym/rl/kernels/eval exist (test_logprob, test_stats).
 - venv: torch 2.14.1+cpu (CPU index [tool.uv.sources]), transformers 5.19.0, peft, safetensors,
-  accelerate, numpy, pydantic, httpx, pytest, ruff, tomli-w.
+  accelerate, numpy, pydantic, httpx, pytest, ruff, tomli-w; uv.lock.
 
 ## Models (done 2026-10-09)
-- `loopgym/models.py`: fetch/info CLI, tiny_config (2L/d64/4H/2KV/V512). models/ (bind
-  mount): 0.5b 954 MB, 1.5b 3.09 GB, BF16; params 494,032,768 / 1,543,714,304 (== HF).
-- GOTCHA: 151936 = config vocab_size; tokenizer length 151,643.
-## Models (models — done 2026-10-09)
-- `loopgym/models.py`: fetch/info CLI (`python -m loopgym.models`), tiny_config (2L/d64/4H/2KV/V512);
-  both models in models/: 0.5b 954 MB / 1.5b 3.09 GB, BF16, single model.safetensors; params
-  494,032,768 / 1,543,714,304 == live HF count; tokenizers byte-identical.
-- GOTCHA: 151936 = config vocab (embedding dim), tokenizer length 151,643 (kernel/training use 151936).
-  Evidence: .agent-evidence/models-{fetch,info2}.log, tests/test_models.py.
+- `loopgym/models.py`: fetch/info CLI, tiny_config (2L/d64/4H/2KV/V512); models/ (bind mount):
+  0.5b 954 MB / 1.5b 3.09 GB, BF16; params 494,032,768 / 1,543,714,304 == HF.
+- GOTCHA: 151936 = config vocab (lm_head dim), tokenizer length 151,643 (training uses 151936).
 
-## Env (exercism — done 2026-10-09)
-- `loopgym/env/`: Task, load_exercise, grade(task, files, runner="local", timeout=30).
-  Local: fresh tmpdir, pristine tests + ONLY solution file, pytest junit XML, new pgroup,
-  SIGKILL on timeout; reward 1 iff tests>0 and no failures/errors/skips. 9/9 known strict.
-  Evidence: exercism-accept2.log.
 ## Env: exercism + toy + splits (done 2026-10-09)
-- `loopgym/env/exercism.py`: Task (stub/reference/prompt/parse) + load_exercise; runner_names()=["local"]:
-  fresh tmpdir, pristine tests + ONLY solution file, pytest junit XML, new process group, SIGKILL on
-  timeout; reward 1 iff tests>0, no failures/errors/skips. Evidence: .agent-evidence/exercism-*.log.
-- `loopgym/env/toy.py`: ToyTask (prompt "Name a fruit.", parse→reply.txt), load_toy("banana"|"coinflip");
-  grade(task, files, step, index) → (reward, info), in-process; `env.grade` dispatches on ToyTask
-  (kwargs w/ defaults, exercism path unchanged). banana = 1 iff "banana" (ci) in decode of first 20
-  tokens (tokenizer cached); coinflip = 1 w.p. 0.5 from random.Random(f"...:{step}:{index}"), ignores
-  text. Known: "I like Banana"=1, "apple"=0, "fig "*21+"banana"=0; coinflip 10k mean 0.4945,
-  text-independent. 12/12 test_toy.py, known reward 9/9. Evidence: .agent-evidence/toy-*.log.
-- `loopgym/env/splits.py`: audit() grades ref+stub of all 142 practice exercises (4 threads, local);
-  `python -m loopgym.env.splits` writes results/env_audit.json (unusable + reason) and
-  results/splits.json. bucket(name) = sha1 % 100: train<70, val<85, test. 137/142 usable;
-  splits 101/9/27. Unusable: alphametics, error-handling (ref=0), ledger, markdown (stub=1 — leaky
-  tests), parallel-letter-frequency (ref timeout). Evidence: .agent-evidence/splits-*.log.
-
-## Splits (done 2026-10-09)
-- `loopgym/env/splits.py`: audit() grades ref+stub of all 142 exercises; writes
-  results/env_audit.json + results/splits.json (bucket by sha1 % 100: train<70, val<85).
-  137/142 usable; splits 101/9/27. Unusable: alphametics, error-handling (ref=0),
-  ledger, markdown (stub=1 leaky), parallel-letter-frequency (timeout).
-- tests/test_splits.py (sha1 value, buckets, 3-fixture mini-audit). Evidence splits-accept.log.
+- `loopgym/env/exercism.py`: Task + load_exercise; local runner: fresh tmpdir, pristine tests +
+  ONLY solution file, pytest junit XML, new pgroup, SIGKILL on timeout; reward 1 iff tests>0,
+  no failures/errors/skips. Known reward 9/9 strict.
+- `loopgym/env/toy.py`: ToyTask (banana: 1 iff "banana" ci in first 20 tokens; coinflip: 1 w.p.
+  0.5 seeded by (step, index), text-blind); env.grade dispatches on ToyTask. Known: banana
+  "I like Banana"=1, "apple"=0, past-20=0; coinflip 10k mean 0.4945. 12/12 test_toy.py.
+- `loopgym/env/splits.py`: audit() grades ref+stub of 142 exercises → results/env_audit.json +
+  splits.json; bucket = sha1 % 100 (train<70, val<85, test). 137/142 usable; 101/9/27.
+  Unusable: alphametics, error-handling (ref=0), ledger, markdown (stub=1 leaky),
+  parallel-letter-frequency (timeout).
 
 ## lgbox (done 2026-10-09)
-- `lgbox serve --port P --workers N --queue Q` (axum 0.8/tokio/libc/tempfile): /run in
-  fresh tmpdir; pre_exec setpgid(0,0) + RLIMIT AS(mem_mb)/CPU(timeout+1s)/NPROC 64/
-  FSIZE 16MB; 4 KB stdout/stderr tails; try_wait vs deadline, killpg(SIGKILL) on timeout;
-  tempdir removed; N workers via semaphore, mpsc(Q) → 503+Retry-After:1; `..`/absolute/
-  empty paths → 400. /health.
-- tests/integration.rs, 7 real-process tests: echo known output; /bin/sleep 30 timeout 1
-  (wall 1.0–3.0 s, no /proc + kill -0 survivors); fork bomb and 2 GB alloc under 256 MB
-  AS die fast, server healthy; one 503 w/ Retry-After at workers=1 queue=1.
-- Evidence: lgbox-cargo-test.log (exit 0), lgbox-makecheck-*.log (make check exit 0).
+- `lgbox serve --port P --workers N --queue Q` (axum/tokio/libc/tempfile): /run in fresh tmpdir;
+  pre_exec setpgid(0,0) + RLIMIT AS(mem_mb)/CPU(timeout+1s)/NPROC 64/FSIZE 16MB; 4 KB tails;
+  killpg on timeout; N workers semaphore, mpsc(Q) → 503+Retry-After; `..`/absolute → 400; /health.
+- 7 real-process integration tests (echo, sleep timeout <3s no survivors, fork bomb, 2 GB
+  alloc, 503 overflow). Evidence: lgbox-cargo-test.log, lgbox-makecheck-*.log.
 
-## Pinned sources (done 2026-10-09)
-- `tools/fetch_src.sh`: vllm/deepspeed/trl stable → read-only .tools/src/<name>-<ver>/;
-  pins tools/versions.txt (vllm 0.31.0, deepspeed 0.19.7 sdist, trl 1.15.0). Never in .venv.
 ## Pinned sources (vsrc — done 2026-10-09)
-- `tools/fetch_src.sh`: latest stable vllm/deepspeed/trl from PyPI → read-only
-  .tools/src/<name>-<version>/; pins in tools/versions.txt (vllm=0.31.0, deepspeed=0.19.7, trl=1.15.0);
-  never installs into .venv; vllm wheel = aarch64, deepspeed = sdist.
-  Evidence: .agent-evidence/vsrc-*.log.
+- `tools/fetch_src.sh`: vllm/deepspeed/trl stable → read-only .tools/src/<name>-<ver>/; pins
+  tools/versions.txt (vllm 0.31.0, deepspeed 0.19.7 sdist, trl 1.15.0). Never in .venv.
 
-## RL (grpo — done 2026-10-09)
+## RL: GRPO math (grpo — done 2026-10-09)
 - `loopgym/rl/grpo.py`: group_advantages/kl_k3/policy_loss per CLAUDE.md "Key definitions";
   known 7/7 (tests/known/test_grpo.py). Evidence: .agent-evidence/grpo-*.log.
 
@@ -88,12 +50,10 @@ Current state for the next run (keep < 4 KB).
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS (shared): clear with `find DIR -mindepth 1 -delete`, never `rm DIR` (EBUSY).
 - rust pin: static.rust-lang.org 404s for 1.100.0/1.101.0 (dist lag); 1.99.0 verified.
 - ruff 0.16 defaults drifted (adds I/EXE) — rule set pinned in [tool.ruff.lint].
-- bootstrap.sh version probes format-fragile (shellcheck `version:`, tflint two lines).
-- tests/known/ has unsorted/unused imports — Kevin's, read-only.
+- bootstrap.sh version probes format-fragile (shellcheck/tflint output); fix the awk on version bumps.
+- tests/known/ has I001/F401 — Kevin's, read-only; left as-is.
 - RLIMIT_NPROC=64 counts ALL uid-1000 tasks; shared-machine load can push it past 64 and
-  untrusted-child forks EAGAIN (transient "Cannot fork"). Tests avoid sh-fork (/bin/sleep).
-- bootstrap.sh version probes are format-fragile (shellcheck/tflint output); fix the awk on version bumps.
-- tests/known/ has I001/F401 (unsorted/unused imports) — Kevin's, read-only; left as-is.
+  untrusted-child forks EAGAIN ("Cannot fork"). Tests use /bin/sleep, not sh-fork.
 
 ## Data
 - tests/known/ = Kevin's known-answer tests (read-only, rule 1); data/raw/ = host export:
