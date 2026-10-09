@@ -99,4 +99,8 @@ All three share Qwen's tokenizer (vocab 151936 for the real ones).
 - The model server holds ~21 GB of each 3090 while agents run, so GPU work needs the agents stopped:
   `scripts/gpu_run.sh` (Kevin) stops them, builds `.venv-gpu`, runs the known tests on CUDA/Triton, the vLLM-vs-HF
   check, then the 1.5B GRPO run (vLLM rollouts on GPU0, trainer on GPU1).
-- `deploy/aws/` Terraform + `scripts/aws_launch.sh` for the multi-node FSDP/DeepSpeed scaling runs (spot GPUs).
+- **Budget: $10 total for cloud, ever.** Training happens on the host 3090s. Multi-node is rehearsed for free with two
+  torchrun "nodes" on this host (`gpu_run.sh --two-node-local`). The AWS run is only a short scaling study: 2× spot
+  g4dn.xlarge (T4), 0.5B, 3 configs × 50 steps (~3 node-hours, expected < $2), with auto-terminate after max_hours,
+  a spot price cap, a $10 AWS Budget alert, and `aws_launch.sh` refusing any plan estimated over $10. Never add
+  always-on resources (NAT gateway, load balancer, S3 lifecycle-less buckets, larger instances) to the Terraform.
