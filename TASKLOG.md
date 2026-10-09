@@ -30,3 +30,11 @@
 - Goal: lgbox metrics
 - Approach: lgbox metrics ticket (id: lgboxmet) complete.
 - Blockers: none
+## Python client and http runner
+- Goal: Python client and http runner
+- Approach: (no summary given)
+- Blockers: none
+## lgbox throughput bench (job)
+- Goal: lgbox throughput bench (job)
+- Approach: script auto-spawns release lgbox server on a free port, sets LOOPGYM_LGBOX_URL so the real http runner path is graded, ThreadPoolExecutor per cell, nearest-rank p50/p95, reward-1.0 + c1-overhead<50ms checks in the JSON
+- Blockers: none
