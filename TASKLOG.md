@@ -46,3 +46,7 @@
 - Goal: HF rollout backend
 - Approach: read transformers 5.19 _sample source to confirm scores are post-warper fp32 logits, then built the backend + 3-test file on the real 0.5B and closed the 0.4-nat gap by disabling the model's shipped top_k/repetition-penalty defaults
 - Blockers: the instruct model's generation_config.json silently applied top_k=20 and repetition_penalty=1.05, giving a 0.4-nat log-prob gap until overridden
+## One GRPO step from completions
+- Goal: One GRPO step from completions
+- Approach: wrote failing tests first on tiny_config; verified mask against an independent log_softmax+gather, step-0 loss −9.9e-9 < 1e-6, +adv logp rose +0.211 nats / −adv fell −0.105 after one step, kl>0 post-step proves adapter disabled in ref; fixed transformers 5.x hidden_states[-1] and unbatched-kernel flattening along the way.
+- Blockers: none — the only real snag was my test's own advanced-indexing bug (slice+vector gives a cross-product, not a diagonal), which briefly looked like an implementation bug.
