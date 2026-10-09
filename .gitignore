@@ -1,0 +1,10 @@
+data/
+models/
+ckpt/
+runs/
+.tools/
+.venv*/
+.agent-evidence/
+target/
+__pycache__/
+*.egg-info/
