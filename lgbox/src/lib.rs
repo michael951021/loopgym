@@ -12,6 +12,7 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use tokio::sync::{mpsc, oneshot, Semaphore};
+use prometheus::{Encoder, Histogram, HistogramOpts, IntCounterVec, IntGauge, Opts, Registry, TextEncoder};
 
 const TAIL_BYTES: usize = 4096;
 const FSIZE_LIMIT: u64 = 16 * 1024 * 1024;
@@ -44,6 +45,70 @@ struct Job {
 
 pub struct AppState {
     tx: mpsc::Sender<Job>,
+    metrics: Metrics,
+}
+
+/// Prometheus series for the server. Handles are cheap clones (shared Arc);
+/// `registry` is used to render /metrics.
+#[derive(Clone)]
+pub struct Metrics {
+    pub registry: Registry,
+    pub runs: IntCounterVec,
+    pub run_seconds: Histogram,
+    pub queue_depth: IntGauge,
+    pub workers_busy: IntGauge,
+}
+
+impl Metrics {
+    fn new() -> Self {
+        let registry = Registry::new();
+        let runs = IntCounterVec::new(
+            Opts::new("lgbox_runs_total", "Total /run requests by outcome."),
+            &["outcome"],
+        )
+        .unwrap();
+        // Materialize every outcome so each series is present from the start.
+        for o in ["ok", "nonzero", "timeout", "rejected"] {
+            runs.with_label_values(&[o]);
+        }
+        let run_seconds = Histogram::with_opts(
+            HistogramOpts::new("lgbox_run_seconds", "Run wall time in seconds.")
+                .buckets(vec![
+                    0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0,
+                ]),
+        )
+        .unwrap();
+        let queue_depth =
+            IntGauge::with_opts(Opts::new("lgbox_queue_depth", "Accepted jobs not yet completed."))
+                .unwrap();
+        let workers_busy =
+            IntGauge::with_opts(Opts::new("lgbox_workers_busy", "Jobs currently executing."))
+                .unwrap();
+        registry.register(Box::new(runs.clone())).unwrap();
+        registry.register(Box::new(run_seconds.clone())).unwrap();
+        registry.register(Box::new(queue_depth.clone())).unwrap();
+        registry.register(Box::new(workers_busy.clone())).unwrap();
+        Metrics {
+            registry,
+            runs,
+            run_seconds,
+            queue_depth,
+            workers_busy,
+        }
+    }
+}
+
+/// Classify a finished run into the outcome label.
+fn outcome_of(out: &RunOut) -> &'static str {
+    if out.timed_out {
+        "timeout"
+    } else {
+        match out.exit_code {
+            Some(0) => "ok",
+            Some(_) => "nonzero",
+            None => "rejected", // runner error: no exit code produced
+        }
+    }
 }
 
 /// A path is bad if it is absolute, contains `..`, or is empty.
@@ -55,20 +120,24 @@ pub fn bad_path(p: &str) -> bool {
 /// that caps concurrency at `workers` (semaphore). Bind the returned Router
 /// to a socket of your choice (tests do this on 127.0.0.1:0).
 pub fn app(workers: usize, queue: usize) -> Router {
+    let metrics = Metrics::new();
     let (tx, rx) = mpsc::channel(queue.max(1));
     let sem = Arc::new(Semaphore::new(workers.max(1)));
-    tokio::spawn(dispatch(rx, sem));
+    tokio::spawn(dispatch(rx, sem, metrics.clone()));
     Router::new()
         .route("/run", post(run_handler))
         .route("/health", get(|| async { "ok" }))
-        .with_state(Arc::new(AppState { tx }))
+        .route("/metrics", get(metrics_handler))
+        .with_state(Arc::new(AppState { tx, metrics }))
 }
 
-async fn dispatch(mut rx: mpsc::Receiver<Job>, sem: Arc<Semaphore>) {
+async fn dispatch(mut rx: mpsc::Receiver<Job>, sem: Arc<Semaphore>, metrics: Metrics) {
     while let Some(job) = rx.recv().await {
         let sem = sem.clone();
+        let m = metrics.clone();
         tokio::spawn(async move {
             let _permit = sem.acquire().await.unwrap();
+            m.workers_busy.inc();
             let out = tokio::task::spawn_blocking(move || run_blocking(job.req))
                 .await
                 .unwrap_or_else(|e| RunOut {
@@ -79,9 +148,28 @@ async fn dispatch(mut rx: mpsc::Receiver<Job>, sem: Arc<Semaphore>) {
                     wall_ms: 0,
                     outputs: BTreeMap::new(),
                 });
+            m.workers_busy.dec();
+            m.runs.with_label_values(&[outcome_of(&out)]).inc();
+            m.run_seconds.observe(out.wall_ms as f64 / 1000.0);
+            m.queue_depth.dec();
             let _ = job.tx.send(out);
         });
     }
+}
+
+async fn metrics_handler(state: State<Arc<AppState>>) -> Response {
+    let encoder = TextEncoder::new();
+    let mut buf = Vec::new();
+    encoder
+        .encode(&state.metrics.registry.gather(), &mut buf)
+        .unwrap();
+    let body = String::from_utf8(buf).unwrap();
+    (
+        StatusCode::OK,
+        [(header::CONTENT_TYPE, encoder.format_type())],
+        body,
+    )
+        .into_response()
 }
 
 fn queue_full() -> Response {
@@ -96,6 +184,7 @@ fn queue_full() -> Response {
 async fn run_handler(state: State<Arc<AppState>>, Json(req): Json<RunReq>) -> Response {
     for p in req.files.keys().chain(req.outputs.iter()) {
         if bad_path(p) {
+            state.metrics.runs.with_label_values(&["rejected"]).inc();
             return (
                 StatusCode::BAD_REQUEST,
                 Json(serde_json::json!({"error": format!("bad path: {p}")})),
@@ -104,6 +193,7 @@ async fn run_handler(state: State<Arc<AppState>>, Json(req): Json<RunReq>) -> Re
         }
     }
     if req.cmd.is_empty() || req.timeout_s == 0 || req.mem_mb == 0 {
+        state.metrics.runs.with_label_values(&["rejected"]).inc();
         return (
             StatusCode::BAD_REQUEST,
             Json(serde_json::json!({"error": "cmd, timeout_s and mem_mb are required"})),
@@ -112,11 +202,18 @@ async fn run_handler(state: State<Arc<AppState>>, Json(req): Json<RunReq>) -> Re
     }
     let (tx, rx) = oneshot::channel();
     if state.tx.try_send(Job { req, tx }).is_err() {
+        state.metrics.runs.with_label_values(&["rejected"]).inc();
         return queue_full();
     }
+    state.metrics.queue_depth.inc();
     match rx.await {
         Ok(out) => (StatusCode::OK, Json(out)).into_response(),
-        Err(_) => queue_full(),
+        // Dispatcher dropped the job (shutdown): balance the gauge we bumped.
+        Err(_) => {
+            state.metrics.queue_depth.dec();
+            state.metrics.runs.with_label_values(&["rejected"]).inc();
+            queue_full()
+        }
     }
 }
 
