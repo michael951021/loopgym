@@ -94,3 +94,7 @@
 - Goal: Baseline 1.5B on Exercism val
 - Approach: compute job base15 ran OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-1.5b-instruct --source exercism --split val --n 4 --out results/eval/base15_val.json (exit 0)
 - Blockers: none
+## Toy banana run
+- Goal: Toy banana run
+- Approach: compute job toybanana ran OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --resume-if-any (exit 0)
+- Blockers: none

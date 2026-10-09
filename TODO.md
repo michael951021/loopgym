@@ -54,7 +54,7 @@
   why: the loop the jobs below run; exact resume matters because CPU jobs get killed and restarted.
 - [x] **Toy known-answer configs** — configs/toy_banana.toml and configs/toy_null.toml (Qwen2.5-Coder-0.5B, LoRA r=16 on q,k,v,o, B=4, G=8, max_new_tokens 24, lr 5e-5, β=0, 60 steps, save_every 10) and tools/toy_check.py: reads runs/toy_{banana,null}/metrics.jsonl, prints mean reward of steps 0-4 vs 55-59 and the bootstrap CI of the slope; exits 1 unless banana goes < 0.2 → > 0.8 and the null slope CI contains 0. Check: 2 steps of toy_banana run in < 5 min. Done when `.venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --steps 2 --out runs/toy_probe` exits 0. (id: toycfg) (after: train)
   why: the planted effect and null control from CLAUDE.md, ready to run as jobs.
-- [ ] **Toy banana run** — (id: toybanana) (after: toycfg) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
+- [x] **Toy banana run** — (id: toybanana) (after: toycfg) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
   why: must learn the planted reward.
 - [ ] **Toy null run** — (id: toynull) (after: toycfg) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_null.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
   why: must not learn noise.
