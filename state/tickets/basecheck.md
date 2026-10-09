@@ -79,6 +79,20 @@ compute job (resumes the sidecars, reuses samples 0–3, then re-runs the
 checker verdict). Until it lands, rule 5 blocks "done"; the range author
 must decide (accept with overlapping CI, or revise the floor).
 
+## Outcome — attempt 4 (2026-10-09)
+New angle: job-dispatch forensics (cause-hunting was exhausted at atk3).
+- Checker re-run first: single FAIL row unchanged (base05 0.0833 < 0.10);
+  base15 in range, 1.5B > 0.5B, CI overlap reported, reference 1.0 — all PASS.
+- `lib/jobs.py` (named by CLAUDE.md and TODO.md:5 as the job runner) exists in
+  no branch; TASKLOG.md shows jobs actually run via the harness ("compute job
+  base05 ran ... exit 0"). The n=16 re-run is a separate unchecked ticket
+  (TODO.md:116) whose (run:) job has not run: both sidecars still 36 lines (n=4).
+- TODO.md:116 was the only (run:) line lacking an (id:) tag; every executed job
+  line has one, and TASKLOG names jobs by id. Added (id: basen16) so the gate
+  job dispatches like the others.
+Blocker unchanged: rule 5 holds until the n=16 job lands and the range author
+rules (accept CI [0, 0.167] overlap, or revise the floor).
+
 ## Outcome — attempt 3 (2026-10-09)
 Closed the last open cause with non-circular evidence (attempts 1–2 used
 the pipeline itself; this is a direct spec comparison):

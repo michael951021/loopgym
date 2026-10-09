@@ -13,8 +13,8 @@ Next-run state; evidence .agent-evidence/*.log.
   dicts; loopgym src NotImplementedError.
 - `tools/check_results.py` (--only/--results-dir): baselines/benches/toy; PENDING != FAIL.
   BASECHECK (rule 5): base05 0.0833 < 0.10 floor -> blocks done. 6 causes ruled out
-  (recompute, 36/36 regrade 0mm, split audit, trunc 0/8@1024, parse, prompt byte-audit
-  atk3). n=16 rerun (run:) TODO.md:116; range author decides.
+  (recompute, 36/36 regrade, split, trunc, parse, prompt bytes atk3) + T=0.8 proto.
+  n=16 rerun = ticket TODO.md:116 (id basen16, not run); range author rules.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
