@@ -63,8 +63,13 @@ State for next run; evidence in .agent-evidence/*.log.
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files + 3 seeds;
   141 cands.
 - `data/verify.py`: worktrees bad+good + pristine check, 3x/side -> verified.jsonl;
-  Makefile check ignores tests/hidden. draftlab-alpha verified (0/3,3/3).
+  Makefile check ignores tests/hidden. draftlab-alpha verified (0/3,3/3). Checks may import
+  worktree code (PYTHONPATH=worktree) but must COLLECT at both commits (import error ->
+  "error" verdict); assert presence/behavior via getattr-style calls.
 - `state/verify/batch1.md`: 1/12 checked (#1 verified); one step/run, first wins.
+- `state/verify/batch1.md`: candidates 1-12 (file order of candidates.jsonl = score order,
+  mine.py sorts -lines,id; no score field). One unchecked step per run, first wins; vb1
+  milestone checks only when all 12 have verdicts. 2/12: #1 7953937, #2 520444c verified.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: `find DIR -mindepth 1 -delete`,
