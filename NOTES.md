@@ -65,7 +65,7 @@ State for next run; evidence: .agent-evidence/*.log.
   Makefile check ignores tests/hidden. Checks may import worktree code (PYTHONPATH=worktree)
   but must COLLECT at both commits (import error -> "error"); getattr-style asserts.
 - `state/verify/batch1.md`: candidates.jsonl order = score order; one unchecked step/run,
-  first wins; vb1 needs all 12 verdicts. 6/12 verified (all bad 0/3, good 3/3).
+  first wins; vb1 needs all 12 verdicts. 7/12 verified (all bad 0/3, good 3/3).
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: `find DIR -mindepth 1 -delete`,
