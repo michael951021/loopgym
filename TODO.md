@@ -107,7 +107,7 @@
   why: one evaluator for every model and checkpoint, with the reference run as its known answer.
 - [x] **Baseline 0.5B on Exercism val** — (id: base05) (after: evalcli) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-0.5b-instruct --source exercism --split val --n 4 --out results/eval/base05_val.json`) (mem: 12) (cpus: 8) (timeout: 8h)
   why: the number GRPO has to beat.
-- [ ] **Baseline 1.5B on Exercism val** — (id: base15) (after: base05) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-1.5b-instruct --source exercism --split val --n 4 --out results/eval/base15_val.json`) (mem: 16) (cpus: 8) (timeout: 12h)
+- [x] **Baseline 1.5B on Exercism val** — (id: base15) (after: base05) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-1.5b-instruct --source exercism --split val --n 4 --out results/eval/base15_val.json`) (mem: 16) (cpus: 8) (timeout: 12h)
   why: model-size known answer (1.5B > 0.5B) and the GPU run's starting point.
 - [ ] **Baselines on loopgym v0** — (id: baselg) (after: freeze, evalcli) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-0.5b-instruct --source loopgym --split test --n 4 --out results/eval/base05_loopgym.json && .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-1.5b-instruct --source loopgym --split test --n 4 --out results/eval/base15_loopgym.json`) (mem: 16) (cpus: 8) (timeout: 16h)
   why: how hard agent-shipped bugs are for small models (range 0–0.25).
