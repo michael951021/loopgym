@@ -42,3 +42,7 @@
 - Goal: lgbox bench run
 - Approach: compute job lgboxbench ran bash -c 'cd lgbox && PATH=/work/.tools/cargo/bin:$PATH cargo build --release && cd .. && .venv/bin/python tools/bench_lgbox.py' (exit 0)
 - Blockers: none
+## HF rollout backend
+- Goal: HF rollout backend
+- Approach: read transformers 5.19 _sample source to confirm scores are post-warper fp32 logits, then built the backend + 3-test file on the real 0.5B and closed the 0.4-nat gap by disabling the model's shipped top_k/repetition-penalty defaults
+- Blockers: the instruct model's generation_config.json silently applied top_k=20 and repetition_penalty=1.05, giving a 0.4-nat log-prob gap until overridden
