@@ -332,15 +332,23 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m loopgym.rl.train")
     ap.add_argument("--config", required=True)
     ap.add_argument("--resume", action="store_true")
+    ap.add_argument("--dist", choices=("fsdp", "deepspeed"), default="fsdp")
+    ap.add_argument("--dry-run", action="store_true")
     args, extra = ap.parse_known_args(argv)
     if len(extra) % 2:
         ap.error("overrides must be --key value pairs")
     overrides = {}
     for i in range(0, len(extra), 2):
         key = extra[i].lstrip("-").replace("-", "_")
-        if not key or key in ("config", "resume"):
+        if not key or key in ("config", "resume", "dist", "dry_run"):
             ap.error(f"unexpected argument {extra[i]!r}")
         overrides[key] = extra[i + 1]
+    if args.dry_run:
+        if args.dist != "deepspeed":
+            ap.error("--dry-run requires --dist deepspeed")
+        from loopgym.rl import ds as _ds
+        print(json.dumps(_ds.engine_cfg(_ds.load_train_doc(args.config)), indent=2, sort_keys=True))
+        return 0
     cfg = load_cfg(args.config, overrides)
     run(cfg, resume=args.resume)
     return 0
