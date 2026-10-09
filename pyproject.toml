@@ -1,0 +1,43 @@
+[project]
+name = "loopgym"
+version = "0.1.0"
+description = "RL post-training of a small coding model on bugs agents shipped"
+requires-python = ">=3.12"
+dependencies = [
+    "torch",
+    "transformers",
+    "safetensors",
+    "accelerate",
+    "peft",
+    "numpy",
+    "pydantic",
+    "httpx",
+    "pytest",
+    "ruff",
+    "tomli-w",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["loopgym"]
+
+[tool.ruff]
+# tests/known/ is Kevin's read-only known-answer tests (CLAUDE.md rule 1): never lint or reformat them.
+extend-exclude = ["tests/known"]
+
+[tool.ruff.lint]
+# Pin the rule set: ruff's defaults have drifted across releases (0.16 adds I/EXE), and the gate
+# must stay stable.
+select = ["E4", "E7", "E9", "F"]
+
+# CPU-only torch: the pytorch CPU index serves +cpu wheels without nvidia-* deps (CLAUDE.md rule 2).
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }

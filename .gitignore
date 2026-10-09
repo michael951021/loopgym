@@ -6,5 +6,6 @@ runs/
 .venv*/
 .agent-evidence/
 target/
+.terraform/
 __pycache__/
 *.egg-info/

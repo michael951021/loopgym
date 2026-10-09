@@ -1,0 +1,8 @@
+# Pinned versions for tools/bootstrap.sh (KEY=VERSION). Bump deliberately, not opportunistically.
+uv=0.12.24
+hadolint=2.15.1
+shellcheck=0.11.0
+terraform=1.16.5
+tflint=0.64.0
+# 1.100.0/1.101.0 are not on static.rust-lang.org yet (404); 1.99.0 verified present 2026-10-09.
+rust=1.99.0
