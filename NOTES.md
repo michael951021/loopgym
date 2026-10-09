@@ -3,8 +3,8 @@
 Next-run state; evidence .agent-evidence/*.log.
 
 ## Foundations
-- `make bootstrap`: .venv py3.12 (torch+cpu), rust 1.99.0.
-- `make check` = ruff+pytest+cargo+lints; `make known` strict.
+- `make bootstrap` (py3.12 torch+cpu, rust 1.99.0); `make check` = ruff+pytest+cargo+lints;
+  `make known` strict.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
@@ -12,9 +12,9 @@ Next-run state; evidence .agent-evidence/*.log.
   <out>.samples.jsonl resume; ref val pass@1 1.000. GOTCHA: splits.json values are
   dicts; loopgym src NotImplementedError.
 - `tools/check_results.py` (--only/--results-dir): baselines/benches/toy; PENDING != FAIL.
-  BASECHECK (rule 5): base05 0.0833 < 0.10 floor -> blocks done; prompt/grading/truncation
-  ruled out (basecheck-probe{512,1024,parse}.log: 9/9 match, 0/8 rec@1024, isogram
-  tautology 8/14). CI [0,0.167] overlaps range; range author's call.
+  BASECHECK (rule 5, atk 2): base05 0.0833 < 0.10 floor -> blocks done; honest: recompute
+  exact + 36/36 regrade 0 mismatch (basecheck2-regrade36.log) + split audit (ledger out,
+  stub=1.0). n=16 rerun (run:) in TODO; range author decides.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
@@ -25,10 +25,8 @@ Next-run state; evidence .agent-evidence/*.log.
   `toy.py`: banana (first 20 tok ci), coinflip (seeded). `splits.py`: sha1%100, 101/9/27, 137/142.
 
 ## lgbox
-- `lgbox serve` (axum): /run (setpgid, RLIMIT, mpsc Q->503), /health, /metrics;
-  Firecracker Vmm+VmPool, FakeVmm-only.
-- docker: lgbox+trainer Dockerfiles (hadolint in check). GOTCHA: no python in image
-  -> process backend can't grade in-image.
+- `lgbox serve` (axum): /run (setpgid, RLIMIT, Q->503), /health, /metrics; FC FakeVmm-only.
+- docker: Dockerfiles (hadolint in check). GOTCHA: no python in image -> no in-image grade.
 
 ## Kernel
 - `kernels/token_logprobs(h,w,t,impl,chunk)->[T]`: chunked max/LSE + per-chunk bwd softmax
@@ -64,15 +62,14 @@ Next-run state; evidence .agent-evidence/*.log.
 - `data/verify.py`: worktrees bad+good + pristine, 3x/side -> verified.jsonl; checks may
   import worktree code but must COLLECT at both commits (import error -> "error");
   check ignores tests/hidden.
-- `state/verify/batch1.md`: first unchecked step wins; vb1: 9/12 verified.
-- draftlab data/ gitignored -> hidden checks: temp root + synthetic fixtures;
-  jaxlm: jax[cpu], chi2 via jax.scipy.
+- state/verify: first unchecked step wins; vb1 9/12.
+- draftlab data/ gitignored -> temp root + synthetic fixtures; jaxlm: jax[cpu].
 
 ## Gotchas
-- .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: `find DIR -mindepth 1 -delete`,
-  never `rm DIR` (EBUSY).
+- .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: never `rm DIR`, find -delete (EBUSY).
 - ruff I/EXE pinned; known/ I001/F401.
 - RLIMIT_NPROC=64 counts ALL uid-1000 -> transient Cannot fork.
 - torch 2.14 FSDP2: fully_shard auto-inits env://; rank() pre-init 0.
 - NOTES.md: merges duplicate lines; condense.
 - .venv: no pip (uv or ensurepip); polars 2.0.0.
+- p-l-f ref audit times out @30s (passes @60s): test split only, val unaffected.
