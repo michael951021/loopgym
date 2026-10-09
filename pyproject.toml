@@ -10,6 +10,7 @@ dependencies = [
     "accelerate",
     "peft",
     "numpy",
+    "triton",
     "pydantic",
     "httpx",
     "pytest",

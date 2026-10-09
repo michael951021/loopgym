@@ -2,6 +2,8 @@
 
 Never materializes the [T, V] logits: the V dimension is processed in chunks with an
 online max / log-sum-exp. "torch" is the reference impl every other impl must match."""
+import os
+
 import torch
 
 __all__ = ["IMPLS", "token_logprobs", "register_impl"]
@@ -73,6 +75,12 @@ def register_impl(name, fn):
     global IMPLS
     _REGISTRY[name] = fn
     IMPLS = tuple(_REGISTRY)
+
+
+# Triton is usable on a GPU host or in the interpreter (sandbox, CLAUDE.md rule 2).
+if os.environ.get("TRITON_INTERPRET") == "1" or torch.cuda.is_available():
+    from . import triton_logprob
+    register_impl("triton", triton_logprob.triton_impl)
 
 
 def token_logprobs(hidden, weight, targets, impl="torch", chunk=8192):
