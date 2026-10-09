@@ -18,7 +18,7 @@ check:
 	if [ -n "$$sh_files" ]; then \
 	  echo "shellcheck"; $(CURDIR)/.tools/bin/shellcheck $$sh_files; \
 	else echo "skip shellcheck: no .sh files under tools/ scripts/ deploy/ yet"; fi
-	@docks=$$(find deploy -type f -name 'Dockerfile*' 2>/dev/null); \
+	@docks=$$(find deploy -type f \( -name 'Dockerfile*' -o -name '*.Dockerfile' \) 2>/dev/null); \
 	if [ -n "$$docks" ]; then \
 	  echo "hadolint"; $(CURDIR)/.tools/bin/hadolint $$docks; \
 	else echo "skip hadolint: no Dockerfiles under deploy/ yet"; fi

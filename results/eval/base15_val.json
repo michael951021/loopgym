@@ -1,0 +1,64 @@
+{
+ "model": "models/qwen2.5-coder-1.5b-instruct",
+ "adapter": null,
+ "source": "exercism",
+ "split": "val",
+ "n": 4,
+ "temperature": 0.8,
+ "max_new_tokens": 512,
+ "seed": 0,
+ "k": 1,
+ "pass_at_k": 0.3611111111111111,
+ "ci": [
+  0.16666666666666666,
+  0.5833333333333334
+ ],
+ "n_tasks": 9,
+ "per_task": {
+  "flatten-array": {
+   "n": 4,
+   "correct": 1,
+   "pass_at_1": 0.25
+  },
+  "food-chain": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "isogram": {
+   "n": 4,
+   "correct": 1,
+   "pass_at_1": 0.25
+  },
+  "largest-series-product": {
+   "n": 4,
+   "correct": 2,
+   "pass_at_1": 0.5
+  },
+  "point-mutations": {
+   "n": 4,
+   "correct": 1,
+   "pass_at_1": 0.25
+  },
+  "resistor-color-duo": {
+   "n": 4,
+   "correct": 1,
+   "pass_at_1": 0.25
+  },
+  "scrabble-score": {
+   "n": 4,
+   "correct": 4,
+   "pass_at_1": 1.0
+  },
+  "sieve": {
+   "n": 4,
+   "correct": 3,
+   "pass_at_1": 0.75
+  },
+  "variable-length-quantity": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  }
+ }
+}

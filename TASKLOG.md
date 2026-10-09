@@ -90,3 +90,7 @@
 - Goal: Baseline 0.5B on Exercism val
 - Approach: compute job base05 ran OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-0.5b-instruct --source exercism --split val --n 4 --out results/eval/base05_val.json (exit 0)
 - Blockers: none
+## Baseline 1.5B on Exercism val
+- Goal: Baseline 1.5B on Exercism val
+- Approach: compute job base15 ran OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-1.5b-instruct --source exercism --split val --n 4 --out results/eval/base15_val.json (exit 0)
+- Blockers: none
