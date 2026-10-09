@@ -51,8 +51,19 @@ Current state for the next run (keep < 4 KB).
   T=2048,V=151936. GOTCHA: keep input dtype end-to-end (f64 gradcheck breaks if
   output cast to f32).
 
-## RL (done)
+## RL
 - `rl/grpo.py`: group_advantages/kl_k3/policy_loss per CLAUDE.md; known 7/7.
+- `rl/batch.py`: Batch (right-pad, target_mask col j = 1 iff col predicts a completion
+  token, i.e. slice [p-1, p+c-1)), StepCfg (logprob_impl/clip_eps/kl_coef/agg/
+  max_grad_norm/chunk), build_batch(groups,rewards,tokenizer,scale), logp_of,
+  grpo_step (logp via kernels.token_logprobs on hidden_states[-1][:, :-1];
+  old=logp.detach(); ref via policy.disable_adapter() or custom ref_fn; backward,
+  clip, step; stats loss/kl/clip_frac/ratio_mean/grad_norm/tokens). 5/5
+  test_batch.py (2 s, tiny_config fp32): mask == independent gather; step-0 β=0
+  loss = -9.9e-9 < 1e-6, ratio=1.0; +adv logp +0.211 / -adv -0.105 nats after one
+  step (lr 1e-2 AdamW LoRA r=4); kl>0 after step proves adapter disabled in ref.
+  GOTCHA: transformers 5.x CausalLMOutput has NO last_hidden_state — use
+  output_hidden_states=True, hidden_states[-1]; kernel is unbatched -> flatten rows.
 - `rl/rollout.py`: Completion/RolloutBackend/HFBackend (chat template, left pad,
   rows x n, output_scores -> per-token logp of sampled token in fp32 post-warper
   scores); temperature<=0 = greedy; trim completion at first eos. GOTCHA:
