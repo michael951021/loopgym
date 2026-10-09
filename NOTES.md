@@ -64,6 +64,9 @@ Next-run state; evidence .agent-evidence/*.log.
   check ignores tests/hidden.
 - state/verify: first unchecked step wins; vb1 9/12.
 - draftlab data/ gitignored -> temp root + synthetic fixtures; jaxlm: jax[cpu].
+- `state/verify/batch1.md`: first unchecked step wins; vb1: 11/12 verified.
+- draftlab data/ gitignored -> hidden checks: temp root + synthetic fixtures;
+  jaxlm: jax[cpu], chi2 via jax.scipy.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: never `rm DIR`, find -delete (EBUSY).
