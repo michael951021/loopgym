@@ -98,3 +98,7 @@
 - Goal: Toy banana run
 - Approach: compute job toybanana ran OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --resume-if-any (exit 0)
 - Blockers: none
+## Toy null run
+- Goal: Toy null run
+- Approach: compute job toynull ran OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_null.toml --resume-if-any (exit 0)
+- Blockers: none
