@@ -35,8 +35,9 @@ Current state for the next run (keep < 4 KB).
 - `lgbox serve --port P --workers N --queue Q` (axum/tokio/libc/tempfile): /run in fresh tmpdir;
   pre_exec setpgid(0,0) + RLIMIT AS(mem_mb)/CPU(timeout+1s)/NPROC 64/FSIZE 16MB; 4 KB tails;
   killpg on timeout; N workers semaphore, mpsc(Q) → 503+Retry-After; `..`/absolute → 400; /health.
-- 7 real-process integration tests (echo, sleep timeout <3s no survivors, fork bomb, 2 GB
-  alloc, 503 overflow). Evidence: lgbox-cargo-test.log, lgbox-makecheck-*.log.
+- 7 process tests + 8 FakeVmm tests (lease/reset order, crashed-slot re-boot, exhaustion
+  queue). Firecracker backend: `Vmm` trait + `VmPool` + `FirecrackerVmm` (API sock + vsock
+  agent); `--dry-run` prints config; docs/firecracker.md. Evidence: lgboxfc-*.log.
 
 ## Pinned sources (vsrc — done 2026-10-09)
 - `tools/fetch_src.sh`: vllm/deepspeed/trl stable → read-only .tools/src/<name>-<ver>/; pins
