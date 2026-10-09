@@ -1,0 +1,19 @@
+# Null control: coinflip reward ignores the text. Slope over steps must stay ~0
+# (bootstrap CI contains 0). Verdict: .venv/bin/python tools/toy_check.py
+model = "0.5b"
+lora_r = 16
+lora_alpha = 32
+lora_targets = ["q_proj", "k_proj", "v_proj", "o_proj"]
+task = "toy"
+toy_task = "coinflip"
+batch = 4
+group = 8
+max_new_tokens = 24
+temperature = 1.0
+lr = 5e-5
+beta = 0.0
+clip = 0.2
+steps = 60
+save_every = 10
+seed = 1337
+out = "runs/toy_null"

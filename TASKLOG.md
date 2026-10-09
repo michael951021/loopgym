@@ -54,3 +54,7 @@
 - Goal: FSDP2 path and equivalence test
 - Approach: Verified pinned torch 2.14.1 FSDP2 defaults to AVG reduce-scatter (per-rank per-token-mean loss → full-batch mean gradient, no 1/W scaling). Two bugs found and fixed during verification: (1) worker called rank() before the group existed (init happens inside wrap_fsdp) so both ranks trained on slice 0 (diff 2e-3 = 2×LR); (2) reference backward used the raw token-sum loss while ranks use the per-token mean — Adam's eps regime diverges up to ~lr/6 (observed 1.253e-4); reference now mirrors the ranks (two b-row forwards, mean loss) so only FSDP's reduction is under test → bit-exact. train.py --dist fsdp wiring left to w2 (owns train.py); dist.py exposes the hooks. Evidence: .agent-evidence/fsdp_equiv6.log, fsdp_make_check.log.
 - Blockers: none.
+## Toy known-answer configs
+- Goal: Toy known-answer configs
+- Approach: Cloned smoke.toml shape for the two configs, wrote the checker over metrics.jsonl train lines with OLS slope bootstrap, tested verdicts on synthetic pass/fail data, then ran the real 2-step CLI probe (46 s, exit 0, range 1-5 min written in the ticket before the run) and make check/known.
+- Blockers: none — noted observation: step-1 banana reward 0.281 exceeds the 0.2 gate start (instruct model); flagged in NOTES.md and the commit for the 60-step run to confirm or rule out per rule 5.

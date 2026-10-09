@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import math
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 from huggingface_hub import snapshot_download
@@ -100,6 +101,59 @@ def tiny_config() -> Qwen2Config:
         num_key_value_heads=2,
         max_position_embeddings=512,
     )
+
+
+SPECIAL = ["<unk>", "<pad>", "<eos>", "Ġ;▅", "Ġ=▅", "Ġ<▅"]
+
+TINY_CORPUS = (
+    "You are an expert Python programmer. Name a fruit. banana apple cherry "
+    "def solve(x): return x + 1 "
+    "for i in range(n): print(i) "
+    "if a > b: return a "
+    "The quick brown fox jumps over the lazy dog. "
+) + "".join(chr(c) for c in range(256))  # full byte alphabet: no text can hit <unk>
+
+
+def tiny_template():
+    im_start = SPECIAL[3]
+    im_end = SPECIAL[4]
+    assistant = SPECIAL[5]
+    return (
+        "{% for message in messages %}"
+        + im_start + "{{ message['role'] + '\n' + message['content'] }}" + im_end + "\n"
+        "{% endfor %}"
+        "{% if add_generation_prompt is defined and add_generation_prompt %}"
+        + assistant + "{% endif %}"
+    )
+
+
+@lru_cache(maxsize=1)
+def tiny_tokenizer():
+    """Deterministic vocab-400 Qwen-style chat tokenizer for tiny_config (vocab 512) models.
+
+    Byte-level BPE trained on a fixed corpus; all ids stay under 512. The chat template
+    mirrors Qwen's role-tag format so rollout.HFBackend prompts work as with real models."""
+    from tokenizers import Tokenizer
+    from tokenizers.models import BPE
+    from tokenizers.pre_tokenizers import ByteLevel
+    from tokenizers.trainers import BpeTrainer
+    from transformers import PreTrainedTokenizerFast
+
+    tok = Tokenizer(BPE(unk_token=SPECIAL[0]))
+    tok.pre_tokenizer = ByteLevel()
+    trainer = BpeTrainer(vocab_size=400, special_tokens=SPECIAL)
+    tok.train_from_iterator([TINY_CORPUS], trainer)
+    assert tok.get_vocab_size() <= 512, tok.get_vocab_size()
+    fast = PreTrainedTokenizerFast(
+        tokenizer_object=tok,
+        model_max_length=512,
+        unk_token=SPECIAL[0],
+        pad_token=SPECIAL[1],
+        eos_token=SPECIAL[2],
+    )
+    fast.chat_template = tiny_template()
+    return fast
+
 
 
 def main(argv: list[str]) -> int:
