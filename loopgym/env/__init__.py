@@ -1,10 +1,10 @@
 """Tasks and grading for RL. Exercism: load_exercise/Task; toy: known-answer rewards;
 more runners and task sources (loopgym.py, splits.py) land here. grade() is one entry
 point for every task source, so the trainer cannot tell them apart."""
-from . import toy
+from . import lgbox, toy
 from .exercism import RUNNERS, Task, grade as _exercism_grade, load_exercise, runner_names
 
-__all__ = ["RUNNERS", "Task", "grade", "load_exercise", "runner_names", "toy"]
+__all__ = ["RUNNERS", "Task", "grade", "lgbox", "load_exercise", "runner_names", "toy"]
 
 
 def grade(task, files, runner="local", timeout=30, step=0, index=0):

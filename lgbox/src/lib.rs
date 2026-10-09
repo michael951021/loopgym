@@ -349,7 +349,7 @@ fn read_tail(mut r: impl Read, buf: Arc<Mutex<Vec<u8>>>) {
         let mut b = buf.lock().unwrap();
         if n >= TAIL_BYTES {
             b.clear();
-            b.extend_from_slice(&chunk[TAIL_BYTES - n..]);
+            b.extend_from_slice(&chunk[n - TAIL_BYTES..n]);
         } else if b.len() + n > TAIL_BYTES {
             let dropn = b.len() + n - TAIL_BYTES;
             b.drain(..dropn);
@@ -373,5 +373,18 @@ mod tests {
         assert!(!bad_path("ok.txt"));
         assert!(!bad_path("dir/nested.txt"));
         assert!(bad_path("a..b")); // spec: paths containing `..` are rejected
+    }
+
+    #[test]
+    fn read_tail_keeps_last_4k_on_oversized_chunk() {
+        // A single read returning >= TAIL_BYTES used to index chunk[TAIL_BYTES - n..]
+        // (underflow, panic). Keep exactly the last TAIL_BYTES bytes.
+        let data: Vec<u8> = (0..30_000u32).map(|i| (i % 251) as u8).collect();
+        let expected = data[data.len() - TAIL_BYTES..].to_vec();
+        let buf = Arc::new(Mutex::new(Vec::new()));
+        let rbuf = Arc::clone(&buf);
+        let t = std::thread::spawn(move || read_tail(std::io::Cursor::new(data), rbuf));
+        t.join().expect("read_tail panicked");
+        assert_eq!(*buf.lock().unwrap(), expected);
     }
 }

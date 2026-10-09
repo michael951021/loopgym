@@ -76,6 +76,25 @@ def load_exercise(exdir):
                 test_file=tests[0], test_files=list(tests))
 
 
+def _xml_counts(xml_text):
+    """(tests, failures, errors, skipped) summed over all testsuites in a junit XML."""
+    root = ET.fromstring(xml_text)
+    suites = [root] if root.tag == "testsuite" else root.findall(".//testsuite")
+    counts = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
+    for s in suites:
+        for k in counts:
+            counts[k] += int(s.get(k) or 0)
+    return counts
+
+
+def _reward(info):
+    """reward 1.0 iff ran without timeout, tests > 0, no failures/errors/skips."""
+    ok = (not info["timed_out"] and info["tests"] > 0 and info["failures"] == 0
+          and info["errors"] == 0 and info["skipped"] == 0)
+    info["reward"] = 1.0 if ok else 0.0
+    return info["reward"], info
+
+
 def _local(task, files, timeout=30):
     info = {"runner": "local", "timed_out": False, "returncode": None,
             "tests": 0, "failures": 0, "errors": 0, "skipped": 0}
@@ -103,22 +122,19 @@ def _local(task, files, timeout=30):
             info["returncode"] = proc.wait()
         xml_path = d / "r.xml"
         if xml_path.exists():
-            root = ET.parse(xml_path).getroot()
-            suites = [root] if root.tag == "testsuite" else root.findall(".//testsuite")
-            for s in suites:
-                for k in ("tests", "failures", "errors", "skipped"):
-                    info[k] += int(s.get(k) or 0)
-    ok = (not info["timed_out"] and info["tests"] > 0 and info["failures"] == 0
-          and info["errors"] == 0 and info["skipped"] == 0)
-    info["reward"] = 1.0 if ok else 0.0
-    return info["reward"], info
+            info.update(_xml_counts(xml_path.read_text()))
+    return _reward(info)
 
 
 RUNNERS = {"local": _local}
 
 
 def runner_names():
-    return sorted(RUNNERS)
+    """All usable runners: "http" (lgbox.py) only when LOOPGYM_LGBOX_URL is set."""
+    names = set(RUNNERS)
+    if not os.environ.get("LOOPGYM_LGBOX_URL"):
+        names.discard("http")
+    return sorted(names)
 
 
 def grade(task, files, runner="local", timeout=30):
