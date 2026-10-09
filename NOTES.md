@@ -57,7 +57,7 @@ State for next run; evidence .agent-evidence/*.log.
 - `tools/fetch_src.sh`: vllm/deepspeed/trl sources -> .tools/src/ (rule 6).
 
 ## Data
-- tests/known/ = Kevin's (rule 1); data/raw/ = host export.
+- data/raw/ = host export.
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files + 3 seeds.
 - `data/verify.py`: worktrees bad+good + pristine check, 3x/side -> verified.jsonl;
   Makefile check ignores tests/hidden. Checks may import worktree code (PYTHONPATH=worktree)
@@ -73,4 +73,4 @@ State for next run; evidence .agent-evidence/*.log.
 - RLIMIT_NPROC=64 counts ALL uid-1000 -> transient Cannot fork (tests /bin/sleep).
 - torch 2.14 FSDP2: fully_shard auto-inits env://; rank() pre-init 0.
 - NOTES.md: merges duplicate lines; condense.
-- .venv: no pip; `uv pip install --python .venv/bin/python P` (pandas+pyarrow in).
+- .venv: no pip; `uv pip install --python .venv/bin/python P` (pandas, pyarrow).
