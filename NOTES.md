@@ -27,7 +27,7 @@ Current state for the next run (keep < 4 KB).
   tools/lgbox_smoke.sh: strict test_reward.py both runners -> 18/18. FIXED pre-existing
   read_tail panic (lib.rs: read >=
   4 KB underflowed `chunk[TAIL-n..]` -> spurious reward 0; now `chunk[n-TAIL..n]`,
-  regression test kept). 7/7 tests/test_lgbox.py (MockTransport).
+  regression test). 7/7 test_lgbox.py (MockTransport).
   Evidence: lgboxpy-{smoke2,makecheck}.log.
 - `toy.py`: ToyTask (banana: "banana" ci in first 20 tokens; coinflip: 0.5 seeded by
   (step, index), text-blind). 12/12 test_toy.py.
@@ -40,12 +40,11 @@ Current state for the next run (keep < 4 KB).
   setpgid + RLIMIT AS/CPU/NPROC64/FSIZE16MB; 4 KB tails; killpg on timeout; mpsc(Q) ->
   503+Retry-After:1; bad path -> 400; /health; /metrics (prometheus 0.14 text:
   lgbox_runs_total{ok|nonzero|timeout|rejected}, run_seconds, queue_depth, workers_busy;
-  all outcomes pre-materialized). 2/2 lib + 8/8 integration tests. Evidence: lgboxmet-*,
-  lgboxpy-*.log (all exit 0).
-- `tools/bench_lgbox.py` (2026-10-09): val refs x local/http x c1/4/16 ->
-  results/lgbox_bench.json (grades/s, p50/p95, reward gate, c1 overhead<50ms); spawns
-  release server (w16 q64; --url to reuse). --quick 11.5 s, 120/120 reward 1.
-  Evidence: lgboxbench-*.log. Full run = next job lgboxbench.
+  all outcomes pre-materialized). 2/2 lib + 8/8 integration tests. Evidence: lgboxmet-*/
+  lgboxpy-*.log.
+- `tools/bench_lgbox.py`: val refs x local/http x c1/4/16 ->
+  results/lgbox_bench.json (grades/s, p50/p95, reward gate, c1 <50ms); spawns release
+  server (--url to reuse). --quick 11.5 s, 120/120 reward 1. Evidence: lgboxbench-*.log.
 
 ## RL (w2, done 2026-10-09)
 - `rl/grpo.py`: group_advantages/kl_k3/policy_loss per CLAUDE.md; known 7/7.
