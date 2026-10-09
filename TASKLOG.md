@@ -38,3 +38,7 @@
 - Goal: lgbox throughput bench (job)
 - Approach: script auto-spawns release lgbox server on a free port, sets LOOPGYM_LGBOX_URL so the real http runner path is graded, ThreadPoolExecutor per cell, nearest-rank p50/p95, reward-1.0 + c1-overhead<50ms checks in the JSON
 - Blockers: none
+## lgbox bench run
+- Goal: lgbox bench run
+- Approach: compute job lgboxbench ran bash -c 'cd lgbox && PATH=/work/.tools/cargo/bin:$PATH cargo build --release && cd .. && .venv/bin/python tools/bench_lgbox.py' (exit 0)
+- Blockers: none

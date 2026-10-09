@@ -5,6 +5,9 @@ use std::process::{Command, ExitStatus, Stdio};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
+pub mod fc;
+pub mod vm;
+
 use axum::extract::State;
 use axum::http::{header, StatusCode};
 use axum::response::{IntoResponse, Response};
@@ -14,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::{mpsc, oneshot, Semaphore};
 use prometheus::{Encoder, Histogram, HistogramOpts, IntCounterVec, IntGauge, Opts, Registry, TextEncoder};
 
-const TAIL_BYTES: usize = 4096;
+pub(crate) const TAIL_BYTES: usize = 4096;
 const FSIZE_LIMIT: u64 = 16 * 1024 * 1024;
 const NPROC_LIMIT: u64 = 64;
 
@@ -36,6 +39,20 @@ pub struct RunOut {
     pub stderr_tail: String,
     pub wall_ms: u64,
     pub outputs: BTreeMap<String, Option<String>>,
+}
+
+/// Executes one grading job. The process backend runs in a temp dir; the
+/// firecracker backend delegates to a leased VM from a VmPool.
+pub trait Runner: Send + Sync {
+    fn run(&self, req: &RunReq) -> RunOut;
+}
+
+pub struct ProcessRunner;
+
+impl Runner for ProcessRunner {
+    fn run(&self, req: &RunReq) -> RunOut {
+        run_blocking(req.clone())
+    }
 }
 
 struct Job {
@@ -116,14 +133,20 @@ pub fn bad_path(p: &str) -> bool {
     p.is_empty() || p.starts_with('/') || p.contains("..")
 }
 
-/// Build the app: a bounded queue of depth `queue` drained by a dispatcher
-/// that caps concurrency at `workers` (semaphore). Bind the returned Router
-/// to a socket of your choice (tests do this on 127.0.0.1:0).
+/// Process-backend app. See `app_with_runner` for the firecracker backend.
 pub fn app(workers: usize, queue: usize) -> Router {
+    app_with_runner(workers, queue, Arc::new(ProcessRunner))
+}
+
+/// Build the app: a bounded queue of depth `queue` drained by a dispatcher
+/// that caps concurrency at `workers` (semaphore), with jobs executed by
+/// `runner` on blocking threads. Bind the returned Router to a socket of
+/// your choice (tests do this on 127.0.0.1:0).
+pub fn app_with_runner(workers: usize, queue: usize, runner: Arc<dyn Runner>) -> Router {
     let metrics = Metrics::new();
     let (tx, rx) = mpsc::channel(queue.max(1));
     let sem = Arc::new(Semaphore::new(workers.max(1)));
-    tokio::spawn(dispatch(rx, sem, metrics.clone()));
+    tokio::spawn(dispatch(rx, sem, runner, metrics.clone()));
     Router::new()
         .route("/run", post(run_handler))
         .route("/health", get(|| async { "ok" }))
@@ -131,14 +154,20 @@ pub fn app(workers: usize, queue: usize) -> Router {
         .with_state(Arc::new(AppState { tx, metrics }))
 }
 
-async fn dispatch(mut rx: mpsc::Receiver<Job>, sem: Arc<Semaphore>, metrics: Metrics) {
+async fn dispatch(
+    mut rx: mpsc::Receiver<Job>,
+    sem: Arc<Semaphore>,
+    runner: Arc<dyn Runner>,
+    metrics: Metrics,
+) {
     while let Some(job) = rx.recv().await {
         let sem = sem.clone();
+        let runner = runner.clone();
         let m = metrics.clone();
         tokio::spawn(async move {
             let _permit = sem.acquire().await.unwrap();
             m.workers_busy.inc();
-            let out = tokio::task::spawn_blocking(move || run_blocking(job.req))
+            let out = tokio::task::spawn_blocking(move || runner.run(&job.req))
                 .await
                 .unwrap_or_else(|e| RunOut {
                     exit_code: None,
@@ -327,7 +356,7 @@ fn run_blocking(req: RunReq) -> RunOut {
     out
 }
 
-fn fail(msg: String, start: Instant) -> RunOut {
+pub(crate) fn fail(msg: String, start: Instant) -> RunOut {
     RunOut {
         exit_code: None,
         timed_out: false,
@@ -336,6 +365,18 @@ fn fail(msg: String, start: Instant) -> RunOut {
         wall_ms: start.elapsed().as_millis() as u64,
         outputs: BTreeMap::new(),
     }
+}
+
+/// Keep only the last TAIL_BYTES of `s` (at a char boundary).
+pub(crate) fn tail(s: &str) -> String {
+    if s.len() <= TAIL_BYTES {
+        return s.to_string();
+    }
+    let mut start = s.len() - TAIL_BYTES;
+    while !s.is_char_boundary(start) {
+        start += 1;
+    }
+    s[start..].to_string()
 }
 
 /// Drain a pipe into `buf`, keeping only the last TAIL_BYTES.
