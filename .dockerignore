@@ -1,0 +1,23 @@
+# Keep the build context (repo root) small and out of gitignored/shared dirs.
+# The Dockerfiles COPY only: lgbox/{Cargo.*,src}, pyproject.toml, loopgym/, csrc/, configs/.
+# Everything below is excluded from the context sent to the daemon.
+.git
+.venv
+.venv-nvcc
+.tools
+.venv-gpu
+ckpt
+models
+data
+runs
+results
+.agent-evidence
+.agent-shared
+.pytest_cache
+.ruff_cache
+loopgym.egg-info
+target
+state
+docs
+tests
+*.md

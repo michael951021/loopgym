@@ -24,6 +24,10 @@ State for next run; evidence: .agent-evidence/*.log.
 ## lgbox
 - `lgbox serve` (axum): /run (setpgid, RLIMIT, tails, mpsc Q->503), /health, /metrics;
   Firecracker Vmm+VmPool, --dry-run, FakeVmm-only.
+- docker: lgbox.Dockerfile (rust->distroless/cc:nonroot) + trainer.Dockerfile (cuda
+  runtime, /app/.venv-gpu CUDA torch); .dockerignore; hadolint clean in make check.
+  GOTCHA: distroless has no python -> process backend can't grade in-image (needs a python
+  base or firecracker rootfs). Makefile hadolint find now matches *.Dockerfile.
 
 ## Kernel
 - `kernels/token_logprobs(h,w,t,impl,chunk)->[T]`: chunked online max/LSE, bwd per-chunk
