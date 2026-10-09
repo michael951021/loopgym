@@ -9,7 +9,7 @@ bootstrap:
 
 check:
 	$(PY) -m ruff check .
-	$(PY) -m pytest -q tests --ignore=tests/known
+	$(PY) -m pytest -q tests --ignore=tests/known --ignore=tests/hidden
 	@if [ -d lgbox ]; then \
 	  echo "cargo test (lgbox)"; \
 	  $(CARGO_ENV) cargo test --manifest-path lgbox/Cargo.toml; \

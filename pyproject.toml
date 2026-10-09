@@ -19,6 +19,10 @@ dependencies = [
     "ninja>=1.13.2",
 ]
 
+[project.optional-dependencies]
+# What the mined draftlab/harness code imports, so a candidate's worktree imports cleanly.
+draftlab = ["numpy", "jax[cpu]", "transformers", "polars", "duckdb"]
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
