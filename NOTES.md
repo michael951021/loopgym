@@ -64,9 +64,9 @@ Next-run state; evidence .agent-evidence/*.log.
 - `data/verify.py`: worktrees bad+good + pristine, 3x/side -> verified.jsonl; checks may
   import worktree code but must COLLECT at both commits (import error -> "error");
   check ignores tests/hidden.
-- `state/verify/batch1.md`: first unchecked step wins; vb1: 11/12 verified.
+- vb1 done: batch1.md 12/12 verified (milestone checked).
 - draftlab data/ gitignored -> hidden checks: temp root + synthetic fixtures;
-  jaxlm: jax[cpu], chi2 via jax.scipy.
+  jaxlm: chi2 via stats.chi2.sf (no chisquare); bias test: FixedDrafter mid-p token.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: `find DIR -mindepth 1 -delete`,
