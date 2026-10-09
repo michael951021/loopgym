@@ -12,9 +12,9 @@ Next-run state; evidence .agent-evidence/*.log.
   <out>.samples.jsonl resume; ref val pass@1 1.000. GOTCHA: splits.json values are
   dicts; loopgym src NotImplementedError.
 - `tools/check_results.py` (--only/--results-dir): baselines/benches/toy; PENDING != FAIL.
-  BASECHECK (rule 5, atk 2): base05 0.0833 < 0.10 floor -> blocks done; honest: recompute
-  exact + 36/36 regrade 0 mismatch (basecheck2-regrade36.log) + split audit (ledger out,
-  stub=1.0). n=16 rerun (run:) in TODO; range author decides.
+  BASECHECK (rule 5): base05 0.0833 < 0.10 floor -> blocks done. 6 causes ruled out
+  (recompute exact, 36/36 regrade 0mm, split audit, truncation 0/8@1024, parse, prompt
+  byte-audit vs CLAUDE.md atk3). n=16 rerun (run:) TODO.md:116; range author decides.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

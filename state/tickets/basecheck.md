@@ -78,3 +78,25 @@ Resolution: n=16 re-run of both baselines added to TODO.md as a (run:)
 compute job (resumes the sidecars, reuses samples 0–3, then re-runs the
 checker verdict). Until it lands, rule 5 blocks "done"; the range author
 must decide (accept with overlapping CI, or revise the floor).
+
+## Outcome — attempt 3 (2026-10-09)
+Closed the last open cause with non-circular evidence (attempts 1–2 used
+the pipeline itself; this is a direct spec comparison):
+- Prompt-format byte audit: exercism.py:18-19 SYSTEM and :49-50 user
+  template are byte-identical to the CLAUDE.md spec (system string,
+  "\n\nComplete this file (`X`):\n```python\n<stub>\n```", append joined
+  with "\n\n"); parse = LAST ```python block else whole reply (exercism.py:
+  53-66), matching the spec. run.py:103-104 uses exactly Task.prompt()/
+  parse(); defaults n=4 T=0.8 top_p=1.0 max_new_tokens=512 seed=0 match
+  the committed JSONs; HFBackend forces top_k=0, rep=1.0 (rollout.py:77-81)
+  so sampling is exactly temperature+top_p; seed scheme seed+idx*100+i
+  matches the sidecars.
+- Checker unit tests 7/7; `--only baselines` exits 1 on exactly one row:
+  base05 0.0833 [0, 0.167] vs [0.10, 0.55]. base15 0.3611 [0.167, 0.583]
+  in range; ordering + CI-overlap (reported: touch at 1/6) + reference
+  1.000 all PASS.
+All six candidate causes (split, grading, metric, truncation, parse,
+prompt) are now ruled out. 0.0833 is an honest 0.5B measurement. Blocker
+unchanged and now fully documented: the n=16 (run:) job at TODO.md:116
+(after: -) must run, then the range author rules. Stopping per rule 5;
+no code changes this attempt.
