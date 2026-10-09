@@ -59,12 +59,12 @@ Next-run state; evidence .agent-evidence/*.log.
 ## Data
 - data/raw/ = host export.
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files + 3 seeds.
-- `data/verify.py`: worktrees bad+good + pristine, 3x/side -> verified.jsonl; checks may
-  import worktree code but must COLLECT at both commits (import error -> "error");
-  check ignores tests/hidden.
-- vb1 done: batch1.md 12/12 verified (milestone checked).
-- draftlab data/ gitignored -> hidden checks: temp root + synthetic fixtures;
-  jaxlm: chi2 via stats.chi2.sf (no chisquare); bias test: FixedDrafter mid-p token.
+- `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; check imports
+  worktree code LAZILY (module import of a file absent at one commit
+  -> tests=0 -> "error").
+- vb1: 12/12. vb2: batch2.md (13-24), one cand/run; cand 13 verified; next cand 14.
+- hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored);
+  jaxlm: chi2 via stats.chi2.sf (no chisquare); FixedDrafter mid-p token.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: never `rm DIR`, find -delete (EBUSY).
