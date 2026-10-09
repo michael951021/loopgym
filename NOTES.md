@@ -26,6 +26,17 @@ Current state for the next run (keep < 4 KB).
   training numbers refer to 151936.
 - Evidence: .agent-evidence/models-fetch.log, models-info2.log; unit tests in tests/test_models.py.
 
+## Pinned sources (vsrc — done 2026-10-09)
+- `tools/fetch_src.sh` (idempotent): latest non-prerelease of vllm/deepspeed/trl from
+  pypi.org JSON → wheel (sdist if no wheel) via curl → unpacked read-only in
+  .tools/src/<name>-<version>/; pins recorded in tools/versions.txt (vllm=0.31.0,
+  deepspeed=0.19.7, trl=1.15.0). Re-run skips in 0.6 s. Never installs into .venv.
+- vllm wheel chosen = aarch64 (alphabetical min among cp38-abi3 wheels); source identical,
+  fine for reading. deepspeed has no wheel → sdist, flattened one dir level.
+- Checks: `rg -l "def load_weights" .tools/src/vllm-*/` (13 files), `rg -l "class DeepSpeedConfig"
+  .tools/src/deepspeed-*/` (2 files) both pass; trl wheel sha256 == PyPI digest.
+- Evidence: .agent-evidence/vsrc-fetch.log, vsrc-rerun.log, vsrc-makecheck.log (all exit 0).
+
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS (shared between agents): clear with
   `find DIR -mindepth 1 -delete`, never `rm DIR` (EBUSY).
