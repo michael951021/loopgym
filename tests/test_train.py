@@ -133,6 +133,28 @@ def test_resume_with_no_checkpoint_fails(tmp_path):
     assert "nothing to resume" in p.stderr, p.stderr
 
 
+def test_resume_if_any_starts_then_continues(tmp_path):
+    """The compute-job command line: one command must both start the run and continue it."""
+    cfg = write_cfg(tmp_path)
+    out = tmp_path / "runs" / "e"
+    out.mkdir(parents=True)
+    # a run that died before its first checkpoint: its rows cannot be continued
+    (out / "metrics.jsonl").write_text(json.dumps({"step": 1, "reward_mean": -1.0}) + "\n")
+    p, _ = run_cli(cfg, "--out", str(out), "--steps", "1", "--resume-if-any")
+    assert p.returncode == 0, p.stderr
+    assert (out / "metrics.jsonl.discarded").is_file()
+    assert [r["step"] for r in train_rows(str(out))] == [1]
+    assert train_rows(str(out))[0]["reward_mean"] != -1.0
+    # killed between saves: a row logged past the checkpoint is redone, not duplicated
+    with (out / "metrics.jsonl").open("a") as f:
+        f.write(json.dumps({"step": 2, "reward_mean": -1.0}) + "\n")
+    p, _ = run_cli(cfg, "--out", str(out), "--steps", "2", "--resume-if-any")
+    assert p.returncode == 0, p.stderr
+    rows_ = train_rows(str(out))
+    assert [r["step"] for r in rows_] == [1, 2], rows_
+    assert rows_[1]["reward_mean"] != -1.0
+
+
 def test_task_sampler_continuity_after_state_roundtrip():
     from loopgym.rl.train import TaskSampler
     names = ["a", "b", "c", "d", "e", "f"]

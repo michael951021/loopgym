@@ -54,9 +54,9 @@
   why: the loop the jobs below run; exact resume matters because CPU jobs get killed and restarted.
 - [x] **Toy known-answer configs** — configs/toy_banana.toml and configs/toy_null.toml (Qwen2.5-Coder-0.5B, LoRA r=16 on q,k,v,o, B=4, G=8, max_new_tokens 24, lr 5e-5, β=0, 60 steps, save_every 10) and tools/toy_check.py: reads runs/toy_{banana,null}/metrics.jsonl, prints mean reward of steps 0-4 vs 55-59 and the bootstrap CI of the slope; exits 1 unless banana goes < 0.2 → > 0.8 and the null slope CI contains 0. Check: 2 steps of toy_banana run in < 5 min. Done when `.venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --steps 2 --out runs/toy_probe` exits 0. (id: toycfg) (after: train)
   why: the planted effect and null control from CLAUDE.md, ready to run as jobs.
-- [ ] **Toy banana run** — (id: toybanana) (after: toycfg) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --resume`) (mem: 20) (cpus: 8) (timeout: 8h)
+- [ ] **Toy banana run** — (id: toybanana) (after: toycfg) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
   why: must learn the planted reward.
-- [ ] **Toy null run** — (id: toynull) (after: toycfg) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_null.toml --resume`) (mem: 20) (cpus: 8) (timeout: 8h)
+- [ ] **Toy null run** — (id: toynull) (after: toycfg) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_null.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
   why: must not learn noise.
 - [ ] **Check toy known answers** — run `.venv/bin/python tools/toy_check.py`; write results/toy.json (both curves' first/last means, slope CIs) and 3 lines in NOTES.md. If it exits 1, do not adjust thresholds: find the bug (use tests/test_batch.py style checks on the failing piece), fix it, and add a `- [ ]` re-run line for the toy jobs. Done when `.venv/bin/python tools/toy_check.py` exits 0. (id: toyok) (after: toybanana, toynull)
   why: the gate before any real GRPO run; a trainer that fails it has a bug, not a finding.
@@ -117,7 +117,7 @@
   why: base05 0.0833 sits under the 0.10 floor with CI [0,0.167]; n=4 is too weak to adjudicate, larger-n is the only in-agent path.
 - [ ] **CPU GRPO config** — configs/grpo05_exercism.toml: 0.5B LoRA r=16, exercism train split restricted to difficulty ≤ 3 (enough signal for a 0.5B), B=4, G=8, max_new_tokens 384, lr 2e-5, β 0.02, 40 steps, eval on val (n=2) every 20 steps, save_every 5; check 1 step runs. Done when `.venv/bin/python -m loopgym.rl.train --config configs/grpo05_exercism.toml --steps 1 --out runs/grpo_probe` exits 0 and its metrics line has reward_mean and frac_groups_all_same. (id: grpocfg) (after: toyok, basecheck)
   why: a small, gated real run on CPU that validates the pipeline end to end; the real experiment is the GPU run.
-- [ ] **CPU GRPO run** — (id: grpo05) (after: grpocfg) (run: `OMP_NUM_THREADS=12 .venv/bin/python -m loopgym.rl.train --config configs/grpo05_exercism.toml --resume`) (mem: 24) (cpus: 12) (timeout: 24h)
+- [ ] **CPU GRPO run** — (id: grpo05) (after: grpocfg) (run: `OMP_NUM_THREADS=12 .venv/bin/python -m loopgym.rl.train --config configs/grpo05_exercism.toml --resume-if-any`) (mem: 24) (cpus: 12) (timeout: 24h)
   why: reward curve and an honest pass@1 delta on CPU scale.
 - [ ] **Eval GRPO checkpoint** — (id: evalgrpo05) (after: grpo05) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-0.5b-instruct --adapter ckpt/grpo05_exercism/last --source exercism --split val --n 4 --out results/eval/grpo05_val.json`) (mem: 12) (cpus: 8) (timeout: 8h)
   why: the before/after number on the same tasks, sampler and grader as the baseline.
