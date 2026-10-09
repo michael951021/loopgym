@@ -67,7 +67,8 @@ State for next run; evidence in .agent-evidence/*.log.
   "error" verdict); assert presence/behavior via getattr-style calls.
 - `state/verify/batch1.md`: candidates 1-12 (file order of candidates.jsonl = score order,
   mine.py sorts -lines,id; no score field). One unchecked step per run, first wins; vb1
-  milestone checks only when all 12 have verdicts. 2/12: #1 7953937, #2 520444c verified.
+  milestone checks only when all 12 have verdicts. 3/12: #1 7953937, #2 520444c,
+  #3 fda7335 verified.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: `find DIR -mindepth 1 -delete`,
