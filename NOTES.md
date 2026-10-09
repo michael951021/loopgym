@@ -64,7 +64,7 @@ Next-run state; evidence .agent-evidence/*.log.
 - `data/verify.py`: worktrees bad+good + pristine, 3x/side -> verified.jsonl; checks may
   import worktree code but must COLLECT at both commits (import error -> "error");
   check ignores tests/hidden.
-- `state/verify/batch1.md`: first unchecked step wins; vb1: 10/12 verified.
+- `state/verify/batch1.md`: first unchecked step wins; vb1: 11/12 verified.
 - draftlab data/ gitignored -> hidden checks: temp root + synthetic fixtures;
   jaxlm: jax[cpu], chi2 via jax.scipy.
 
