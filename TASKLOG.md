@@ -50,3 +50,7 @@
 - Goal: One GRPO step from completions
 - Approach: wrote failing tests first on tiny_config; verified mask against an independent log_softmax+gather, step-0 loss −9.9e-9 < 1e-6, +adv logp rose +0.211 nats / −adv fell −0.105 after one step, kl>0 post-step proves adapter disabled in ref; fixed transformers 5.x hidden_states[-1] and unbatched-kernel flattening along the way.
 - Blockers: none — the only real snag was my test's own advanced-indexing bug (slice+vector gives a cross-product, not a diagonal), which briefly looked like an implementation bug.
+## FSDP2 path and equivalence test
+- Goal: FSDP2 path and equivalence test
+- Approach: Verified pinned torch 2.14.1 FSDP2 defaults to AVG reduce-scatter (per-rank per-token-mean loss → full-batch mean gradient, no 1/W scaling). Two bugs found and fixed during verification: (1) worker called rank() before the group existed (init happens inside wrap_fsdp) so both ranks trained on slice 0 (diff 2e-3 = 2×LR); (2) reference backward used the raw token-sum loss while ranks use the per-token mean — Adam's eps regime diverges up to ~lr/6 (observed 1.253e-4); reference now mirrors the ranks (two b-row forwards, mean loss) so only FSDP's reduction is under test → bit-exact. train.py --dist fsdp wiring left to w2 (owns train.py); dist.py exposes the hooks. Evidence: .agent-evidence/fsdp_equiv6.log, fsdp_make_check.log.
+- Blockers: none.
