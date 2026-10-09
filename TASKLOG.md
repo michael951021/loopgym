@@ -22,3 +22,7 @@
 - Goal: Exercise audit and splits
 - Approach: wrote failing acceptance first, then audit() with ThreadPoolExecutor over load_exercise/grade, pure sha1-bucket split function, and tests/test_splits.py (published sha1 value, bucket/disjointness checks, 3-fixture mini-audit graded with real pytest).
 - Blockers: none (one self-inflicted fixture bug — "bad ref" x+2 actually passed f(2)==4 — caught by the test and fixed).
+## lgbox server with process backend
+- Goal: lgbox server with process backend
+- Approach: std::process::Command in spawn_blocking with pre_exec setpgid+setrlimit, try_wait vs deadline then killpg(SIGKILL); mpsc(Q) queue with semaphore-capped workers; raw-HTTP integration tests on 127.0.0.1:0 covering echo, sleep-30 timeout survivors, fork bomb, 2 GB alloc, 400s, 503 count.
+- Blockers: transient shared-machine load pushed uid-1000 task count past RLIMIT_NPROC=64 so sh's fork hit EAGAIN; fixed by execing /bin/sleep directly and documenting the interaction in NOTES.md.
