@@ -62,3 +62,7 @@
 - Goal: vLLM rollout backend with weight sync
 - Approach: (no summary given)
 - Blockers: none
+## C++ CPU kernel forward
+- Goal: C++ CPU kernel forward
+- Approach: torch.utils.cpp_extension.load JIT into .tools/build (-O3 -fopenmp); a Python autograd.Function wrapping the C++ forward reuses the factored-out torch chunked backward as placeholder until cppbwd, keeping the full known suite (f64 gradcheck, real-model test) green at every commit point.
+- Blockers: torch 2.14's cpp_extension.load hard-requires ninja on PATH (no make fallback); resolved by adding the ninja wheel to the venv dep set plus a PATH guard in the loader.
