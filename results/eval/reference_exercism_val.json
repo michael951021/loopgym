@@ -1,0 +1,64 @@
+{
+ "model": null,
+ "adapter": null,
+ "source": "exercism",
+ "split": "val",
+ "n": 4,
+ "temperature": 0.8,
+ "max_new_tokens": 512,
+ "seed": 0,
+ "k": 1,
+ "pass_at_k": 1.0,
+ "ci": [
+  1.0,
+  1.0
+ ],
+ "n_tasks": 9,
+ "per_task": {
+  "flatten-array": {
+   "n": 4,
+   "correct": 4,
+   "pass_at_1": 1.0
+  },
+  "food-chain": {
+   "n": 4,
+   "correct": 4,
+   "pass_at_1": 1.0
+  },
+  "isogram": {
+   "n": 4,
+   "correct": 4,
+   "pass_at_1": 1.0
+  },
+  "largest-series-product": {
+   "n": 4,
+   "correct": 4,
+   "pass_at_1": 1.0
+  },
+  "point-mutations": {
+   "n": 4,
+   "correct": 4,
+   "pass_at_1": 1.0
+  },
+  "resistor-color-duo": {
+   "n": 4,
+   "correct": 4,
+   "pass_at_1": 1.0
+  },
+  "scrabble-score": {
+   "n": 4,
+   "correct": 4,
+   "pass_at_1": 1.0
+  },
+  "sieve": {
+   "n": 4,
+   "correct": 4,
+   "pass_at_1": 1.0
+  },
+  "variable-length-quantity": {
+   "n": 4,
+   "correct": 4,
+   "pass_at_1": 1.0
+  }
+ }
+}

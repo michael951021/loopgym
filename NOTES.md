@@ -9,6 +9,10 @@ State for next run; evidence in .agent-evidence/*.log.
 
 ## Eval
 - `bootstrap_ci(values,groups)`; `pass_at_k` (Chen 2021), CI over tasks.
+- `eval/run.py`: --model/--adapter | --reference; HF 1 sample per generate call
+  (seed=seed+idx*100+i); sidecar <out>.samples.jsonl resume; --reference val pass@1
+  1.000 (known, evalcli-ref.log); 0.5B 2-task n=1 ~100s exit 0. GOTCHA: splits.json
+  values are dicts (sorted() them). loopgym source = NotImplementedError.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151,643.
@@ -30,9 +34,9 @@ State for next run; evidence in .agent-evidence/*.log.
   C++ bwd (dS@w_c/dS.T@h).
   triton: fwd 1 prog/row; bwd_h row, bwd_w V-tile; iff CUDA or TRITON_INTERPRET=1.
   GOTCHA: interpret cap 1048576 -> C<=1024; masked cols -inf.
-  cuda: csrc/logprob_cuda* (pure CUDA + binding); bootstrap_cuda.sh -> .venv-nvcc
-  (pip CUDA 13.2.86; cu12 wheels lack nvcc; 12.9 fails gcc15/glibc2.43). Reg iff
-  torch.cuda (host); compile-checked; host gate: test_cuda_backward (bwd_w not in known).
+  cuda: csrc/logprob_cuda* + bootstrap_cuda.sh (.venv-nvcc, CUDA 13.2.86; cu12 lacks
+  nvcc, 12.9 fails gcc15/glibc2.43); reg iff torch.cuda (host); host gate
+  test_cuda_backward (bwd_w not in known).
 - `tools/bench_logprob.py` -> results/bench_logprob.json; f64 1e-4 + fused<1/8 naive
   PASS; CPU peak=chrome trace, triton T=1 interpret.
 
@@ -63,13 +67,11 @@ State for next run; evidence in .agent-evidence/*.log.
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files + 3 seeds;
   141 cands.
 - `data/verify.py`: worktrees bad+good + pristine check, 3x/side -> verified.jsonl;
-  Makefile check ignores tests/hidden. draftlab-alpha verified (0/3,3/3). Checks may import
-  worktree code (PYTHONPATH=worktree) but must COLLECT at both commits (import error ->
-  "error" verdict); assert presence/behavior via getattr-style calls.
-- `state/verify/batch1.md`: 1/12 checked (#1 verified); one step/run, first wins.
-- `state/verify/batch1.md`: candidates 1-12 (file order of candidates.jsonl = score order,
-  mine.py sorts -lines,id; no score field). One unchecked step per run, first wins; vb1
-  milestone checks only when all 12 have verdicts. 2/12: #1 7953937, #2 520444c verified.
+  Makefile check ignores tests/hidden. Checks may import worktree code (PYTHONPATH=worktree)
+  but must COLLECT at both commits (import error -> "error" verdict); assert via getattr calls.
+- `state/verify/batch1.md`: candidates 1-12 (file order = score order; no score field);
+  one unchecked step/run, first wins; vb1 milestone once all 12 have verdicts.
+  2/12: #1 7953937, #2 520444c verified.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: `find DIR -mindepth 1 -delete`,
