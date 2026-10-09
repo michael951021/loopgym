@@ -15,6 +15,7 @@ dependencies = [
     "pytest",
     "ruff",
     "tomli-w",
+    "ninja>=1.13.2",
 ]
 
 [build-system]
