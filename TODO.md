@@ -81,7 +81,7 @@
   why: CUDA C++ written and compiled here, verified on the 3090s by gpu_run.sh with the same known tests.
 - [x] **Log-prob bench script** — tools/bench_logprob.py: T ∈ {512, 2048}, V = 151936, d = 896 (0.5B shapes), random fp32 inputs; per impl (naive full logits, torch, cpp, triton when available) median time of 5 runs and peak extra memory (torch.profiler profile_memory on CPU, cuda max_memory_allocated on GPU) → results/bench_logprob.json; `--quick` uses T=128. Done when `.venv/bin/python tools/bench_logprob.py --quick` exits 0 in < 3 min. (id: benchlpcode) (after: cppbwd)
   why: the memory and speed claims for the report come from this script.
-- [ ] **Log-prob bench run** — (id: benchlp) (after: benchlpcode) (run: `OMP_NUM_THREADS=8 .venv/bin/python tools/bench_logprob.py`) (mem: 16) (cpus: 8) (timeout: 2h)
+- [x] **Log-prob bench run** — (id: benchlp) (after: benchlpcode) (run: `OMP_NUM_THREADS=8 .venv/bin/python tools/bench_logprob.py`) (mem: 16) (cpus: 8) (timeout: 2h)
   why: measured numbers; CLAUDE.md range: fused peak < 1/8 of naive.
 
 ## loopgym: bugs agents shipped, as tasks

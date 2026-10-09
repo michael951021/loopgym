@@ -74,3 +74,7 @@
 - Goal: Log-prob bench script
 - Approach: Reused the f64 reference/tolerance from tests/known, probed torch profiler output to find a reliable CPU peak (function_events self sums were broken; [memory] event cumulative Total Allocated max works), benched triton-under-interpreter at T=1 with a flag since interpreter time is overhead, not kernel performance
 - Blockers: torch 2.14 kineto function_events memory accounting returned bogus peaks (negative parent self values) — worked around by parsing the exported chrome trace's cumulative allocations
+## Log-prob bench run
+- Goal: Log-prob bench run
+- Approach: compute job benchlp ran OMP_NUM_THREADS=8 .venv/bin/python tools/bench_logprob.py (exit 0)
+- Blockers: none
