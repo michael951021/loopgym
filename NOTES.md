@@ -11,8 +11,19 @@ Current state for the next run (keep < 4 KB).
   (last three skip until their files exist). `make known` = check_known.sh (kevin-only
   authors, clean worktree) + strict tests/known. Still red: {test_grpo,test_logprob,
   test_stats}.py import loopgym.rl/kernels/eval (not built); test_reward.py 9/9 strict.
+## Foundations (boot — done 2026-10-09)
+- `make bootstrap` = idempotent toolchain (tools/bootstrap.sh, pins tools/versions.txt):
+  uv 0.12.24, .venv py3.12.14, rust 1.99.0 minimal (.tools/{rust,cargo}), hadolint 2.15.1,
+  shellcheck 0.11.0, terraform 1.16.5, tflint 0.64.0 in .tools/bin; evidence
+  .agent-evidence/boot-cleanslate.log (exit 0).
+- `make check` = ruff (E4/E7/E9/F, tests/known excluded) + pytest (minus known) + cargo test
+  lgbox/ + shellcheck + hadolint + terraform init -backend=false && validate (last three skip
+  until files exist). `make known` = kevin-only worktree check + strict tests/known; red until
+  loopgym/rl/kernels/eval exist (test_logprob, test_stats).
 - venv: torch 2.14.1+cpu (CPU index [tool.uv.sources]), transformers 5.19.0, peft,
   safetensors, accelerate, numpy, pydantic, httpx, pytest, ruff, tomli-w; uv.lock.
+- venv: torch 2.14.1+cpu (CPU index [tool.uv.sources]), transformers 5.19.0, peft, safetensors,
+  accelerate, numpy, pydantic, httpx, pytest, ruff, tomli-w; uv.lock.
 
 ## Models (done 2026-10-09)
 - `loopgym/models.py`: fetch/info CLI (`python -m loopgym.models`), tiny_config
@@ -20,6 +31,9 @@ Current state for the next run (keep < 4 KB).
   1,543,714,304 == HF; tokenizers byte-identical. GOTCHA: 151936 = config vocab
   (embedding dim), tokenizer length 151,643 (kernel/training use 151936).
   Evidence: models-{fetch,info2}.log, tests/test_models.py.
+- `loopgym/models.py`: fetch/info CLI, tiny_config (2L/d64/4H/2KV/V512); models/ (bind mount):
+  0.5b 954 MB / 1.5b 3.09 GB, BF16; params 494,032,768 / 1,543,714,304 == HF.
+- GOTCHA: 151936 = config vocab (lm_head dim), tokenizer length 151,643 (training uses 151936).
 
 ## Env: exercism + toy + splits (done 2026-10-09)
 - `exercism.py`: Task (stub/reference/prompt/parse) + load_exercise; grade local runner:
@@ -36,6 +50,16 @@ Current state for the next run (keep < 4 KB).
   137/142 usable, splits 101/9/27; unusable: alphametics, error-handling, ledger,
   markdown (stub leaky), parallel-letter-frequency (timeout). tests/test_splits.py.
   Evidence: splits-{accept,makecheck}.log.
+- `loopgym/env/exercism.py`: Task + load_exercise; local runner: fresh tmpdir, pristine tests +
+  ONLY solution file, pytest junit XML, new pgroup, SIGKILL on timeout; reward 1 iff tests>0,
+  no failures/errors/skips. Known reward 9/9 strict.
+- `loopgym/env/toy.py`: ToyTask (banana: 1 iff "banana" ci in first 20 tokens; coinflip: 1 w.p.
+  0.5 seeded by (step, index), text-blind); env.grade dispatches on ToyTask. Known: banana
+  "I like Banana"=1, "apple"=0, past-20=0; coinflip 10k mean 0.4945. 12/12 test_toy.py.
+- `loopgym/env/splits.py`: audit() grades ref+stub of 142 exercises → results/env_audit.json +
+  splits.json; bucket = sha1 % 100 (train<70, val<85, test). 137/142 usable; 101/9/27.
+  Unusable: alphametics, error-handling (ref=0), ledger, markdown (stub=1 leaky),
+  parallel-letter-frequency (timeout).
 
 ## lgbox (done 2026-10-09)
 - `lgbox serve --port P --workers N --queue Q` (axum 0.8/tokio/libc/tempfile): /run in
@@ -48,12 +72,24 @@ Current state for the next run (keep < 4 KB).
   lgbox_workers_busy (around run_blocking). All 4 outcomes pre-materialized (show at 0).
 - 8/8 integration tests incl. metrics_counts_exact (3 runs → exact 1/1/1/0, hist count=3,
   gauges 0). Evidence: lgboxmet-{cargo-test,makecheck}.log (exit 0).
+- `lgbox serve --port P --workers N --queue Q` (axum/tokio/libc/tempfile): /run in fresh tmpdir;
+  pre_exec setpgid(0,0) + RLIMIT AS(mem_mb)/CPU(timeout+1s)/NPROC 64/FSIZE 16MB; 4 KB tails;
+  killpg on timeout; N workers semaphore, mpsc(Q) → 503+Retry-After; `..`/absolute → 400; /health.
+- 7 real-process integration tests (echo, sleep timeout <3s no survivors, fork bomb, 2 GB
+  alloc, 503 overflow). Evidence: lgbox-cargo-test.log, lgbox-makecheck-*.log.
 
 ## Pinned sources (done 2026-10-09)
 - `tools/fetch_src.sh`: latest stable vllm/deepspeed/trl → read-only .tools/src/<name>-
   <ver>/; pins tools/versions.txt (vllm 0.31.0, deepspeed 0.19.7 sdist, trl 1.15.0);
   never in .venv; vllm wheel=aarch64, deepspeed=sdist. Evidence: vsrc-{fetch,rerun,
   makecheck}.log (exit 0).
+## Pinned sources (vsrc — done 2026-10-09)
+- `tools/fetch_src.sh`: vllm/deepspeed/trl stable → read-only .tools/src/<name>-<ver>/; pins
+  tools/versions.txt (vllm 0.31.0, deepspeed 0.19.7 sdist, trl 1.15.0). Never in .venv.
+
+## RL: GRPO math (grpo — done 2026-10-09)
+- `loopgym/rl/grpo.py`: group_advantages/kl_k3/policy_loss per CLAUDE.md "Key definitions";
+  known 7/7 (tests/known/test_grpo.py). Evidence: .agent-evidence/grpo-*.log.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: clear with `find DIR -mindepth 1
@@ -64,6 +100,10 @@ Current state for the next run (keep < 4 KB).
 - tests/known/ has I001/F401 — Kevin's, read-only, left as-is.
 - RLIMIT_NPROC=64 counts ALL uid-1000 tasks; shared load can push past 64 → transient
   "Cannot fork". Tests avoid sh-fork (/bin/sleep).
+- bootstrap.sh version probes format-fragile (shellcheck/tflint output); fix the awk on version bumps.
+- tests/known/ has I001/F401 — Kevin's, read-only; left as-is.
+- RLIMIT_NPROC=64 counts ALL uid-1000 tasks; shared-machine load can push it past 64 and
+  untrusted-child forks EAGAIN ("Cannot fork"). Tests use /bin/sleep, not sh-fork.
 
 ## Data
 - tests/known/ = Kevin's known-answer tests (read-only, rule 1); data/raw/ = host export:
