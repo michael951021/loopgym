@@ -59,10 +59,10 @@ Next-run state; evidence .agent-evidence/*.log.
 ## Data
 - data/raw/ = host export.
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files + 3 seeds.
-- `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; check imports
-  worktree code LAZILY (module import of a file absent at one commit
-  -> tests=0 -> "error").
-- vb1: 12/12. vb2: batch2.md (13-24), one cand/run; cands 13-14 verified; next 15.
+- `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; import of a file
+  ABSENT at one commit -> tests=0 -> "error" (use lazy import there); present at
+  both commits -> top-level import fine (411f1c8 spec.py exists, buggy).
+- vb1: 12/12. vb2: batch2.md (13-24), one cand/run; cands 13-15 verified; next 16.
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored);
   jaxlm: chi2 via stats.chi2.sf (no chisquare); FixedDrafter mid-p token.
 
