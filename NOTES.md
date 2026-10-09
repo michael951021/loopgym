@@ -3,14 +3,20 @@
 Current state for the next run (keep < 4 KB).
 
 ## Foundations (done 2026-10-09)
-- `make bootstrap` (tools/bootstrap.sh, pins tools/versions.txt): uv 0.12.24, .venv py3.12.14,
-  rust 1.99.0 minimal (.tools/{rust,cargo}), hadolint 2.15.1, shellcheck 0.11.0, terraform 1.16.5,
-  tflint 0.64.0 in .tools/bin. venv: torch 2.14.1+cpu ([tool.uv.sources]), transformers 5.19.0,
-  peft, safetensors, accelerate, numpy, pydantic, httpx, pytest, ruff, tomli-w; uv.lock.
-- `make check` = ruff (E4/E7/E9/F, tests/known excluded) + pytest (minus known) + cargo test
-  lgbox/ + shellcheck + hadolint + terraform init -backend=false && validate (last three skip
-  until their files exist). `make known` = kevin-only authors + clean worktree + strict
-  tests/known. Still red: test_logprob, test_stats (import kernels/eval, not built).
+- `make bootstrap` (tools/bootstrap.sh, pins tools/versions.txt): uv 0.12.24, py3.12.14 venv
+  (torch 2.14.1+cpu, transformers 5.19.0, peft, safetensors, accelerate, numpy, pydantic,
+  httpx, pytest, ruff, tomli-w; uv.lock), rust 1.99.0 minimal, hadolint/shellcheck/
+  terraform/tflint in .tools/bin.
+- `make check` = ruff (E4/E7/E9/F, known excluded) + pytest (minus known) + cargo test +
+  shellcheck + hadolint + terraform validate (skips when files absent). `make known` =
+  kevin-only authors + strict tests/known. Still red: test_logprob (kernels not built).
+
+## Eval (done 2026-10-09)
+- `eval/stats.py` bootstrap_ci(values, groups, n_boot, seed, alpha) -> (mean, lo, hi);
+  resamples groups (tasks) as units when given. `eval/passk.py`: pass_at_k(n,c,k) =
+  product form of 1 - C(n-c,k)/C(n,k) (Chen 2021); summarize(records, k) (task/n/c dicts)
+  -> per-task pass@k + task-clustered CI. 4/4 known test_stats, 5/5 test_passk.
+  Evidence: stats-makecheck.log.
 
 ## Models (done 2026-10-09)
 - `loopgym/models.py`: fetch/info CLI (`python -m loopgym.models`), tiny_config
@@ -19,21 +25,18 @@ Current state for the next run (keep < 4 KB).
 
 ## Env (done 2026-10-09)
 - `exercism.py`: Task + load_exercise; local runner: fresh tmpdir, pristine tests + ONLY
-  solution file, pytest junit XML, new pgroup, SIGKILL on timeout; reward 1 iff tests>0, no
-  failures/errors/skips. Shared `_xml_counts`/`_reward` score XML for BOTH runners.
-- `lgbox.py`: LgboxClient (httpx; retries 503 honoring Retry-After, 120 s budget) + `_http`
-  runner = RUNNERS["http"] (pristine tests + solution file, pytest --junitxml=r.xml,
-  outputs ["r.xml"], mem_mb 2048). runner_names() adds "http" iff LOOPGYM_LGBOX_URL set.
-  tools/lgbox_smoke.sh: strict test_reward.py both runners -> 18/18. FIXED pre-existing
-  read_tail panic (lib.rs: read >=
-  4 KB underflowed `chunk[TAIL-n..]` -> spurious reward 0; now `chunk[n-TAIL..n]`,
-  regression test). 7/7 test_lgbox.py.
-  Evidence: lgboxpy-{smoke2,makecheck}.log.
+  solution file, junit XML, new pgroup, SIGKILL on timeout; reward 1 iff tests>0, no
+  failures/errors/skips; `_xml_counts`/`_reward` shared by BOTH runners.
+- `lgbox.py`: LgboxClient (httpx; 503 retries honor Retry-After, 120 s budget) +
+  RUNNERS["http"] (pristine tests + solution file, --junitxml, outputs r.xml, mem_mb 2048);
+  active iff LOOPGYM_LGBOX_URL set. FIXED read_tail panic (lib.rs `chunk[TAIL-n..]`
+  underflow -> spurious reward 0; now `chunk[n-TAIL..n]`). 7/7 test_lgbox.py.
+  Evidence: lgboxpy-*.log.
 - `toy.py`: ToyTask (banana: "banana" ci in first 20 tokens; coinflip: 0.5 seeded by
   (step, index), text-blind). 12/12 test_toy.py.
 - `splits.py`: audit() of 142 exercises -> results/env_audit.json + splits.json;
-  bucket=sha1%100 (train<70, val<85, test); 137/142 usable, splits 101/9/27. Unusable:
-  alphametics, error-handling, ledger, markdown, parallel-letter-frequency.
+  bucket=sha1%100 (train<70, val<85, test); 137/142 usable, splits 101/9/27; 5 unusable
+  (list in env_audit.json).
 
 ## lgbox server (done 2026-10-09)
 - `lgbox serve --port P --workers N --queue Q` (axum 0.8): /run in fresh tmpdir; pre_exec
