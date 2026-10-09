@@ -117,9 +117,11 @@ class _CppLogprob(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, g):
-        # C++ backward lands in cppbwd; until then reuse the torch chunked math.
         h, w, t, lse = ctx.saved_tensors
-        return _torch_backward(g, h, w, t, lse, ctx.chunk)
+        need_h, need_w = h.requires_grad, w.requires_grad
+        grad_h, grad_w = _load_cpp().logprob_bwd(h, w, t, lse, g.reshape(-1),
+                                                 need_h, need_w, int(ctx.chunk))
+        return grad_h if need_h else None, grad_w if need_w else None, None, None
 
 
 def _cpp_impl(h, w, t, chunk):

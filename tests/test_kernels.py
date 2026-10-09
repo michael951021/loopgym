@@ -1,4 +1,5 @@
 """Regression tests for loopgym/kernels beyond the known-answer suite."""
+import pytest
 import torch
 
 from loopgym import kernels
@@ -28,6 +29,23 @@ def test_dtype_preserved_and_weight_grad():
     h2, w2 = h.detach().clone().double().requires_grad_(True), w.detach().clone().double().requires_grad_(True)
     gh2, gw2 = torch.autograd.grad(ref(h2, w2, t).sum(), (h2, w2))
     assert torch.allclose(gh, gh2, atol=1e-10) and torch.allclose(gw, gw2, atol=1e-10)
+
+
+@pytest.mark.skipif("cpp" not in kernels.IMPLS, reason="cpp kernel not built")
+def test_cpp_backward_matches_reference():
+    """C++ logprob_bwd (via autograd) == naive log-softmax autograd; f64 tight, f32 loose."""
+    g = torch.Generator().manual_seed(7)
+    for dt, atol in ((torch.float64, 1e-10), (torch.float32, 1e-4)):
+        h = torch.randn(9, 16, generator=g, dtype=dt, requires_grad=True)
+        w = torch.randn(40, 16, generator=g, dtype=dt, requires_grad=True)
+        t = torch.randint(0, 40, (9,), generator=g)
+        gh, gw = torch.autograd.grad(kernels.token_logprobs(h, w, t, impl="cpp", chunk=7).sum(),
+                                     (h, w))
+        h2 = h.detach().clone().double().requires_grad_(True)
+        w2 = w.detach().clone().double().requires_grad_(True)
+        gh2, gw2 = torch.autograd.grad(ref(h2, w2, t).sum(), (h2, w2))
+        assert torch.allclose(gh.double(), gh2, atol=atol), (dt, "grad_h")
+        assert torch.allclose(gw.double(), gw2, atol=atol), (dt, "grad_w")
 
 
 def test_unknown_impl_raises():

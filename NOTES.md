@@ -30,8 +30,9 @@ Current state for next run (keep <4KB). Evidence: .agent-evidence/*.log.
 - `kernels/token_logprobs(h,w,t,impl,chunk)->[T]`: chunked online max/LSE, bwd per-chunk
   softmax (no [T,V] saved); impls torch, cpp. 12/12 known (0.5B==HF 1e-3, f64 gradcheck);
   peak << 1/8 naive. Keep input dtype.
-  cpp: csrc/logprob_cpu.cpp JIT (ninja dep, .tools/build, -O3 -fopenmp), OpenMP over T,
-  f32+f64; bwd = torch placeholder (cppbwd).
+  cpp: csrc/logprob_cpu.cpp JIT (ninja dep, .tools/build, -O3 -fopenmp), OpenMP over T
+  fwd, f32+f64; bwd = C++ logprob_bwd (chunked -g*exp(s-lse)+g@tgt; dS@w_c / dS.T@h);
+  6/6 -k cpp incl. f64 gradcheck (cppbwd-accept.log).
 
 ## RL
 - `grpo.py` group_advantages/kl_k3/policy_loss; 7/7 known.
