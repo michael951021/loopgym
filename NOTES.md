@@ -67,7 +67,7 @@ Next-run state; evidence: .agent-evidence/.
 - `data/verify.py`: worktrees bad+good + pristine check 3x/side -> verified.jsonl;
   checks may import worktree code, must COLLECT at both (import error -> "error");
   Makefile ignores tests/hidden.
-- `state/verify/batch1.md`: first unchecked step wins; vb1: 9/12 verified.
+- `state/verify/batch1.md`: first unchecked step wins; vb1: 10/12 verified.
   draftlab data/ gitignored -> hidden checks use temp root + synthetic fixtures.
   jaxlm checks: jax[cpu] in .venv; chi2 via jax.scipy.
 
