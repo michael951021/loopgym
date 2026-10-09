@@ -1,0 +1,164 @@
+{
+ "mode": "full",
+ "T": [
+  512,
+  2048
+ ],
+ "V": 151936,
+ "d": 896,
+ "chunk": 8192,
+ "runs": 5,
+ "dtype": "torch.float32",
+ "cuda": false,
+ "triton_interpret": true,
+ "note": "triton_interpret times are TRITON_INTERPRET=1 Python overhead, not kernel performance; GPU numbers come from scripts/gpu_run.sh",
+ "cells": [
+  {
+   "impl": "naive",
+   "T": 512,
+   "time_median_s": 0.3628,
+   "time_runs_s": [
+    0.3686,
+    0.3628,
+    0.3521,
+    0.3524,
+    0.3815
+   ],
+   "peak_extra_bytes": 622336000
+  },
+  {
+   "impl": "torch",
+   "T": 512,
+   "time_median_s": 0.385,
+   "time_runs_s": [
+    0.3613,
+    0.385,
+    0.382,
+    0.4166,
+    0.4438
+   ],
+   "peak_extra_bytes": 50342400
+  },
+  {
+   "impl": "cpp",
+   "T": 512,
+   "time_median_s": 2.5423,
+   "time_runs_s": [
+    2.5423,
+    2.4522,
+    2.4028,
+    2.8464,
+    2.7374
+   ],
+   "peak_extra_bytes": 167944
+  },
+  {
+   "impl": "triton",
+   "T": 1,
+   "time_median_s": 2.8626,
+   "time_runs_s": [
+    2.887,
+    2.8594,
+    2.8613,
+    2.8626,
+    2.8957
+   ],
+   "peak_extra_bytes": 8,
+   "triton_interpret": true
+  },
+  {
+   "impl": "naive",
+   "T": 2048,
+   "time_median_s": 1.3041,
+   "time_runs_s": [
+    1.1963,
+    1.3162,
+    1.3041,
+    1.0444,
+    1.3942
+   ],
+   "peak_extra_bytes": 2489344008
+  },
+  {
+   "impl": "torch",
+   "T": 2048,
+   "time_median_s": 1.3595,
+   "time_runs_s": [
+    1.3063,
+    1.3151,
+    1.4192,
+    1.3595,
+    1.4882
+   ],
+   "peak_extra_bytes": 201369608
+  },
+  {
+   "impl": "cpp",
+   "T": 2048,
+   "time_median_s": 10.0408,
+   "time_runs_s": [
+    10.0408,
+    10.5795,
+    10.2283,
+    10.0355,
+    9.9719
+   ],
+   "peak_extra_bytes": 180240
+  },
+  {
+   "impl": "triton",
+   "T": 1,
+   "time_median_s": 3.0773,
+   "time_runs_s": [
+    3.0986,
+    3.2549,
+    3.0476,
+    3.0485,
+    3.0773
+   ],
+   "peak_extra_bytes": 16,
+   "triton_interpret": true
+  }
+ ],
+ "checks": {
+  "all_impls_match_f64_reference_1e-4": {
+   "pass": true,
+   "tolerance": 0.0001,
+   "max_diffs": {
+    "naive_T512": 7.572290186885766e-06,
+    "torch_T512": 7.139117172982878e-06,
+    "cpp_T512": 4.648561669284845e-05,
+    "triton_T1": 1.966386818708088e-06,
+    "naive_T2048": 7.6285638073159134e-06,
+    "torch_T2048": 7.682485900772917e-06,
+    "cpp_T2048": 4.331424680970031e-05
+   }
+  },
+  "fused_peak_lt_1_8_naive": {
+   "pass": true,
+   "detail": {
+    "cpp_T512": {
+     "peak_extra_bytes": 167944,
+     "naive_peak_bytes": 622336000,
+     "pass": true
+    },
+    "torch_T512": {
+     "peak_extra_bytes": 50342400,
+     "naive_peak_bytes": 622336000,
+     "pass": true
+    },
+    "cpp_T2048": {
+     "peak_extra_bytes": 180240,
+     "naive_peak_bytes": 2489344008,
+     "pass": true
+    },
+    "torch_T2048": {
+     "peak_extra_bytes": 201369608,
+     "naive_peak_bytes": 2489344008,
+     "pass": true
+    }
+   }
+  }
+ },
+ "generated": "2026-10-09T11:54:52"
+}

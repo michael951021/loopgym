@@ -25,21 +25,16 @@ State for next run (<4KB). Evidence: .agent-evidence/*.log.
   /metrics; Firecracker Vmm+VmPool, --dry-run, FakeVmm-only (rule 4); bench 120/120.
 
 ## Kernel
-- `kernels/token_logprobs(h,w,t,impl,chunk)->[T]`: chunked online max/LSE, bwd per-chunk softmax
-  (no [T,V] saved); impls torch, cpp, triton. Known: 0.5B==HF 1e-3, f64 gradcheck; peak << 1/8
-  naive. Keep input dtype.
-  cpp: csrc/logprob_cpu.cpp JIT (ninja, .tools/build, -O3 -fopenmp), OpenMP over T, f32+f64;
-  bwd = torch placeholder (cppbwd).
-- `triton_logprob.py`: fwd 1 prog/row, V-tile online max/LSE + target logit; bwd_h 1 prog/row
-  (acc p·w); bwd_w 1 prog/V-tile (row loop, no atomics); f64 ok. Registered iff CUDA or
-  TRITON_INTERPRET=1. GOTCHA: interpret block cap 1048576 -> C<=1024; masked V cols s=-inf;
-  target-acc init -inf. strict incl. model: triton-accept2.log.
 - `kernels/token_logprobs(h,w,t,impl,chunk)->[T]`: chunked online max/LSE, bwd per-chunk
-  softmax (no [T,V] saved); impls torch, cpp. 12/12 known (0.5B==HF 1e-3, f64 gradcheck);
-  peak << 1/8 naive. Keep input dtype.
-  cpp: csrc/logprob_cpu.cpp JIT (ninja dep, .tools/build, -O3 -fopenmp), OpenMP over T
-  fwd, f32+f64; bwd = C++ logprob_bwd (chunked -g*exp(s-lse)+g@tgt; dS@w_c / dS.T@h);
-  6/6 -k cpp incl. f64 gradcheck (cppbwd-accept.log).
+  softmax (no [T,V]); impls torch, cpp, triton; keep dtype. Known 0.5B==HF 1e-3, gradcheck.
+  cpp: csrc/logprob_cpu.cpp JIT (ninja, .tools/build, OpenMP); bwd C++
+  (saved lse) 6/6.
+  triton: fwd 1 prog/row; bwd_h row, bwd_w V-tile. iff CUDA or
+  TRITON_INTERPRET=1. GOTCHA: interpret cap 1048576 -> C<=1024; masked cols -inf.
+- `tools/bench_logprob.py` -> results/: median of 5 + peak/impl; f64 1e-4 + fused<1/8
+  naive PASS (naive 593/2374, torch 48/192, cpp 0.2 MiB; benchlp_full2.log).
+  CPU peak = max Total Allocated, chrome trace (kineto self sums bad).
+  triton-interpret benched T=1, flagged.
 
 ## RL
 - `grpo.py` group_advantages/kl_k3/policy_loss; 7/7 known.
