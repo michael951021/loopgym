@@ -1,0 +1,31 @@
+{
+ "exercises": 142,
+ "usable": 137,
+ "unusable": {
+  "alphametics": {
+   "reason": "ref=0.0",
+   "ref": 0.0,
+   "stub": 0.0
+  },
+  "error-handling": {
+   "reason": "ref=0.0",
+   "ref": 0.0,
+   "stub": 0.0
+  },
+  "ledger": {
+   "reason": "stub=1.0",
+   "ref": 1.0,
+   "stub": 1.0
+  },
+  "markdown": {
+   "reason": "stub=1.0",
+   "ref": 1.0,
+   "stub": 1.0
+  },
+  "parallel-letter-frequency": {
+   "reason": "ref=0.0 (timeout)",
+   "ref": 0.0,
+   "stub": 0.0
+  }
+ }
+}
