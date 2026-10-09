@@ -62,7 +62,7 @@ Next-run state; evidence .agent-evidence/*.log.
 - `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; check imports
   worktree code LAZILY (module import of a file absent at one commit
   -> tests=0 -> "error").
-- vb1: 12/12. vb2: batch2.md (13-24), one cand/run; cand 13 verified; next cand 14.
+- vb1: 12/12. vb2: batch2.md (13-24), one cand/run; cands 13-14 verified; next 15.
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored);
   jaxlm: chi2 via stats.chi2.sf (no chisquare); FixedDrafter mid-p token.
 
