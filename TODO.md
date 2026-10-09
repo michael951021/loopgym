@@ -37,7 +37,7 @@
   why: process limits are weak isolation; the microVM backend is the production answer, prototyped on this host at 0.63 s boot.
 - [x] **lgbox throughput bench (job)** — tools/bench_lgbox.py: 200 grades of reference solutions from the val split at concurrency 1/4/16 for the local runner and the http runner; per cell grades/s and p50/p95 latency → results/lgbox_bench.json. Write the script with a `--quick` flag (20 grades) and check `--quick` runs in < 2 min; the full bench runs as the next job. Done when `.venv/bin/python tools/bench_lgbox.py --quick` exits 0 and writes the JSON. (id: lgboxbenchcode) (after: lgboxpy, splits)
   why: the bench script, kept small; the measured numbers come from the job below.
-- [ ] **lgbox bench run** — (id: lgboxbench) (after: lgboxbenchcode) (run: `bash -c 'cd lgbox && PATH=/work/.tools/cargo/bin:$PATH cargo build --release && cd .. && .venv/bin/python tools/bench_lgbox.py'`) (mem: 8) (cpus: 8) (timeout: 2h)
+- [x] **lgbox bench run** — (id: lgboxbench) (after: lgboxbenchcode) (run: `bash -c 'cd lgbox && PATH=/work/.tools/cargo/bin:$PATH cargo build --release && cd .. && .venv/bin/python tools/bench_lgbox.py'`) (mem: 8) (cpus: 8) (timeout: 2h)
   why: grading throughput and overhead numbers for the report (plausible range in CLAUDE.md).
 
 ## RL core
