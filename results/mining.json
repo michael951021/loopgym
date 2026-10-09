@@ -1,0 +1,76 @@
+{
+ "repos": {
+  "draftlab": {
+   "commits": 186,
+   "kw_fixes": 38,
+   "pairs": 118,
+   "kept": 110,
+   "dropped_lines": 8,
+   "dropped_files": 0,
+   "seed_and_auto": 1,
+   "seeds": 3
+  },
+  "harness": {
+   "commits": 54,
+   "kw_fixes": 9,
+   "pairs": 29,
+   "kept": 29,
+   "dropped_lines": 0,
+   "dropped_files": 0
+  }
+ },
+ "candidates": 141,
+ "seeds": {
+  "draftlab-alpha": {
+   "recalled": true,
+   "rule": "keyword in fix message + blame of deleted lines",
+   "fixes": [
+    [
+     "7a848915",
+     554
+    ],
+    [
+     "ca4403cb",
+     150
+    ],
+    [
+     "5bf9b0db",
+     10
+    ],
+    [
+     "0158d68f",
+     1
+    ]
+   ]
+  },
+  "draftlab-spec": {
+   "recalled": true,
+   "rule": "keyword in fix message + blame of deleted lines",
+   "fixes": [
+    [
+     "1e9f5d39",
+     66
+    ],
+    [
+     "ae371e3c",
+     4
+    ],
+    [
+     "5bf9b0db",
+     1
+    ]
+   ]
+  },
+  "draftlab-lora": {
+   "recalled": true,
+   "rule": "keyword in fix message + blame of deleted lines",
+   "fixes": [
+    [
+     "11b1d163",
+     11
+    ]
+   ]
+  }
+ },
+ "recalled": "3/3"
+}
