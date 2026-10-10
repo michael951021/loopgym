@@ -15,8 +15,8 @@
   lines held.
 - hostgate: atk4: host tip still 4cb686d (all refs scanned; main/origin
   older); no HUMAN_ONLY -> unapplied; fresh worktree RED->GREEN (real
-  TODO.md), 4/4, 0/16; shipped tools/hostgate_apply.sh (idempotent,
-  tested). Kevin: run on host + restart dispatcher.
+  TODO.md), 4/4, 0/16; shipped tools/hostgate_apply.sh (tested). Kevin:
+  run on host + restart dispatcher.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
@@ -24,12 +24,6 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md Plan step 1; E2E valid; checker unchanged
-  since cd681e9).
-  atk32/attempt7 terminal wait: ruling absent (disk+refs+stash);
-  checker+eval unchanged since cd681e9; fresh exit 1, base05 FAIL 0.0764
-  [0.014,0.153] <0.10 (w1a32-verdict.log); gate exit 1; 16/16 pass;
-  paste E2E re-verified (fail-closed). Kevin: paste + hostgate (w2).
   (paste: kevinruling.md Plan step 1, :58). attempt10 (w1a35) terminal wait:
   ruling absent (disk+all refs), gate exit 1, master unchanged since dcb59cf
   -> atk34 verification holds (paste->exit 0, 5/5 PASS; verdict exit 1,
