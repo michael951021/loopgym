@@ -19,10 +19,10 @@ Next-run state; evidence .agent-evidence/*.log.
   passes only via range-author ruling (malformed fails closed).
   base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
   results/rulings/base05_val.ruling.json (forms: state/tickets/kevinruling.md).
-  Ruling E2E atk5, checker cd681e9 (unchanged since): none->1, accept->0,
+  Ruling E2E atk5 (checker cd681e9, unchanged): none->1, accept->0,
   revise-in->0, revise-out->1. atk7: ruling absent on all refs (master
-  f612cb5), verdict exit 1 (kevinruling7-verdict.log); 7th dispatch, dedicated
-  line did not stop re-dispatch — Kevin: commit file or stop dispatch.
+  f612cb5), verdict exit 1 (kevinruling7-verdict.log); 7th dispatch, line did
+  not stop re-dispatch.
   rangerule (after: kevinruling) records verdict; basecheck gated to exit 0.
 
 ## Models
