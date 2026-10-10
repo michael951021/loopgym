@@ -5,7 +5,7 @@ base05 val pass@1 0.0764 [0.014, 0.153] is below the pre-run 0.10 floor. Rule 5:
 only the range author (Kevin) may accept the number or revise the range — agents
 never write rulings. Until this lands, basecheck stays exit 1 and everything
 gated after it (grpocfg, grpo05) is blocked. The dedicated line was meant to
-stop re-dispatch but did not (18th dispatch: atk18).
+stop re-dispatch but did not (19th dispatch: atk19).
 
 ## Question
 Does the range author accept 0.0764 (task-clustered CI straddles the 0.10 floor)
@@ -27,6 +27,15 @@ absent; a committed ruling closes it.
   Stop-when, stopped without re-running ruled-out checks. Root-cause ticket
   (id: humandispatch) stands: the dispatcher keeps re-dispatching this
   human-only line.
+- atk19 (2026-10-10): unchanged — ruling absent on disk (.gitkeep only) and
+  on all refs, no remote; fresh verdict exit 1, single FAIL base05
+  (.agent-evidence/kevinruling19-verdict.log). 19th dispatch. Task dispatcher
+  is harness-side: no scheduler code in the repo (only match is the lgbox
+  job-queue dispatcher, unrelated). No ruled-out checks re-run. NEW: the
+  paste-ready accept command in Plan is E2E-verified on a scratch copy of
+  the real results/ against the real checker -> exit 0, all rows PASS
+  (.agent-evidence/kevinruling19-accept-e2e.log) — Kevin's unblock is now a
+  single paste.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 - atk5: ruling-channel E2E on checker cd681e9 against a copy of the real
@@ -48,6 +57,11 @@ ruled-out cause checks. Kevin: commit the one file above; the gated line
 (id: rangerule, after: kevinruling) then runs the checker and records the verdict.
 
 ## Plan
-1. Kevin commits results/rulings/base05_val.ruling.json (one of the two forms).
+1. Kevin pastes (accept; E2E-verified exit 0 atk19 — kevinruling19-accept-e2e.log):
+   ```sh
+   printf %s '{"author": "kevin", "decision": "accept", "rationale": "task-clustered CI [0.014, 0.153] straddles the 0.10 floor; ten pipeline causes ruled out (atk1-10)"}' > results/rulings/base05_val.ruling.json
+   git add results/rulings/base05_val.ruling.json && git commit -m "ruling: accept base05 0.0764 (CI straddles 0.10 floor)"
+   ```
+   (revise form: see Done-when — new_range [lo,hi] with 0.0764 inside.)
 2. Next agent run (rangerule): checker `--only baselines` → expect exit 0,
    record verdict in NOTES.md, unblock basecheck.

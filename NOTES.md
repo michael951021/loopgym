@@ -13,12 +13,12 @@ Next-run state; logs in .agent-evidence/.
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
-  passes only via range-author ruling (malformed fails closed). base05 0.0764
-  [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
-  results/rulings/base05_val.ruling.json (forms: state/tickets/kevinruling.md).
-  atk18: absent all refs AND on disk (no remote); fresh verdict exit 1
-  unchanged (kevinruling18-verdict.log). 18 dispatches; humandispatch stands;
-  basecheck gated.
+  passes only via range-author ruling (malformed fails closed; --results-dir).
+  base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
+  results/rulings/base05_val.ruling.json — paste-ready cmd in
+  state/tickets/kevinruling.md, E2E-verified exit 0 (kevinruling19-accept-e2e.log).
+  atk19: absent all refs AND disk; verdict exit 1 (kevinruling19-verdict.log).
+  19 dispatches; dispatcher harness-side; humandispatch stands; basecheck gated.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
