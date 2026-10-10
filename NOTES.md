@@ -12,12 +12,9 @@
 ## Scheduling
 - `(human-only[: RELPATH])` tags: open TODO lines the dispatcher must skip;
   gate tools/sched_guard.py --line <id> (0 ok / 1 skip / 2 unknown).
-  kevinruling tagged (file present -> exit 0). hostgate (human-only):
-  gate verified (1/1/0/2, --list 1, tests 5/5); Kevin's host patch
-  left (ro mount); see state/tickets/hostgate.md.
-  kevinruling tagged (guard: file present -> exit 0, verified atk17,
-  releases pre-commit). hostgate (human-only): dispatcher never calls the
-  gate: re-dispatched atk2-22.
+  kevinruling tagged (file present -> exit 0; releases pre-commit).
+  hostgate (human-only): gate verified (1/1/0/2, --list 1, tests 5/5);
+  Kevin's host patch left (ro mount); state/tickets/hostgate.md.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
