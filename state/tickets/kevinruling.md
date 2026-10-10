@@ -5,7 +5,7 @@ base05 val pass@1 0.0764 [0.014, 0.153] is below the pre-run 0.10 floor. Rule 5:
 only the range author (Kevin) may accept the number or revise the range — agents
 never write rulings. Until this lands, basecheck stays exit 1 and everything
 gated after it (grpocfg, grpo05) is blocked. The dedicated line was meant to
-stop re-dispatch but did not (50th: atk50; humandispatch TODO.md:135).
+stop re-dispatch but did not (58th: atk58; humandispatch TODO.md:135).
 
 ## Question
 Does the range author accept 0.0764 (task-clustered CI straddles the 0.10 floor)
@@ -98,6 +98,12 @@ absent; a committed ruling closes it.
   exit 1, single base05 FAIL 0.0764 [0.014,0.153] <0.10, all other
   baseline rows PASS (kevinruling57-verdict.log). 57th dispatch;
   terminal wait on Kevin.
+- atk58 (2026-10-10): unchanged — ruling never committed
+  (`git log --all -- <file>` empty; dir = .gitkeep; no stash/remote; master
+  = w2 HEAD da7a0ca); ListAgents: no live peer. Checker+test unchanged since
+  cd681e9 (git log cd681e9..HEAD empty). Fresh real verdict exit 1, single
+  base05 FAIL 0.0764 [0.014,0.153] <0.10, other rows PASS
+  (kevinruling58-verdict.log). 58th dispatch; terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
