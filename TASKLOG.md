@@ -121,3 +121,7 @@
 - Goal: Check toy known answers
 - Approach: Ran tools/toy_check.py on the landed toybanana3/toynull3 metrics, generated toy.json from the same load_pairs/window/slope-bootstrap functions, verified via check_results and the make-check test scope
 - Blockers: none
+## Freeze loopgym v0
+- Goal: Freeze loopgym v0
+- Approach: reuse load_tasks()/verified records as the source of truth, add a freeze module with build/--check, pin the split rule to a published SHA-1 vector, run the acceptance chain end-to-end
+- Blockers: none
