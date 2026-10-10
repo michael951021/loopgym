@@ -22,14 +22,13 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md Plan step 1; E2E accept->exit 0 valid, checker
-  unchanged since cd681e9).
-  w1a22 (terminal wait): ruling still absent (refs/stash/remote, no live
-  peer); gate exit 1; verdict inputs unchanged since cd681e9 (fff19b8
-  added only loopgym_v0.json, checker does not load it) so w1a21 verdict
-  holds: exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10, others PASS
-  (w1a21-verdict.log). Paste at kevinruling.md Plan step 1 valid; no
-  agent step (rule 5).
+  (paste: kevinruling.md Plan step 1; E2E valid; checker unchanged
+  since cd681e9).
+  w1a22 (terminal wait): ruling still absent (refs/stash/remote, no
+  peer); gate exit 1; verdict inputs unchanged since cd681e9 -> w1a21
+  verdict holds (exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10, others
+  PASS, w1a21-verdict.log). Paste at kevinruling.md Plan step 1 valid;
+  no agent step (rule 5).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
@@ -68,6 +67,6 @@
   train 13/test 13; data/loopgym/v0/ + results/loopgym_v0.json; `--check`
   exit 1 on drift; redaction: public draftlab/harness only.
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
-- hidden checks: temp root + synthetic fixtures; assert completion claim; cross-check
-  cited numbers vs results/*.json; GOTCHA: results/*.json absent at bad -> lazy
-  worktree discovery inside tests (module level = collection error -> "error").
+- hidden checks: temp root + synthetic fixtures; assert completion claim;
+  cross-check cited numbers vs results/*.json; GOTCHA: results/*.json absent
+  at bad -> lazy discovery in tests (module level = collection error).
