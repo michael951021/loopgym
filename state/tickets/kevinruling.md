@@ -258,6 +258,14 @@ absent; a committed ruling closes it.
   sched_guard+check_results pass. No agent-side step (rule 5); terminal
   wait: Kevin's paste (Plan step 1) + hostgate apply (w2).
 
+- atk33 (attempt 8): unchanged — ruling absent (disk: rulings/ = .gitkeep;
+master has no such path; no stash); checker+eval byte-identical since
+cd681e9 (git diff --stat empty) -> verdict holds; fresh exit 1, single
+base05 FAIL 0.0764 [0.014, 0.153] < 0.10, others PASS (w1a33-verdict.log);
+gate exit 1; 16/16 sched_guard+check_results pass (w1a33-tests.log).
+Paste intact at Plan step 1. No agent-side step (rule 5); terminal wait:
+Kevin's paste + hostgate apply (w2).
+
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
 `.venv/bin/python tools/check_results.py --only baselines` exits 0.
