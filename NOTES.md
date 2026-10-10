@@ -14,7 +14,7 @@
   gate tools/sched_guard.py --line <id> (0 ok / 1 skip / 2 unknown).
   kevinruling tagged (guard: file present -> exit 0, verified atk17,
   releases pre-commit). hostgate (human-only): dispatcher never calls the
-  gate: re-dispatched atk2-21.
+  gate: re-dispatched atk2-22.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
@@ -24,11 +24,12 @@
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
   (paste: kevinruling.md Plan step 1; E2E accept->exit 0 valid, checker
   unchanged since cd681e9).
-  atk21 (terminal wait): ruling absent all refs + reflog-path-log, no
-  remote, no live peer (Kevin's checkout unmounted). Gate exit 1; checker
-  exit 1 (base05 FAIL 0.0764 [0.014,0.153] <0.10, others PASS,
-  w1a21-verdict.log). Paste at kevinruling.md Plan step 1 valid. No agent
-  step (rule 5).
+  w1a22 (terminal wait): ruling still absent (refs/stash/remote, no live
+  peer); gate exit 1; verdict inputs unchanged since cd681e9 (fff19b8
+  added only loopgym_v0.json, checker does not load it) so w1a21 verdict
+  holds: exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10, others PASS
+  (w1a21-verdict.log). Paste at kevinruling.md Plan step 1 valid; no
+  agent step (rule 5).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
