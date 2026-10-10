@@ -13,9 +13,9 @@
 - `(human-only[: RELPATH])`: hold open tagged lines; gate
   tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); open tagged
   lines held.
-- hostgate: harness patch (base 4cb686d) verified: plan()/cmd_next hold
-  tagged lines; RED->GREEN on TODO.md, 4/4 tests, 0 gate mismatches;
-  patch+recipe: state/tickets/hostgate.{patch,md}; Kevin applies.
+- hostgate: atk3 re-verified on current TODO.md: 4cb686d newest mirror
+  state, no HUMAN_ONLY in any ref (host patch unapplied); patch applies
+  clean, 4/4 tests, 0/16 gate mismatches; Kevin's step pending (hostgate.md).
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
@@ -29,7 +29,7 @@
   checker+eval identical since cd681e9; fresh exit 1, base05 FAIL 0.0764
   [0.014,0.153] <0.10 (w1a28-verdict.log); paste re-verified (accept/
   revise-in True, fail-closed; E2E tempdir exit 0); gate exit 1; no agent
-  step (rule 5); hostgate recipe merged -> Kevin's host step pending.
+  step (rule 5).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
