@@ -25,15 +25,11 @@
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
   (paste: kevinruling.md Plan step 1; E2E valid; checker unchanged
   since cd681e9).
-  w1a28 (terminal wait, atk28): ruling absent (refs/stash/remotes);
-  checker+eval identical since cd681e9; fresh exit 1, base05 FAIL 0.0764
-  [0.014,0.153] <0.10 (w1a28-verdict.log); paste re-verified (accept/
-  revise-in True, fail-closed; E2E tempdir exit 0); gate exit 1; no agent
-  step (rule 5).
-  (paste: kevinruling.md Plan step 1; E2E exit 0; test asserts both states).
-  atk31/attempt6 terminal wait: ruling absent (disk+all refs+stash); fresh
-  exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10 (w1a31-verdict.log); gate
-  exit 1; 16/16 pass. Kevin: paste + hostgate apply (hostgate=w2).
+  atk31 terminal wait: ruling absent (disk+all refs+stash); checker+eval
+  identical since cd681e9; fresh exit 1, base05 FAIL 0.0764 [0.014,0.153]
+  <0.10 (w1a31-verdict.log); paste re-verified (fail-closed; E2E exit 0;
+  ruling test absent->1, present->0); gate exit 1; 16/16 pass. Kevin: paste
+  + hostgate apply (hostgate=w2).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
