@@ -192,6 +192,21 @@ absent; a committed ruling closes it.
   fresh verdict exit 1, single base05 FAIL 0.0764 [0.014, 0.153] <0.10,
   others PASS (w1a19-verdict.log). Paste at Plan step 1 (:209) valid.
   19th w1 dispatch; terminal wait on Kevin.
+- w1 atk22 (2026-10-10): unchanged — ruling still absent (dir = .gitkeep;
+  `git log --all -- <file>` empty; no stash/remote; ListAgents: no live
+  peer). Verdict inputs unchanged since cd681e9 (fff19b8 added only
+  results/loopgym_v0.json, which the checker does not load: it reads
+  results/eval/*.json, toy.json, bench files) -> w1a21 verdict holds
+  (exit 1, single base05 FAIL 0.0764 [0.014,0.153] <0.10); no re-run
+  (Stop-when). Gate exit 1. Paste intact at Plan step 1. 22nd w1
+  dispatch; terminal wait on Kevin.
+- w1 atk23 (2026-10-10): unchanged — ruling never committed
+  (`git log --all -- <file>` empty; no stash/remote; rulings/ = .gitkeep);
+  results/ since cd681e9 = fff19b8 only (loopgym_v0.json + DATASET.md,
+  not loaded by checker) -> w1a21 verdict holds, no re-run; gate exit 1
+  (line 133); ListAgents: no live peer to message. Terminal wait on Kevin
+  (Plan step 1); re-dispatch root cause ticketed (hostgate, TODO:137,
+  w2 active).
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and

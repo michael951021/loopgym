@@ -15,6 +15,9 @@
   kevinruling tagged (file present -> exit 0). hostgate (human-only):
   gate verified (1/1/0/2, --list 1, tests 5/5); Kevin's host patch
   left (ro mount); see state/tickets/hostgate.md.
+  kevinruling tagged (guard: file present -> exit 0, verified atk17,
+  releases pre-commit). hostgate (human-only): dispatcher never calls the
+  gate: re-dispatched atk2-22.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
@@ -22,13 +25,13 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md Plan step 1; E2E accept->exit 0 valid, checker
-  unchanged since cd681e9).
-  atk21 (terminal wait): ruling absent all refs + reflog-path-log, no
-  remote, no live peer (Kevin's checkout unmounted). Gate exit 1; checker
-  exit 1 (base05 FAIL 0.0764 [0.014,0.153] <0.10, others PASS,
-  w1a21-verdict.log). Paste at kevinruling.md Plan step 1 valid. No agent
-  step (rule 5).
+  (paste: kevinruling.md Plan step 1; E2E valid; checker unchanged
+  since cd681e9).
+  w1a23 (terminal wait): ruling never committed (git log --all empty;
+  no stash/remote/live peer); results/ since cd681e9 = fff19b8 only (not
+  loaded by checker) -> w1a21 verdict holds (exit 1, base05 FAIL 0.0764
+  [0.014,0.153] <0.10, others PASS); gate exit 1. No agent step (rule 5);
+  Kevin's paste: kevinruling.md Plan step 1; re-dispatch fix: hostgate.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
@@ -67,6 +70,6 @@
   train 13/test 13; data/loopgym/v0/ + results/loopgym_v0.json; `--check`
   exit 1 on drift; redaction: public draftlab/harness only.
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
-- hidden checks: temp root + synthetic fixtures; assert completion claim; cross-check
-  cited numbers vs results/*.json; GOTCHA: results/*.json absent at bad -> lazy
-  worktree discovery inside tests (module level = collection error -> "error").
+- hidden checks: temp root + synthetic fixtures; assert completion claim;
+  cross-check cited numbers vs results/*.json; GOTCHA: results/*.json absent
+  at bad -> lazy discovery in tests (module level = collection error).
