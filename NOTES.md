@@ -11,12 +11,11 @@
 
 ## Scheduling
 - `(human-only[: RELPATH])`: hold open tagged lines; gate
-  tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); both open
-  tagged lines -> skip.
-- hostgate: harness patch verified (base 4cb686d): plan()/cmd_next hold
-  tagged lines; RED->GREEN on real TODO.md (2 ready -> 0), 4/4 tests,
-  0 mismatches vs gate; state/tickets/hostgate.patch + recipe in
-  hostgate.md; Kevin applies on host.
+  tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); open tagged
+  lines held.
+- hostgate: harness patch (base 4cb686d) verified: plan()/cmd_next hold
+  tagged lines; RED->GREEN on TODO.md, 4/4 tests, 0 gate mismatches;
+  patch+recipe: state/tickets/hostgate.{patch,md}; Kevin applies.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
@@ -26,11 +25,6 @@
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
   (paste: kevinruling.md Plan step 1; E2E valid; checker unchanged
   since cd681e9).
-  w1a23 (terminal wait): ruling never committed (git log --all empty,
-  no stash/remote); results/ since cd681e9 = fff19b8 only; w1a21 verdict
-  holds (gate exit 1; base05 FAIL 0.0764 [0.014,0.153] <0.10). No agent
-  step (rule 5).
-  HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json.
   w1a27 (terminal wait, atk27): ruling still absent (dir=.gitkeep; no new
   refs/stash; checker+results/eval unchanged since cd681e9 -> w1a26 verdict
   holds; fresh run exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10, w1a27-
