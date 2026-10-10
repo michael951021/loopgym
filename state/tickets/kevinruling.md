@@ -177,6 +177,13 @@ absent; a committed ruling closes it.
   tests/test_check_results.py 11/11. Real checker exit 1, single base05
   FAIL (w1a15-verdict.log). 15th dispatch; only Kevin's paste (Plan step 1)
   remains, rule 5; terminal wait on Kevin.
+- w1 atk16 (2026-10-10): unchanged — dir = .gitkeep, `git log --all --
+  <ruling file>` empty (0 commits ever), master = w1 HEAD (no new commits);
+  gate exit 1; fresh verdict exit 1, single FAIL base05 0.0764 [0.014, 0.153]
+  < 0.10, others PASS (w1a16-verdict.log). Checker/tests unchanged since
+  cd681e9, so atk15 E2E (paste verbatim -> exit 0, kr15-e2e.log) still valid;
+  no re-E2E. Paste at :202-204. No agent-side step remains (rule 5);
+  terminal wait on Kevin.
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
