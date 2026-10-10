@@ -60,13 +60,13 @@
 
 ## Data
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
-- vb1/vb2 24/24; vb3 9/16, all verified (bad 0/3, good 3/3); next =
-  draftlab-fc210e7-f0371d7.
-- hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored).
+- vb1/vb2 24/24; vb3 10/16, all verified (bad 0/3, good 3/3); next =
+  draftlab-fda7335-5bf9b0d.
+- hidden checks: temp root + synthetic fixtures.
   spec-chi2: fix in test file -> spy spec_generate, assert rejecting rounds
   (drafted>accepted) > 0 + recompute chi2 p>0.01.
-  NOTES.md cands: assert the completion claim, not bare numbers (bad-commit
-  lines may hold cost estimates).
+  NOTES.md cands: assert the completion claim, not bare numbers.
   harness cands: find ROOT from sys.path, fabricate a git project under ROOT/projects.
-  tf cands: init -backend=false+validate on a temp copy (offline via
-  .tools/tfplugin-cache) + shape grep; ticket = mining artifact.
+  tf/GKE cands: root() marker draftlab/ + tools/check.sh (at both commits;
+  in-test fail, not collection); temp-copy init -backend=false + validate
+  (warm .tools/tfplugin-cache ~0.7s) + shape grep.
