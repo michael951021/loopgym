@@ -92,6 +92,13 @@ absent; a committed ruling closes it.
   absent, no AGENT_TASK handler) — the re-dispatch lever is host-side; the
   "kevin:" title prefix is the ready marker for the humandispatch fix
   (TODO.md:135, Kevin-side). 56th dispatch; terminal wait on Kevin.
+- w1 atk4 (2026-10-10): unchanged — ruling never committed
+  (for-each-ref newest = harness commits; no stash/remote), Kevin's checkout
+  HEAD synced to master, tree view = known mount artifact (only his .git
+  bound). No live peer (ListAgents); /opt/agent re-audited: prompts =
+  agent-run prompts only, line selection is host-side. Gate exit 1; fresh
+  verdict exit 1, single base05 FAIL 0.0764 [0.014, 0.153] < 0.10, other
+  rows PASS (kevinruling-w1a4-verdict.log). Terminal wait on Kevin.
 - atk57 (2026-10-10): unchanged — ruling never committed
   (`git log --all -- <file>` empty), dir = .gitkeep, no stash/remote,
   master not ahead of w2; ListAgents: no live peer. Fresh real verdict
