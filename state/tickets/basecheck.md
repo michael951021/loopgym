@@ -1,5 +1,36 @@
 # Ticket: Check baselines against ranges (id: basecheck)
 
+## Outcome — attempt 12 (2026-10-10)
+Cause-hunting and channel work exhausted (atk1-11); this attempt fixed the
+systemic gap instead of re-deriving the verdict:
+1. Nothing changed since atk11: master == HEAD, results/rulings/ .gitkeep-only,
+   CLAUDE.md range still 0.10–0.55, verdict re-run exit 1, single FAIL row
+   base05 0.0764 [0.014, 0.153] < 0.10, all other rows PASS
+   (.agent-evidence/basecheck12-verdict.log).
+2. Fresh independent cross-check from raw sidecars (not the JSON aggregates):
+   11/144 = 0.076389 base05, 44/144 = 0.305556 base15, exact match to the
+   committed JSONs; 0 base05 timeouts. Number stands.
+3. Root cause of 12 no-progress dispatches: the basecheck line had
+   `(after: base05, base15)` — no edge to the human-blocked rangerule — so the
+   harness re-assigned an un-runnable task 12x. Fixed: line now
+   `(after: base05, base15, rangerule)`; basecheck dispatches only after the
+   ruling, when the checker exit decides mechanically.
+Unblock unchanged: Kevin writes results/rulings/base05_val.ruling.json
+(accept or revise; exact forms below at atk10). Then `--only baselines`.
+## Outcome — attempt 11 (2026-10-10)
+No new pipeline evidence to find (ten causes out, atk1-10); this attempt
+verified the handoff itself instead of re-deriving the verdict:
+1. master == HEAD (96e75ea); `results/rulings/` still .gitkeep-only.
+2. Verdict re-run: exit 1, single FAIL row base05 0.0764 [0.014, 0.153]
+   < 0.10, note cites the exact ruling path; all other rows PASS
+   (.agent-evidence/basecheck11-verdict.log).
+3. The handoff JSON below was checked verbatim against check_ruling
+   (tools/check_results.py:61): accept → (True, "in range by ruling — …"),
+   so Kevin's one file flips the exit to 0 mechanically (channel E2E atk8).
+Unblock remains ticket rangerule: Kevin writes
+`results/rulings/base05_val.ruling.json` (accept, or revise with
+`"new_range": [lo, hi]`, 0.0764 inside). Agents may not write rulings
+(rule 5). Stopping; no repeat of ruled-out causes.
 ## Outcome — attempt 10 (2026-10-10)
 Verdict re-run: exit 1, single FAIL row unchanged (base05 0.0764 [0.014,
 0.153] < 0.10; base15 0.3056, ordering + CI-overlap reported, reference 1.0
