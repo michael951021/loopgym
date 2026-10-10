@@ -10,13 +10,12 @@
 - env.grade default timeout=30 < slowest loopgym check: pass cfg.timeout=120.
 
 ## Scheduling
-- `(human-only[: RELPATH])`: gate tools/sched_guard.py --line <id>
-  (0 ok/1 skip/2 unknown); tagged lines held.
-- hostgate: unapplied on host (live: atk5). atk5: 4cb686d worktree
-  RED->GREEN, 4/4, 0/16 (hostgate-atk5-verify.log); no restart needed
-  (agent:473 spawns lib/sched.py/cycle; pool.py:77 reloads/poll).
-  Kevin: projects/loopgym/tools/hostgate_apply.sh, commit sched.py,
-  check TODO:137.
+- `(human-only[: P])`: tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); tagged held.
+- hostgate: unapplied on host (6th dispatch = gate not live). atk6:
+  fixed apply-script restart msg; E2E 4cb686d apply+4/4+rc0 + real
+  TODO.md L133/L137 held (hostgate-atk6-apply.log). Kevin:
+  projects/loopgym/tools/hostgate_apply.sh (no restart), commit
+  lib/sched.py, check TODO:137.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.

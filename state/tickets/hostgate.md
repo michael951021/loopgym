@@ -59,6 +59,16 @@ human-only line after applying the patch refutes the fix.
   on disk"). Also: /work is the host worktree
   ~/Documents/coders/loop/work/loopgym/w2; the stable script path is the
   primary checkout ~/Documents/coders/loop/projects/loopgym.
+- atk6 (2026-10-10): this 6th dispatch of the (human-only) line is the live
+  proof the gate is still not in the live dispatcher (with it, plan() holds
+  L137). No patch re-verification (identical to atk4/atk5); instead
+  hardened the operator path: hostgate_apply.sh no longer says "restart
+  the dispatcher" (contradicted atk5's no-restart finding). Fresh E2E on a
+  /tmp/hg6 clone of the mirror at 4cb686d: first run applies + 4/4 + rc 0,
+  rerun idempotent + rc 0; real TODO.md: `next` -> rc 11 waiting (no gated
+  line claimed), `status` holds L133/L137 as human-only
+  (.agent-evidence/hostgate-atk6-apply.log). In-repo 16/16 (sched_guard +
+  check_results); live gate rc: kevinruling 1, hostgate 1, rangerule 0.
 
 ## Done when
 1. On the host harness repo: `git apply
