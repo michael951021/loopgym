@@ -22,11 +22,11 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md Plan step 1). Re-verified each dispatch (latest
-  attempt 2: ruling absent on all refs; fresh guard exit 1, verdict exit 1:
-  base05 0.0764 [0.014,0.153] <0.10, atk2-atk22b-verdict.log; checker
-  unchanged since 5/5 E2E). No agent step; root cause = hostgate (script on
-  master). Kevin: 2-line paste on host + hostgate apply.
+  (paste: kevinruling.md Plan step 1). Re-verified each dispatch (3rd
+  attempt 2026-10-10: ruling absent on all refs; fresh guard exit 1,
+  verdict exit 1: base05 0.0764 [0.014,0.153] <0.10, atk3-verdict.log;
+  checker cd681e9/guard 83475c8 unchanged since 5/5 E2E). No agent step;
+  root cause = hostgate (script on master). Kevin: 2-line paste + hostgate.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
