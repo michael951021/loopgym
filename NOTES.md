@@ -30,6 +30,12 @@
   no stash/remote); results/ since cd681e9 = fff19b8 only; w1a21 verdict
   holds (gate exit 1; base05 FAIL 0.0764 [0.014,0.153] <0.10). No agent
   step (rule 5).
+  HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json.
+  w1a27 (terminal wait, atk27): ruling still absent (dir=.gitkeep; no new
+  refs/stash; checker+results/eval unchanged since cd681e9 -> w1a26 verdict
+  holds; fresh run exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10, w1a27-
+  verdict.log); gate exit 1; no agent step (rule 5). Re-dispatch fix:
+  hostgate (w2 active).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
