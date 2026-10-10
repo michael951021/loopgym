@@ -16,10 +16,10 @@ Next-run state; logs in .agent-evidence/.
   passes only via range-author ruling (malformed fails closed; --results-dir).
   base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
   results/rulings/base05_val.ruling.json — paste-ready cmd in
-  state/tickets/kevinruling.md, E2E-verified exit 0 (kevinruling19-accept-e2e.log).
-  atk23: absent all refs AND disk; verdict exit 1 (kevinruling23-verdict.log).
-  23 dispatches; dispatcher harness-side; humandispatch ticket stands (TODO.md);
-  basecheck gated.
+  state/tickets/kevinruling.md (E2E exit 0, atk19). atk26: absent all refs AND
+  disk; checker since cd681e9, eval since bf0b283; verdict exit 1
+  (kevinruling26-verdict.log). 26 dispatches; humandispatch stands
+  (TODO.md:135); basecheck gated.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
