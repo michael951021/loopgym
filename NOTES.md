@@ -14,8 +14,8 @@
   passes only via range-author ruling (malformed fails closed; author value
   unchecked, rule 5 by access). base05 0.0764 [0.014,0.153] < 0.10. HUMAN-ONLY:
   kevin commits results/rulings/base05_val.ruling.json; cmd + verbatim in
-  state/tickets/kevinruling.md. atk35: ruling absent (live host .git view:
-  no Kevin commit); "tree wiped 181 del" = MOUNT ARTIFACT (sandbox binds only
+  state/tickets/kevinruling.md. atk35: absent (live host .git view: no Kevin
+  commit); "tree wiped 181 del" = MOUNT ARTIFACT (sandbox binds only
   his .git) -> Kevin: `git status` on host, paste if clean. verdict exit 1
   (kevinruling35-verdict.log); humandispatch TODO.md:135.
 
