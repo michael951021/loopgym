@@ -22,11 +22,10 @@
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
   (paste: kevinruling.md:190-194; E2E exit 0 unblocks checker).
-  w1 atk12 (2026-10-10): ruling still absent (results/rulings/ = .gitkeep
-  only, added by cd681e9; no other ref/stash); no live peer; gate exit 1;
-  checker exit 1: base05 FAIL 0.0764 [0.014,0.153] <0.10, other rows PASS
-  (w1a12-verdict.log). No agent-side step (rule 5). Terminal wait: Kevin's
-  paste + hostgate wiring (TODO:137).
+  w1 atk13 (2026-10-10): ruling absent (rulings/ = .gitkeep only; no ref/stash);
+  no live peer; gate exit 1; checker exit 1: base05 FAIL 0.0764 [0.014,0.153] <0.10,
+  others PASS (w1a13-verdict.log). No agent step (rule 5). Terminal wait: Kevin's
+  paste + hostgate (TODO:137, still open).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
