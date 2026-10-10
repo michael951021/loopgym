@@ -13,10 +13,10 @@ or revise the pre-run range? Open iff results/rulings/base05_val.ruling.json is
 absent; a committed ruling closes it.
 
 ## Evidence (all observed, no guesses)
-- atk9: ruling still absent — master tip a191021 (== HEAD), `git log --all`
+- atk10: ruling still absent — `results/rulings/` empty, `git log --all`
   has no ruling on any ref; checker and results/ unchanged since atk8, so the
   atk5 E2E stands. Fresh verdict exit 1, single FAIL base05 0.0764 < 0.10,
-  unchanged (.agent-evidence/kevinruling9-verdict.log). 9th dispatch; the
+  unchanged (.agent-evidence/kevinruling10-verdict.log). 10th dispatch; the
   dedicated line did not stop re-dispatch — root-cause ticket (id:
   humandispatch) stands: Kevin, commit the file or stop dispatching this line.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.

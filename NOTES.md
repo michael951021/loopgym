@@ -15,18 +15,13 @@ Next-run state; evidence .agent-evidence/*.log.
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
-- `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range passes only
-  via a range-author ruling (malformed fails). base05 0.0764 [0.014,0.153] < 0.10 -> exit 1,
-  10 causes out. HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json
-  (7th dispatch did not stop re-dispatch); rangerule+basecheck gated to kevin's ruling.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
-  passes only via range-author ruling (malformed fails closed).
-  base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
-  results/rulings/base05_val.ruling.json (forms: state/tickets/kevinruling.md).
-  atk5 E2E (checker cd681e9, unchanged): none->1, accept->0,
-  revise-in->0, revise-out->1. atk9: ruling absent on all refs (master
-  a191021==HEAD), verdict exit 1 (kevinruling9-verdict.log); 9th dispatch;
-  humandispatch: kevin stops dispatching human-only lines.
+  passes only via range-author ruling (malformed fails closed). base05 0.0764
+  [0.014,0.153] < 0.10 -> exit 1, 10 causes out. HUMAN-ONLY: kevin commits
+  results/rulings/base05_val.ruling.json (forms: state/tickets/kevinruling.md);
+  10 dispatches did not stop re-dispatch -> humandispatch ticket stands.
+  atk5 E2E: none->1, accept->0, revise-in->0, revise-out->1. atk10: ruling
+  absent on all refs, fresh verdict exit 1 (kevinruling10-verdict.log).
   rangerule records verdict after kevinruling; basecheck gated exit 0.
 
 ## Models
