@@ -14,8 +14,8 @@
   tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); open tagged
   lines held.
 - hostgate: atk3 re-verified on current TODO.md: 4cb686d newest mirror
-  state, no HUMAN_ONLY in any ref (host patch unapplied); patch applies
-  clean, 4/4 tests, 0/16 gate mismatches; Kevin's step pending (hostgate.md).
+  state, no HUMAN_ONLY in any ref (unapplied on host); patch clean, 4/4
+  tests, 0/16 mismatches; Kevin's step pending.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
