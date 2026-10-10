@@ -231,6 +231,21 @@ absent; a committed ruling closes it.
   bad-decision False (fail closed). Gate exit 1 (line 133). No agent-side
   step (rule 5); terminal wait: Kevin's paste (Plan step 1) + hostgate
   (w2 active).
+
+- w1 atk28 (2026-10-10): unchanged — ruling still absent (rulings/ =
+  .gitkeep; `git log --all -- <file>` empty; no stash/remote; /work/.git =
+  Kevin's host object store, so check is exhaustive). Checker +
+  results/eval byte-identical since cd681e9 (since then only new hidden
+  test files, not loaded by checker) -> w1a26/27 verdict stands; fresh
+  checker exit 1, single base05 FAIL 0.0764 [0.014, 0.153] < 0.10, others
+  PASS (w1a28-verdict.log). Paste re-verified in memory vs real
+  check_ruling(r, p=0.0764): accept True, revise-in True, revise-out /
+  no-rationale / bad-decision False (fail closed). NEW E2E: temp results
+  copy + paste ruling -> checker exit 0, all 5 baselines PASS. w2's
+  hostgate ticket + host wiring recipe merged to master; Kevin's host step
+  still pending (gate hostgate exit 1, human-only). No agent-side step
+  (rule 5); terminal wait: Kevin's paste (Plan step 1).
+
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
 `.venv/bin/python tools/check_results.py --only baselines` exits 0.
@@ -250,7 +265,8 @@ ruled-out cause checks. Kevin: commit the one file above; the gated line
    /home/kevin/Documents/coders/loop/projects/loopgym; if clean, go straight
    to step 1; `git restore .` only if it shows local deletions. (Or paste in
    any checkout with the full tree.)
-1. Kevin pastes (accept; E2E re-verified exit 0 atk27 — kevinruling27-accept-e2e.log):
+1. Kevin pastes (accept; E2E re-verified exit 0 atk28 — temp results copy +
+   paste -> checker exit 0, all baselines PASS):
    ```sh
    printf %s '{"author": "kevin", "decision": "accept", "rationale": "task-clustered CI [0.014, 0.153] straddles the 0.10 floor; ten pipeline causes ruled out (atk1-10)"}' > results/rulings/base05_val.ruling.json
    git add results/rulings/base05_val.ruling.json && git commit -m "ruling: accept base05 0.0764 (CI straddles 0.10 floor)"

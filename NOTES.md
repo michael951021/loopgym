@@ -22,11 +22,11 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json.
-  w1a27 (terminal wait, atk27): ruling still absent (dir=.gitkeep; no new
-  refs/stash; checker+results/eval unchanged since cd681e9 -> w1a26 verdict
-  holds; fresh run exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10, w1a27-
-  verdict.log); gate exit 1; no agent step (rule 5). Re-dispatch fix:
-  hostgate (w2 active).
+  w1a28 (terminal wait, atk28): ruling absent (refs/stash/remotes);
+  checker+eval identical since cd681e9; fresh exit 1, base05 FAIL 0.0764
+  [0.014,0.153] <0.10 (w1a28-verdict.log); paste re-verified (accept/
+  revise-in True, fail-closed; E2E tempdir exit 0); gate exit 1; no agent
+  step (rule 5); hostgate recipe merged -> Kevin's host step pending.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
