@@ -18,8 +18,8 @@ Next-run state; logs in .agent-evidence/.
   base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
   results/rulings/base05_val.ruling.json (cmd in state/tickets/kevinruling.md).
   atk30: ruling absent everywhere; Kevin's tree wiped — results/rulings/
-  missing: restore first (`git restore .`); verdict exit 1
-  (kevinruling30-verdict.log). 30 dispatches; humandispatch at TODO.md:135;
+  missing: restore (`git restore .`); verdict exit 1
+  (kevinruling30-verdict.log). 30 dispatches; humandispatch TODO.md:135;
   basecheck gated.
 
 ## Models
