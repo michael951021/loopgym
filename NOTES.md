@@ -65,7 +65,7 @@ Next-run state; evidence .agent-evidence/*.log.
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files + 3 seeds.
 - `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; lazy import when file
   absent at one commit (tests=0 -> error).
-- vb1: 12/12. vb2: 8/12 (cands 13-20 verified); next 21 (draftlab-673042b).
+- vb1: 12/12. vb2: 9/12; next 22 (draftlab-f67aa44-181ed9d).
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored);
   jaxlm: chi2 via stats.chi2.sf (no chisquare); FixedDrafter mid-p token.
   harness: sched.py via runpy (name clash); empty logs/*.jsonl stops grep stdin;
