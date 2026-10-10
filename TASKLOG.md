@@ -117,3 +117,7 @@
 ## Re-run toy banana, fresh
 - Goal: Re-run toy banana, fresh
 - Approach: compute job toybanana3 ran OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --resume-if-any (exit 0)
+## Check toy known answers
+- Goal: Check toy known answers
+- Approach: Ran tools/toy_check.py on the landed toybanana3/toynull3 metrics, generated toy.json from the same load_pairs/window/slope-bootstrap functions, verified via check_results and the make-check test scope
+- Blockers: none
