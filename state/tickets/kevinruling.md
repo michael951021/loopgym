@@ -51,8 +51,13 @@ absent; a committed ruling closes it.
   5 commits (2026-10-09 bootstrap 7442a3e, 46fa73f, 0a84071, 80a2e1d,
   8506b8f) touch no ruling path; `git log --all -- <ruling>` empty; dir =
   .gitkeep. Fresh verdicts exit 1, same single FAIL base05
-  (kevinruling{38,39}-verdict.log). Root-cause ticket (humandispatch,
-  Kevin-only) stands at TODO.md:135; no new agent-side path exists (rule 5).
+  (kevinruling{38,39}-verdict.log).
+- atk40 (2026-10-10): unchanged — absent (dir = .gitkeep;
+  `git log --all -- <ruling>` = cd681e9 only, the agent commit that created
+  the path). Fresh verdict exit 1, single FAIL base05
+  0.0764 [0.014, 0.153] < 0.10 (kevinruling40-verdict.log). 40th dispatch on
+  this human-only line; root-cause ticket (humandispatch, Kevin-only) stands
+  at TODO.md:135; no agent-side path exists (rule 5).
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 

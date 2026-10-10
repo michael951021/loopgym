@@ -11,14 +11,12 @@
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
-  passes only via range-author ruling (malformed fails closed; author value
-  unchecked, rule 5 by access). base05 0.0764 [0.014,0.153] < 0.10. HUMAN-ONLY:
-  kevin commits results/rulings/base05_val.ruling.json; cmd + verbatim in
-  state/tickets/kevinruling.md. atk39: absent — Kevin's only 5
-  commits (2026-10-09 bootstrap 7442a3e..8506b8f) touch no ruling path;
-  `git log --all -- <ruling>` empty; dir = .gitkeep. Kevin: `git status` on
-  host, paste if clean. verdict exit 1 (single base05 FAIL row,
-  kevinruling39-verdict.log); humandispatch TODO.md:135.
+  passes only via range-author ruling (malformed fails closed; rule 5 by access).
+  HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json; verbatim
+  cmd in state/tickets/kevinruling.md. atk40: absent (dir = .gitkeep;
+  `git log --all -- <ruling>` = cd681e9 only). verdict exit 1, single base05
+  FAIL row 0.0764 [0.014,0.153] < 0.10 (kevinruling40-verdict.log);
+  humandispatch TODO.md:135 stands.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
