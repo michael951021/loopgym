@@ -155,6 +155,29 @@ def test_resume_if_any_starts_then_continues(tmp_path):
     assert rows_[1]["reward_mean"] != -1.0
 
 
+def test_orphaned_checkpoint_fails_resume_if_any(tmp_path):
+    """Stale ckpt with metrics lost (the toybanana2 incident): a retried job must not
+    report success with no artifacts."""
+    cfg = write_cfg(tmp_path)
+    out = str(tmp_path / "runs" / "o")
+    p, _ = run_cli(cfg, "--out", out, "--steps", "1")
+    assert p.returncode == 0, p.stderr
+    (Path(out) / "metrics.jsonl").unlink()
+    p, _ = run_cli(cfg, "--out", out, "--steps", "1", "--resume-if-any")
+    assert p.returncode != 0, "orphaned checkpoint must not exit 0"
+    assert "missing" in p.stderr, p.stderr
+
+
+def test_complete_run_resume_if_any_noops(tmp_path):
+    cfg = write_cfg(tmp_path)
+    out = str(tmp_path / "runs" / "n")
+    p, _ = run_cli(cfg, "--out", out, "--steps", "1")
+    assert p.returncode == 0, p.stderr
+    p, _ = run_cli(cfg, "--out", out, "--steps", "1", "--resume-if-any")
+    assert p.returncode == 0, p.stderr
+    assert "nothing to do" in p.stdout, p.stdout
+
+
 def test_task_sampler_continuity_after_state_roundtrip():
     from loopgym.rl.train import TaskSampler
     names = ["a", "b", "c", "d", "e", "f"]
