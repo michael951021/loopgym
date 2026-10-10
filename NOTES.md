@@ -27,8 +27,8 @@
   ruling absent (disk .gitkeep only; git --all + stash empty); guard --line
   kevinruling exit 1 (--line = id, not lineno); checker+guard unchanged
   since b710661; fresh verdict exit 1: base05 0.0764 [0.014,0.153] <0.10
-  (kevinruling-atk19-verdict.log). No agent step; re-dispatch root cause =
-  dispatcher (hostgate, w2 working). Kevin: paste + hostgate apply.
+  (atk19-verdict.log). No agent step; root cause: dispatcher (hostgate, w2).
+  Kevin: paste + hostgate apply.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
