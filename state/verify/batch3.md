@@ -23,7 +23,7 @@ NOTES.md, and stop.
 > why: each verified check turns one real agent-shipped defect into an RL task.
 
 - [x] **Check harness-bc2cdd8-97ddf39** — harness bc2cdd8..97ddf39, files lib/jobs.py: jobs: give-up survives failed.json resets; edited line = new job; pool reloads sched each poll. Verdict: verified (bad 0/3, good 3/3)
-- [ ] **Check draftlab-35a5d46-1e9f5d3** — draftlab 35a5d46..1e9f5d3, files draftlab/jaxlm/spec.py, draftlab/tests/test_spec.py: spec: lossless T>0 model drafting, one target forward per step. Verdict: (fill in)
+- [x] **Check draftlab-35a5d46-1e9f5d3** — draftlab 35a5d46..1e9f5d3, files draftlab/jaxlm/spec.py, draftlab/tests/test_spec.py: spec: lossless T>0 model drafting, one target forward per step. Verdict: verified (bad 0/3, good 3/3)
 - [ ] **Check draftlab-bea1633-9b213ef** — draftlab bea1633..9b213ef, files README.md, REPORT.md: REPORT: recompute all numbers from results/, run-level CIs, Corrections section. Verdict: (fill in)
 - [ ] **Check draftlab-7074368-07efa48** — draftlab 7074368..07efa48, files NOTES.md, tools/compare_sweep_alpha.py: checks: 393-prompt val set, by_kind key fix, trajectory-scoring tool (engine-vs-metric on same text). Verdict: (fill in)
 - [ ] **Check draftlab-8e65e54-ea27462** — draftlab 8e65e54..ea27462, files web/src/pages/Overview.tsx, web/src/tests/overview.test.tsx: Resolve dl-report merge: fix the 3 make-check reds left in the tree. Verdict: (fill in)
