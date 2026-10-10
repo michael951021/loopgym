@@ -24,11 +24,11 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md Plan step 1, :58). attempt13 (w1a38) terminal wait,
-  all re-run fresh this run: ruling absent (disk + all refs), gate exit 1
-  (--line takes an id, not a line no), verdict exit 1 base05 0.0764
-  [0.014,0.153] <0.10, paste E2E exit 0 (5/5), checker+guard 16/16. No
-  agent-side step. Kevin: paste + hostgate (w2).
+  (paste: kevinruling.md Plan step 1). attempt14 (w1a39) terminal wait:
+  ruling absent (disk + all refs), gate exit 1, verdict exit 1 base05
+  0.0764 [0.014,0.153] <0.10, checker+guard 16/16, paste E2E holds
+  (checker+eval byte-identical since atk28). No agent-side step (rule 5).
+  Kevin: paste + hostgate (w2).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
