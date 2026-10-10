@@ -17,9 +17,10 @@ Next-run state; logs in .agent-evidence/.
   author VALUE not schema-checked — rule 5 enforced by access, atk27 E2E).
   base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
   results/rulings/base05_val.ruling.json — paste cmd in state/tickets/kevinruling.md
-  (E2E re-verified exit 0 atk27). atk27: absent all refs/disk/stashes/Kevin worktrees;
-  checker since cd681e9, eval since bf0b283; verdict exit 1 (kevinruling27-*.log).
-  27 dispatches; humandispatch stands (TODO.md:135); basecheck gated.
+  (E2E exit 0). atk28: absent all refs/disk/stashes; Kevin checkout at
+  b494a9f clean, job/* worktrees prunable; merge brought no ruling; verdict
+  exit 1 (kevinruling28-verdict.log). 28 dispatches; humandispatch stands
+  (TODO.md:135); basecheck gated.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
