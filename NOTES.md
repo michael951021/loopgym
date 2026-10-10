@@ -16,16 +16,13 @@ Next-run state; evidence .agent-evidence/*.log.
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
-  passes only via a range-author ruling file (malformed fails).
-  BASECHECK/RANGERULE: verdict exit 1 (base05 0.0764 [0.014,0.153] < 0.10;
-  10 causes out atk1-12; raw recompute exact, 0 timeouts). atk4: master
-  unchanged since atk3, rulings/ .gitkeep-only, checker code frozen at
-  cd681e9 -> verdict follows from state; no re-run. kevinruling is the 4th
-  agent dispatch on a human-only line — nothing agent-doable remains.
-  TODO split: kevinruling
-  (HUMAN-ONLY file, spec+verbatim forms in state/tickets/kevinruling.md) +
-  rangerule agent residue (after: kevinruling) — no agent dispatch on the
-  human part; basecheck (after: base05, base15, rangerule) gated to exit 0.
+  passes only via range-author ruling (malformed fails closed).
+  base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY unblock: kevin
+  commits results/rulings/base05_val.ruling.json (forms: state/tickets/
+  kevinruling.md); atk5 E2E on checker cd681e9: none->1, accept->0,
+  revise-in->0, revise-out->1 (.agent-evidence/kevinruling5-accept-e2e.log).
+  atk5: ruling absent (master 58fd3ed), 5th dispatch, no agent work left.
+  rangerule (after: kevinruling) records verdict; basecheck gated to exit 0.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

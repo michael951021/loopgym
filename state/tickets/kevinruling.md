@@ -18,10 +18,13 @@ absent; a committed ruling closes it.
   .gitkeep-only.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
-- Accept ruling E2E-proven to flip the checker to exit 0 (atk8).
-- atk4: master tip unchanged since atk3 (e4333b5), rulings/ still .gitkeep-only,
-  checker code unchanged since cd681e9 -> verdict (exit 1, single FAIL) follows
-  from state alone; no checker re-run (repeating it adds no evidence).
+- atk5: ruling-channel E2E re-proven on the current checker (cd681e9) against a
+  copy of the real results/: none->exit 1, verbatim accept->exit 0, revise with
+  0.0764 in range->exit 0, revise with 0.0764 out of range->exit 1 (fail
+  closed) — .agent-evidence/kevinruling5-accept-e2e.log. (The older atk8 log is
+  no longer in .agent-evidence/; this run replaces it.)
+- atk5: ruling still absent — master tip 58fd3ed (atk4), rulings/ .gitkeep-only,
+  no ruling on any branch. 5th dispatch; nothing agent-doable remains (rule 5).
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
