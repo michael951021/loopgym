@@ -12,7 +12,8 @@
 ## Scheduling
 - `(human-only[: RELPATH])` tags: open TODO lines the dispatcher must skip;
   gate tools/sched_guard.py --line <id> (0 ok / 1 skip / 2 unknown).
-  kevinruling tagged (releases on the committed ruling); wiring: Kevin's.
+  kevinruling tagged (releases on the committed ruling); host wiring ticket
+  hostgate (human-only: dispatcher never calls the gate — atk2-6).
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
@@ -20,12 +21,12 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md Plan step 1; E2E exit 0 atk27). w1 atk5 (2026-10-10):
-  ruling absent (all refs/stash/remote; master 796f533); no live peer;
-  gate exit 1; fresh checker exit 1: base05 FAIL 0.0764 [0.014,0.153] <0.10
-  (kevinruling-w1a5-verdict.log). humandispatch [x] (TODO:135): in-repo gate
-  works; host dispatcher wiring Kevin's (no sandbox lever). Terminal wait:
-  Kevin runs the 2-line paste.
+  (paste: kevinruling.md Plan step 1, lines 171-175). w1 atk6 (2026-10-10):
+  ruling absent (refs/stash/remote; master=837292d=w1 HEAD); no live peer;
+  gate exit 1 (kevinruling skip), checker exit 1: base05 FAIL
+  0.0764 [0.014,0.153] <0.10 (kevinruling-w1a6-verdict.log). Added hostgate
+  ticket (TODO:137, human-only) for the host dispatcher gap. No agent-side
+  step remains (rule 5); terminal wait: Kevin's 2-line paste.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
