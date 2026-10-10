@@ -16,10 +16,11 @@
   passes only via range-author ruling (malformed fails closed; rule 5 by access).
   HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json (one-shot
   paste in state/tickets/kevinruling.md; E2E accept->exit 0 atk5/19/27).
-  atk49: absent (git log --all empty; reflog = harness syncs); fresh verdict
+  atk50: absent (git log --all empty; no stash; dir = .gitkeep); fresh verdict
   exit 1, single base05 FAIL 0.0764 [0.014,0.153] < 0.10
-  (kevinruling49-verdict.log); 49th dispatch; no agent-side lever (rule 5;
-  dispatcher host-side); humandispatch fix (TODO.md:135) Kevin-side.
+  (kevinruling50-verdict.log); checker tests 11/11
+  (kevinruling50-checker-tests.log); 50th dispatch; no agent-side lever
+  (rule 5; dispatcher host-side); humandispatch fix (TODO.md:135) Kevin-side.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
