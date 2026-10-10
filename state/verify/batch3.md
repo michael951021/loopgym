@@ -34,7 +34,7 @@ NOTES.md, and stop.
 - [x] **Check draftlab-fc210e7-f0371d7** — draftlab fc210e7..f0371d7, files NOTES.md: deploy/terraform: GKE as code (VPC+subnet, Standard cluster, L4 GPU pool autoscale 0-2 w/ taint). Verdict: verified (bad 0/3, good 3/3)
 - [x] **Check draftlab-fda7335-5bf9b0d** — draftlab fda7335..5bf9b0d, files NOTES.md: distill: 1200-step run (val KL 30.6% drop), alpha eval, teacher-init control. Verdict: verified (bad 0/3, good 3/3)
 - [x] **Check harness-5279ea0-29cc54f** — harness 5279ea0..29cc54f, files prompts/loop.md, tests/fake_claude.py, tests/smoke.sh: harness close-out: acceptance-check-first and known-answer rules. Verdict: verified (bad 0/3, good 3/3)
-- [ ] **Check draftlab-35a5d46-2c54450** — draftlab 35a5d46..2c54450, files NOTES.md: sweep batch3: T=0.7 grid complete (42 cells); recalibrate model-drafter gates; check PASS. Verdict: (fill in)
+- [x] **Check draftlab-35a5d46-2c54450** — draftlab 35a5d46..2c54450, files NOTES.md: sweep batch3: T=0.7 grid complete (42 cells); recalibrate model-drafter gates; check PASS. Verdict: verified (bad 0/3, good 3/3)
 - [ ] **Check draftlab-7953937-d5fd1c1** — draftlab 7953937..d5fd1c1, files NOTES.md: NOTES: condense under 4KB, align stale lines with corrected REPORT. Verdict: (fill in)
 - [ ] **Check draftlab-44cfa02-2c2ba6b** — draftlab 44cfa02..2c2ba6b, files NOTES.md: NOTES: condense under 4KB, align stale lines with corrected REPORT. Verdict: (fill in)
 - [ ] **Check draftlab-cf96577-11b1d16** — draftlab cf96577..11b1d16, files NOTES.md: lora a3: fix step_loss off-by-one (HF alignment), motif tiny stream, retrain + re-eval. Verdict: (fill in)

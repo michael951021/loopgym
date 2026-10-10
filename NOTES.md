@@ -63,8 +63,8 @@
 
 ## Data
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
-- vb1/vb2 24/24; vb3 12/16, all verified (bad 0/3, good 3/3); next =
-  draftlab-35a5d46-2c54450.
+- vb1/vb2 24/24; vb3 13/16, all verified (bad 0/3, good 3/3); next =
+  draftlab-7953937-d5fd1c1.
 - hidden checks: temp root + synthetic fixtures.
   NOTES.md cands: assert the completion claim, not bare numbers.
   harness cands: ROOT from PYTHONPATH; fabricate a tmp git repo (agent-loop
