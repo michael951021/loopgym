@@ -11,11 +11,10 @@
 
 ## Scheduling
 - `(human-only[: P])`: tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); tagged held.
-- hostgate: 8th dispatch: unapplied. atk8: delivery OK (script+patch on
-  master 18e9b3f = primary checkout; mirror 4cb686d, no HUMAN_ONLY;
-  E2E rc0+idempotent, 4/4, guard 1/1/0, 16/16; atk8-verify.log). Kevin
-  (host): projects/loopgym/tools/hostgate_apply.sh, commit harness
-  lib/sched.py, check TODO:137.
+- hostgate: 8th dispatch, unapplied. atk8: delivery ok — script+patch
+  on master 18e9b3f = primary checkout; mirror 4cb686d; E2E rc0, 4/4,
+  16/16 (atk8-verify.log). Kevin: host projects/loopgym/
+  tools/hostgate_apply.sh, commit harness sched.py, check TODO:137.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
