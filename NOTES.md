@@ -24,6 +24,11 @@
   no ruling on any ref; gate exit 1 (skip); checker exit 1, base05 FAIL
   0.0764 [0.014,0.153] <0.10. Host still dispatches (wiring Kevin's);
   terminal wait on Kevin.
+  (paste kevinruling.md:152-153; E2E atk73: exact :152 bytes -> exit 0,
+  all PASS; checker+tests unchanged since cd681e9). atk74: ruling absent,
+  no new commits/remotes/stash; verdict exit 1, base05 FAIL 0.0764
+  [0.014,0.153] <0.10, unchanged. Gate merged in: kevinruling skip (exit 1),
+  rangerule exit 0; 16/16 tests, ruff clean. Wait on Kevin (74th dispatch).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
@@ -31,14 +36,10 @@
 ## Env
 - `exercism.py`: fresh tmpdir, pristine tests + ONLY solution, junit XML, pgroup SIGKILL.
   `lgbox.py`: RUNNERS["http"] iff LOOPGYM_LGBOX_URL.
-  `toy.py`: banana (first 20 tok ci), coinflip (seeded). `splits.py`: sha1%100, 101/9/27,
+  `splits.py`: sha1%100, 101/9/27,
   137/142 usable, val 9. `loopgym.py`: Task(prompt/parse/reference/stub)+grade over verified
   records; elided bad files (diff -U0 ±3, 4500-chr, <=6k tok); ```path blocks; grade = reply
   on bad worktree, pristine V._run_once (outside task.files -> 0); ref=1, stub=0, hidden=0.
-
-## lgbox
-- `lgbox serve` (axum): /run (setpgid, RLIMIT, Q->503), /health, /metrics;
-  FC FakeVmm-only. docker: Dockerfiles.
 
 ## Kernel
 - `kernels/token_logprobs(h,w,t,impl,chunk)->[T]: chunked max/LSE bwd softmax (no
@@ -63,9 +64,8 @@
 
 ## Data
 - `freeze.py`: v0 = 26 verified tasks (draftlab 22/harness 4), sha1%100>=70
-  train 13/test 13; kill>=25 met -> train+eval; data/loopgym/v0/ +
-  results/loopgym_v0.json; `--check` re-derives, exit 1 on drift; redaction:
-  public draftlab/harness only.
+  train 13/test 13; data/loopgym/v0/ + results/loopgym_v0.json; `--check`
+  exit 1 on drift; redaction: public draftlab/harness only.
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
 - hidden checks: temp root + synthetic fixtures; assert completion claim; cross-check
   cited numbers vs results/*.json; GOTCHA: results/*.json absent at bad -> lazy
