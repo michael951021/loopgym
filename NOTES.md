@@ -17,8 +17,9 @@ Next-run state; evidence .agent-evidence/*.log.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via a range-author ruling file (malformed fails).
-  BASECHECK: base05 0.0764 [0.014,0.153] < 0.10; 10 causes out (atk10:
-  s4-15 indep regrade 0/4); await kevin's ruling (rangerule).
+  BASECHECK: base05 0.0764 [0.014,0.153] < 0.10; 10 causes out (atk1-10);
+  atk11: handoff JSON verbatim-matches check_ruling, ruling dir
+  .gitkeep-only, verdict exit 1 unchanged; await kevin's ruling (rangerule).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
