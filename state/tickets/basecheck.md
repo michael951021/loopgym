@@ -79,6 +79,26 @@ compute job (resumes the sidecars, reuses samples 0–3, then re-runs the
 checker verdict). Until it lands, rule 5 blocks "done"; the range author
 must decide (accept with overlapping CI, or revise the floor).
 
+## Outcome — attempt 5 (2026-10-09)
+The n=16 gate job had run in the meantime: job/basen16 (8a7c865, 20:50) holds
+complete n=16 output but its (run:) command ends in the checker, which exits 1
+on a FAIL verdict, so the job can never exit 0 and its output was stranded
+unmerged. Verified it independently: 144 sidecar rows/model (9 tasks x 16),
+first 36 rows identical to the committed n=4 sidecars (resume determinism),
+pass@1 recomputed from sidecars (0.076389/0.305556) matches the JSONs
+exactly. Landed the 4 result files (new ticket landn16, checked off in
+TODO.md), re-ran the verdict (.agent-evidence/basecheck5-verdict-n16.log):
+- base05 0.0764 [0.014, 0.153] < 0.10 floor — FAIL (unchanged in substance;
+  the larger-n re-run reproduced the out-of-range number with 12 fresh
+  samples/task: honest 0.5B performance, range mis-calibration, not pipeline —
+  all six causes ruled out atk1-4).
+- base15 0.3056 [0.132, 0.486] in range; 1.5B > 0.5B; CI overlap reported;
+  reference 1.0 — all PASS.
+Rule 5: recorded as suspected bug in NOTES.md (range mis-calibration), range
+never widened. "Done when" (checker exit 0) remains blocked on the range
+author's ruling (accept the overlapping CI, or revise the 0.10 floor in
+CLAUDE.md).
+
 ## Outcome — attempt 4 (2026-10-09)
 New angle: job-dispatch forensics (cause-hunting was exhausted at atk3).
 - Checker re-run first: single FAIL row unchanged (base05 0.0833 < 0.10);
