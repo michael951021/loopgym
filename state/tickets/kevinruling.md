@@ -21,6 +21,11 @@ absent; a committed ruling closes it.
   parse (11/11 ruling-channel tests pass). 13th dispatch; root-cause ticket
   (id: humandispatch) stands: Kevin, commit the file or stop dispatching
   this line.
+- atk14 (2026-10-10): still absent on all refs AND no git remote exists
+  (nothing to fetch — Kevin's ruling must be a local commit here). Verbatim
+  accept/revise forms re-read against check_ruling (check_results.py:61):
+  both parse, malformed still fails closed. Fresh verdict exit 1, single FAIL
+  base05 (.agent-evidence/kevinruling14-verdict.log). 14th dispatch.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 - atk5: ruling-channel E2E on checker cd681e9 against a copy of the real
