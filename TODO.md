@@ -107,7 +107,7 @@
   why: one candidate per run keeps each check small; the batch is where the dataset comes from.
 - [x] **Hidden checks, batch 2** — as batch 1 for candidates 13–24, checklist state/verify/batch2.md. (id: vb2) (after: vb1) (checklist: state/verify/batch2.md)
   why: more tasks; the yield of batch 1 decides whether batch 3 is worth it.
-- [ ] **Hidden checks, batch 3** — as batch 1 for candidates 25–40, checklist state/verify/batch3.md; skip (check the line, note why in NOTES.md) if batches 1–2 verified < 30% of candidates. (id: vb3) (after: vb2) (checklist: state/verify/batch3.md)
+- [x] **Hidden checks, batch 3** — as batch 1 for candidates 25–40, checklist state/verify/batch3.md; skip (check the line, note why in NOTES.md) if batches 1–2 verified < 30% of candidates. (id: vb3) (after: vb2) (checklist: state/verify/batch3.md)
   why: the last mining pass before the dataset is frozen.
 - [x] **loopgym task environment** — loopgym/env/loopgym.py: Task from a verified record: prompt = ticket text + the changed files at the bad commit (≤ 6k tokens, truncated around the changed lines) + "Find and fix the defect. Reply with the full new content of each file you change in ```path\n...``` blocks."; parse the reply into files; grade = hidden check on the bad commit with the model's files applied (pristine check, only the task's files taken). tests/test_loopgym_env.py: for every verified task, the good commit's versions of the files score 1 and the bad versions 0 (CLAUDE.md known answer); a reply that edits the hidden test scores 0. Done when `.venv/bin/python -m pytest -q tests/test_loopgym_env.py` passes. (id: lgenv) (after: vb1, exercism)
   why: turns verified defects into gradeable RL tasks with the same reward contract as Exercism.

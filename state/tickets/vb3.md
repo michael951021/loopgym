@@ -43,3 +43,12 @@ lines for this area. Other candidates are for later runs (one per run). Two atte
 2. Field-match script vs jsonl rows 25–40 via capture.py.
 3. Write candidate-25 check (tick() re-asserts give-up after failed.json reset).
 4. Run verify; record verdict; check step. NOTES, commit, merge master.
+
+## Close-out (milestone complete)
+- All 16 steps checked `verified (bad 0/3, good 3/3)`; step ids match candidates 25–40 in score order.
+- All 16 hidden checks present; latest-ts record verified for each id in verified.jsonl (cross-check
+  16/16 OK, this close-out run).
+- Yield: 12/12 + 12/12 + 16/16 = 40/40 (100%) verified across batches 1–3.
+- Fresh regression on current tree: verify draftlab-cf96577-11b1d16 → verified in 3.5 s, exit 0
+  (.agent-evidence/verify-cf96577-11b1d16.log).
+- vb3 line checked in TODO.md per batch 1's contract (check the line when every step is checked).
