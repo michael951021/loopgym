@@ -72,6 +72,13 @@ absent; a committed ruling closes it.
   < 0.10 (.agent-evidence/kevinruling25-verdict.log). 25th dispatch;
   humandispatch ticket stands at TODO.md:135. No agent-side path exists
   (rule 5); Kevin's one paste (Plan step 1) is the only unblock.
+- atk26 (2026-10-10): unchanged — results/rulings/ = .gitkeep only, no
+  ruling on any ref (git log --all: only cd681e9 touched the path), no
+  remote; checker unchanged since cd681e9, results/eval since bf0b283, so
+  the atk19 E2E-verified paste stands; fresh verdict exit 1, single FAIL
+  base05 0.0764 [0.014,0.153] < 0.10 (.agent-evidence/kevinruling26-verdict.log).
+  26th dispatch; humandispatch ticket stands at TODO.md:135. No agent-side
+  path exists (rule 5); Kevin's one paste (Plan step 1) is the only unblock.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 - atk5: ruling-channel E2E on checker cd681e9 against a copy of the real
