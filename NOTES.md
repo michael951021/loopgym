@@ -30,6 +30,10 @@
   <0.10 (w1a31-verdict.log); paste re-verified (fail-closed; E2E exit 0;
   ruling test absent->1, present->0); gate exit 1; 16/16 pass. Kevin: paste
   + hostgate apply (hostgate=w2).
+  (paste: kevinruling.md Plan step 1; E2E exit 0; test asserts both states).
+  atk32/attempt7 terminal wait: ruling absent (disk+all refs+stash); fresh
+  exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10 (w1a32-verdict.log); gate
+  exit 1; 16/16 pass. Kevin: paste + hostgate apply (hostgate=w2).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
