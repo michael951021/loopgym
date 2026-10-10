@@ -35,10 +35,9 @@ results/rulings/base05_val.ruling.json exists (author kevin; decision
 Known answer: the checker applies the ruling verbatim (check_ruling,
 tools/check_results.py:61; tests/test_check_results.py); malformed rulings
 fail closed. I run the checker first this run: expect exit 1, single FAIL
-row, note citing the ruling path. Ruling forms (verbatim-verified atk11):
-- accept: {"author": "kevin", "decision": "accept", "rationale": "task-
-  clustered CI [0.014, 0.153] straddles the 0.10 floor; ten pipeline
-  causes ruled out (atk1-10)"}
+row, note citing the ruling path. Ruling forms (verbatim-verified atk11; exact single-line paste in
+state/tickets/kevinruling.md Plan step 1 — do not re-wrap the JSON):
+- accept: {"author": "kevin", "decision": "accept", "rationale": "task-clustered CI [0.014, 0.153] straddles the 0.10 floor; ten pipeline causes ruled out (atk1-10)"}
 - revise: same, "decision": "revise", "new_range": [lo, hi], 0.0764 in.
 
 ## Stop when

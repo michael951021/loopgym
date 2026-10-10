@@ -21,14 +21,13 @@
   `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
-  HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md Plan step 1; E2E valid; checker unchanged
-  since cd681e9).
-  w1a24 (terminal wait): ruling still absent (no refs/stash/remote/peer);
-  gate --line kevinruling exit 1 (arg is the id; a line number -> exit 2);
-  fresh checker exit 1 (base05 FAIL 0.0764 [0.014,0.153] <0.10, others
-  PASS, w1a24-verdict.log). No agent step (rule 5); Kevin's paste:
-  kevinruling.md Plan step 1; re-dispatch fix: hostgate (w2 active).
+  HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json.
+  w1a25 (terminal wait): ruling still absent (no refs/stash/peer); gate
+  exit 1; checker unchanged since cd681e9 -> w1a24 verdict holds (exit 1,
+  base05 FAIL 0.0764 [0.014,0.153] <0.10, others PASS). No agent step (rule
+  5). NEW: rangerule.md paste was wrapped (copy would be malformed);
+  TODO:133 + both tickets now byte-identical single-line forms, re-verified
+  vs check_ruling (fail closed). Re-dispatch fix: hostgate (w2 active).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

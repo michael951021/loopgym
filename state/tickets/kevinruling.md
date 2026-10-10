@@ -207,6 +207,18 @@ absent; a committed ruling closes it.
   (line 133); ListAgents: no live peer to message. Terminal wait on Kevin
   (Plan step 1); re-dispatch root cause ticketed (hostgate, TODO:137,
   w2 active).
+- w1 atk25 (2026-10-10): unchanged — ruling never committed
+  (`git log --all -- <file>` empty; rulings/ = .gitkeep; no stash/remote);
+  checker/tests/results all unchanged since cd681e9 (git log empty) ->
+  w1a24 verdict holds (exit 1, single base05 FAIL 0.0764 [0.014,0.153]
+  <0.10, others PASS), no re-run (Stop-when); gate exit 1 (line 133);
+  ListAgents: no live peer. NEW (different approach): TODO:133 pointed at
+  rangerule.md, whose accept form was wrapped over 3 lines — a verbatim
+  copy would be malformed JSON (fails closed). Both tickets now carry the
+  byte-identical single-line form (diff-verified) re-checked in memory
+  against check_ruling: accept -> True, revise w/ 0.0764 in [0.05,0.15]
+  -> True, out-of-range/no-rationale/bad-decision -> False. Kevin's paste
+  is now copy-safe from either file. Terminal wait on Kevin.
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
