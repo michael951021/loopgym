@@ -1,5 +1,17 @@
 # Ticket: Check baselines against ranges (id: basecheck)
 
+## Outcome — attempt 13 (2026-10-10) — DONE
+The atk12 blocker (Kevin's ruling) landed: results/rulings/base05_val.ruling.json
+(kevin, decision accept, atk10 handoff form verbatim; commit 64ecd1b). Verdict:
+1. `--only baselines` exit 0, 5/5 PASS — base05 row PASS "in range by ruling",
+   cited verbatim; base15 0.3056 in [0.25, 0.75]; 1.5B > 0.5B; CI overlap
+   reported; reference 1.0 known answer (basecheck13-verdict.log).
+2. Negative control: tampered copy (base15 -> 0.95) via --results-dir -> FAIL
+   row + exit 1, ruling path cited (basecheck13-negctl.log). Checker still
+   fails closed; ranges untouched.
+3. Regression: tests/test_check_results.py 11/11; full run (all sections)
+   exit 0 (benches 5, toy 3). Done when satisfied.
+
 ## Outcome — attempt 12 (2026-10-10)
 Cause-hunting and channel work exhausted (atk1-11); this attempt fixed the
 systemic gap instead of re-deriving the verdict:
