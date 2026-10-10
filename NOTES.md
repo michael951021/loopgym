@@ -62,8 +62,10 @@
 
 ## Data
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
-- vb1/vb2 24/24; vb3 14/16 all verified (bad 0/3, good 3/3); next = draftlab-44cfa02-2c2ba6b.
+- vb1/vb2 24/24; vb3 15/16 all verified (bad 0/3, good 3/3); next = draftlab-cf96577-11b1d16.
 - hidden checks: temp root + synthetic fixtures. NOTES.md cands: assert the
-  completion claim; cross-check cited numbers vs results/*.json (same at bad/good).
+  completion claim; cross-check cited numbers vs results/*.json; when bad is
+  self-consistent-but-stale, anchor on corrected-world facts (Corrections
+  section, heldout split, CI recomputed from results).
   harness cands: ROOT from PYTHONPATH; fabricate a tmp git repo (agent-loop cands
   under ROOT/projects), drive tests/fake_claude.py, assert on stream-json events.
