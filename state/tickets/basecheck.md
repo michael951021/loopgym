@@ -1,5 +1,36 @@
 # Ticket: Check baselines against ranges (id: basecheck)
 
+## Outcome — attempt 10 (2026-10-10)
+Verdict re-run: exit 1, single FAIL row unchanged (base05 0.0764 [0.014,
+0.153] < 0.10; base15 0.3056, ordering + CI-overlap reported, reference 1.0
+all PASS); ruling file still absent (.agent-evidence/basecheck10-verdict.log).
+Two new facts close out grading of the n=16 extension (samples s4-15, never
+independently verified — atk2 covered only s0-3):
+1. Eval pipeline (rollout.py, exercism.py, eval/, splits.py) is byte-identical
+   between the n=4 job (a5c11cd) and the n=16 job (bf0b283): `git diff
+   a5c11cd bf0b283 -- <paths>` empty. s4-15 used the exact code atk2
+   re-verified on s0-3 (36/36 regen+regrade matches).
+2. Independent regrade of 4 committed new-segment zero-rewards (food-chain
+   s5/105, largest-series-product s5/305, point-mutations s5/405,
+   scrabble-score s5/605): deterministic regen (T=0.8, top_p=1.0, 512 tok,
+   sidecar seeds) + fresh spec-compliant parse (last ```python block) and
+   grader (fresh dir, pristine tests, junit XML, tests>0 & no
+   fail/err/skip) → 0/4 mismatches; zeros are genuine failures (14/14 LSP
+   fail, 10/11 scrabble, 3/8 PM, 1 err food-chain)
+   (.agent-evidence/basecheck10-newseg-regrade.log).
+Also: 8 of 11 base05 passes sit in s4-15, so the extension's grading awards
+passes too — new-segment grading verified in both directions. Ten pipeline
+causes ruled out in total; the number is an honest measurement.
+**Ruling handoff (range author, one file, then the checker decides
+mechanically — channel E2E at atk8):** write
+`results/rulings/base05_val.ruling.json`:
+- accept: `{"author": "kevin", "decision": "accept",
+  "rationale": "task-clustered CI [0.014, 0.153] straddles the 0.10 floor;
+  ten pipeline causes ruled out (atk1-10)"}`
+- or revise: same + `"decision": "revise", "new_range": [lo, hi]` with
+  0.0764 inside. Malformed rulings fail closed (check_ruling, tools/
+  check_results.py:61). Agents may not write rulings (rule 5; ticket
+  rangerule).
 ## Outcome — attempt 9 (2026-10-10)
 Verdict re-run: `--only baselines` still exits 1, single FAIL row (base05
 0.0764 [0.014, 0.153] < 0.10), all other rows PASS; ruling file still absent
