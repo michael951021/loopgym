@@ -15,10 +15,12 @@ NAMES = sorted(BY_NAME)
 EXPECTED = {
     "draftlab-1d2ae92-44cfa02",
     "draftlab-3c28deb-5bf9b0d",
+    "draftlab-411f1c8-e2004eb",
     "draftlab-7953937-0c66ede",
     "draftlab-a75ef10-1f173d1",
     "draftlab-alpha",
     "draftlab-b7c6e4f-1f173d1",
+    "draftlab-b7c6e4f-e2004eb",
     "draftlab-e8f8ebb-fe264e9",
     "harness-520444c-4b0c866",
 }
