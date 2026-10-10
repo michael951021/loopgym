@@ -17,11 +17,13 @@ Next-run state; evidence .agent-evidence/*.log.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via a range-author ruling file (malformed fails).
-  BASECHECK atk12: verdict exit 1 unchanged (base05 0.0764 [0.014,0.153]
-  < 0.10; raw-sidecar recompute 11/144 exact, 0 timeouts —
-  basecheck12-verdict.log); ruling still absent. basecheck line now
-  (after: base05, base15, rangerule): no re-dispatch before kevin's ruling;
-  after it, the checker decides mechanically.
+  BASECHECK/RANGERULE: verdict exit 1 (base05 0.0764 [0.014,0.153] < 0.10;
+  10 causes out atk1-12; raw recompute exact, 0 timeouts — basecheck12 +
+  rangerule1-verdict.log). Ruling still absent (rulings/ .gitkeep-only);
+  unblock = kevin writes results/rulings/base05_val.ruling.json (accept,
+  or revise + new_range containing 0.0764; exact forms in
+  state/tickets/rangerule.md), then the checker decides; basecheck line
+  (after: base05, base15, rangerule) stays gated until then.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
