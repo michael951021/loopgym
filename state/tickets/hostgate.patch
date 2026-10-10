@@ -1,0 +1,113 @@
+diff --git a/lib/sched.py b/lib/sched.py
+index fb8e2a5..edffb17 100755
+--- a/lib/sched.py
++++ b/lib/sched.py
+@@ -22,6 +22,8 @@ Dependencies (TODO.md or checklist lines):
+   (after: A, B)     runs once tasks A and B are checked (or gone); "(after: -)" = no dependencies
+   no (after: ...)   runs once every open task above it is checked: the file is worked top-down,
+                     exactly like a single agent
++  (human-only[: P]) a line only a human can finish: state "human-only", never dispatched while
++                    open; with P, released (dispatchable) once P exists relative to DIR
+ A milestone line ending in "(checklist: PATH)" is claimed as a whole; its steps run one at a time.
+ A line with (run: `CMD`) is a compute job, not an agent task: plan() gives it state "job" when it is
+ ready, workers never claim it, and lib/jobs.py runs CMD (no model) under (mem: GB) (cpus: N) caps.
+@@ -43,6 +45,7 @@ ID = re.compile(r"\(id: *([\w.-]+)\)")
+ AFTER = re.compile(r"\(after: *([^)]*)\)")
+ CHECKLIST = re.compile(r"\(checklist: ([^) ]+)\)")
+ RUN_CMD = re.compile(r"\(run: *`([^`]+)`\)")   # a compute job (lib/jobs.py); backticks, so CMD may hold ( )
++HUMAN_ONLY = re.compile(r"\(human-only(?::\s*([^)]+?))?\)")   # never dispatched while open (see plan())
+ 
+ 
+ TITLE = re.compile(r"^\*\*(.+?)\*\*\s*(?:—\s*)?(.*)$")
+@@ -175,7 +178,13 @@ def plan(files, claims, failed):
+         elif RUN_CMD.search(text):
+             state, why = "job", "compute job (lib/jobs.py)"
+         else:
+-            state, why = "ready", ""
++            hm = HUMAN_ONLY.search(text)
++            rel = hm.group(1) if hm else None
++            if hm and (rel is None or not files.read(rel)):
++                state = "human-only"
++                why = "human-only" if rel is None else "skip until " + rel + " exists"
++            else:
++                state, why = "ready", ""
+         state_of[k] = state
+         out.append((entry, state, why))
+     return out
+@@ -324,10 +333,13 @@ def cmd_next(st, worker, d, ref):
+             st.save(f"workers/{worker}.json", {"worker": worker, "pid": int(os.environ.get("AGENT_PID") or os.getppid()), "key": entry["key"],
+                                                "task": job["task"], "since": time.time()})
+             return 0, job
++        held = [e["text"] for e, s, _ in rows if s == "human-only"]
+         if claims or any(s == "job" for _, s, _ in rows):   # something is running (or a job will): its merge may unblock the rest
+             waiting = [(e["text"], why) for e, s, why in rows if s in ("claimed", "waiting")]
+             return 11, {"reason": "waiting", "open": len(rows),
+                         "claimed": [(c["worker"], c["task"]) for c in claims.values()], "first_wait": waiting[:1]}
++        if held and not any(s in ("failed", "blocked-failed") for _, s, _ in rows):
++            return 10, {"reason": "no agent tasks", "held": [split_title(t)[0] for t in held]}
+         return 12, {"reason": "blocked by given-up tasks", "failed": list(failed.values())}
+ 
+ 
+diff --git a/tests/test_sched_human_only.py b/tests/test_sched_human_only.py
+new file mode 100644
+index 0000000..ca5751d
+--- /dev/null
++++ b/tests/test_sched_human_only.py
+@@ -0,0 +1,57 @@
++"""Regressions for the (human-only) dispatch gate in lib/sched.py (plan()/cmd_next).
++
++Run: .venv/bin/python -m unittest discover -s tests -p 'test_*.py'
++"""
++import importlib.util
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT / "lib"))   # prompt() imports taskcontract
++spec = importlib.util.spec_from_file_location("sched", ROOT / "lib" / "sched.py")
++sched = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(sched)
++
++
++class HumanOnlyGate(unittest.TestCase):
++    def repo(self, body, extra=()):
++        d = Path(tempfile.mkdtemp(prefix="schedh-"))
++        (d / "TODO.md").write_text(body)
++        for p in extra:
++            (d / p).write_text("x")
++        return d
++
++    def states(self, d):
++        return {sched.split_title(e["text"])[0]: (s, w)
++                for e, s, w in sched.plan(sched.Files(d), {}, {})}
++
++    def test_plain_tag_held_rest_ready(self):
++        d = self.repo("- [ ] **A** — first (after: -) (id: a)\n"
++                      "- [ ] **H** — human line (id: h) (human-only) (after: -)\n")
++        s = self.states(d)
++        self.assertEqual(s["A"][0], "ready")
++        self.assertEqual(s["H"], ("human-only", "human-only"))
++
++    def test_release_path(self):
++        body = "- [ ] **R** — released line (id: r) (human-only: gate.txt) (after: -)\n"
++        self.assertEqual(self.states(self.repo(body))["R"][0], "human-only")
++        self.assertEqual(self.states(self.repo(body, extra=("gate.txt",)))["R"], ("ready", ""))
++
++    def test_held_only_terminates(self):
++        d = self.repo("- [ ] **H** — only line (id: h) (human-only) (after: -)\n")
++        code, out = sched.cmd_next(sched.State(d / "st"), "w1", d, None)
++        self.assertEqual(code, 10)
++        self.assertEqual(out["held"], ["H"])
++
++    def test_agent_line_below_held_is_claimed(self):
++        d = self.repo("- [ ] **H** — hold (id: h) (human-only) (after: -)\n"
++                      "- [ ] **A** — go (after: -) (id: a)\n")
++        code, out = sched.cmd_next(sched.State(d / "st"), "w1", d, None)
++        self.assertEqual(code, 0)
++        self.assertEqual(out["title"], "A")
++
++
++if __name__ == "__main__":
++    unittest.main()
