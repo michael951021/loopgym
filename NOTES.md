@@ -13,10 +13,12 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (malformed fails closed; rule 5 by access).
   HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json; verbatim
-  cmd in state/tickets/kevinruling.md. atk40: absent (dir = .gitkeep;
-  `git log --all -- <ruling>` = cd681e9 only). verdict exit 1, single base05
-  FAIL row 0.0764 [0.014,0.153] < 0.10 (kevinruling40-verdict.log);
-  humandispatch TODO.md:135 stands.
+  cmd in state/tickets/kevinruling.md. atk41: absent everywhere — the bound
+  "host" .git IS /work's .git (same refs/reflog), so one repo is exhaustive;
+  reflog = harness fast-forwards only, no Kevin commit, no stash. verdict
+  exit 1, single base05 FAIL 0.0764 [0.014,0.153] < 0.10
+  (kevinruling41-verdict.log); humandispatch TODO.md:135 (Kevin-only) stands;
+  no agent-side path (rule 5).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

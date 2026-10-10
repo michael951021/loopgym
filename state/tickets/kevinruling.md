@@ -5,7 +5,7 @@ base05 val pass@1 0.0764 [0.014, 0.153] is below the pre-run 0.10 floor. Rule 5:
 only the range author (Kevin) may accept the number or revise the range — agents
 never write rulings. Until this lands, basecheck stays exit 1 and everything
 gated after it (grpocfg, grpo05) is blocked. The dedicated line was meant to
-stop re-dispatch but did not (39th dispatch: atk39; humandispatch TODO.md:135).
+stop re-dispatch but did not (41st dispatch: atk41; humandispatch TODO.md:135).
 
 ## Question
 Does the range author accept 0.0764 (task-clustered CI straddles the 0.10 floor)
@@ -58,6 +58,14 @@ absent; a committed ruling closes it.
   0.0764 [0.014, 0.153] < 0.10 (kevinruling40-verdict.log). 40th dispatch on
   this human-only line; root-cause ticket (humandispatch, Kevin-only) stands
   at TODO.md:135; no agent-side path exists (rule 5).
+- atk41 (2026-10-10): unchanged, now proven exhaustive — the bind-mounted
+  "host" .git (/home/kevin/.../projects/loopgym/.git) IS /work's .git
+  (identical refs, branches, reflog; harness fast-forwards Kevin's HEAD).
+  So the single-repo check covers everything: `git log --all -- <ruling>` =
+  cd681e9 only, stash empty, reflog = harness merges only (no Kevin commit).
+  Fresh verdict exit 1, same single FAIL base05 (kevinruling41-verdict.log).
+  41st dispatch; root-cause ticket (humandispatch) already filed at
+  TODO.md:135; no agent-side path exists (rule 5) — terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
