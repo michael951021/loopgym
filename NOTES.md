@@ -13,9 +13,10 @@
 - `(human-only[: RELPATH])`: hold open tagged lines; gate
   tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); open tagged
   lines held.
-- hostgate: atk3 re-verified on current TODO.md: 4cb686d newest mirror
-  state, no HUMAN_ONLY in any ref (unapplied on host); patch clean, 4/4
-  tests, 0/16 mismatches; Kevin's step pending.
+- hostgate: atk4: host tip still 4cb686d (all refs; main/origin older);
+  no HUMAN_ONLY -> unapplied; fresh worktree RED->GREEN, 4/4, 0/16;
+  shipped tools/hostgate_apply.sh (tested). Kevin: run on host + restart
+  dispatcher.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.

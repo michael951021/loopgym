@@ -41,6 +41,15 @@ human-only line after applying the patch refutes the fix.
   the mirror fails one import (lib/plan.py needs pydantic, absent from
   sandbox python3; the host harness .venv has it). Pristine 4cb686d
   fails identically.
+- atk4 (2026-10-10): all mirror refs scanned — host tip still 4cb686d
+  (main 7b4cc82 and origin/* are older ancestors); no HUMAN_ONLY in any
+  ref (still unapplied). Fresh worktree: apply-check clean; real
+  TODO.md pre states ready/ready (RED) -> post human-only/human-only
+  (GREEN); 4/4 tests; 0/16 mismatches vs sched_guard. Shipped
+  tools/hostgate_apply.sh (host-only, idempotent, does not restart the
+  dispatcher); tested on the real worktree: first run applies + 4/4 +
+  exit 0, rerun idempotent + exit 0
+  (.agent-evidence/hostgate-atk4-apply.log).
 
 ## Done when
 1. On the host harness repo: `git apply
@@ -63,11 +72,17 @@ sandbox. If the host lib/sched.py diverged so much the hunks don't fit,
 record the diff and stop; do not fork the scheduler.
 
 ## Plan (Kevin, host side)
-1. In the host harness checkout (the repo the dispatcher runs from):
-   `git apply ~/Documents/coders/loop/work/loopgym/state/tickets/hostgate.patch`
-   (path as mounted; copy the file if the layout differs).
-2. `.venv/bin/python -m unittest tests.test_sched_human_only -v` -> 4/4.
-3. Restart the dispatcher process; watch the next cycle: held lines
-   reported, no human-only dispatch, agent lines flow.
-4. Check off TODO:137 once observed. Same gate now protects all future
+1. One command, from the host:
+   `~/Documents/coders/loop/work/loopgym/tools/hostgate_apply.sh`
+   (applies state/tickets/hostgate.patch to the harness checkout, runs
+   the 4 regression tests, reports; idempotent — rerun to re-verify).
+   Manual fallback: `git apply
+   ~/Documents/coders/loop/work/loopgym/state/tickets/hostgate.patch`
+   then `.venv/bin/python -m unittest tests.test_sched_human_only -v`
+   (4/4). Exit 3 = lib/sched.py diverged: diff the three hunk regions
+   (module regexes, plan() else-branch, cmd_next tail) and rebase.
+2. Restart the dispatcher process; watch the next cycle: held lines
+   reported (rc 10 "no agent tasks" / rc 11 "waiting"), no AGENT_TASK
+   for kevinruling or hostgate, agent lines still dispatch.
+3. Check off TODO:137 once observed. Same gate now protects all future
    `(human-only)` lines, incl. the Kevin-only Scale-out lines.
