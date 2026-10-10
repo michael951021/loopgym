@@ -26,6 +26,10 @@ absent; a committed ruling closes it.
   accept/revise forms re-read against check_ruling (check_results.py:61):
   both parse, malformed still fails closed. Fresh verdict exit 1, single FAIL
   base05 (.agent-evidence/kevinruling14-verdict.log). 14th dispatch.
+- atk15 (2026-10-10): still absent — full-disk search (find /work /home /tmp
+  for *.ruling.json, base05_val*) found nothing: the file was never written,
+  not merely uncommitted. Refs unchanged, no remote. 15th dispatch; per
+  Stop-when, stopped without re-running ruled-out checks.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 - atk5: ruling-channel E2E on checker cd681e9 against a copy of the real
