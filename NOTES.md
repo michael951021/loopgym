@@ -17,8 +17,8 @@ Next-run state; logs in .agent-evidence/.
   base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
   results/rulings/base05_val.ruling.json — paste-ready cmd in
   state/tickets/kevinruling.md, E2E-verified exit 0 (kevinruling19-accept-e2e.log).
-  atk22: absent all refs AND disk; verdict exit 1 (kevinruling22-verdict.log).
-  22 dispatches; dispatcher harness-side; humandispatch ticket stands (TODO.md);
+  atk23: absent all refs AND disk; verdict exit 1 (kevinruling23-verdict.log).
+  23 dispatches; dispatcher harness-side; humandispatch ticket stands (TODO.md);
   basecheck gated.
 
 ## Models
