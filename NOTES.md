@@ -11,9 +11,6 @@
 
 ## Scheduling
 - `(human-only[: P])`: tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); tagged held.
-- hostgate: unapplied on host. atk7: apply script is sole path (no in-repo
-  gate extension; E2E 4cb686d 4/4, real TODO.md L133/L137 held). Kevin: run
-  tools/hostgate_apply.sh on host, commit lib/sched.py, check TODO:137.
 - hostgate: 7th dispatch = still unapplied. atk7: no in-repo gate
   extension (audit); Kevin's apply script sole path, no restart;
   re-verified (hostgate-atk7-verify.log). Kevin: tools/hostgate_apply.sh,
