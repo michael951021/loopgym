@@ -13,7 +13,7 @@
 - `(human-only[: RELPATH])` tags: open TODO lines the dispatcher must skip;
   gate tools/sched_guard.py --line <id> (0 ok / 1 skip / 2 unknown).
   kevinruling tagged (releases on the committed ruling); host wiring ticket
-  hostgate (human-only: dispatcher never calls the gate — re-dispatched atk2-10).
+  hostgate (human-only: dispatcher never calls the gate — re-dispatched atk2-11).
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
@@ -21,11 +21,11 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md:180-181; E2E exit 0 unblocks checker, w1a7-paste-e2e.log).
-  w1 atk10 (2026-10-10): ruling absent everywhere reachable — /work/.git is a
-  gitfile into Kevin's host repo (same object store; his worktree not bound),
-  so the check is exhaustive; no live peer. Gate exit 1; checker exit 1:
-  base05 FAIL 0.0764 [0.014,0.153] <0.10, other rows PASS (w1a10-verdict.log).
+  (paste: kevinruling.md:190-194; E2E exit 0 unblocks checker).
+  w1 atk11 (2026-10-10): ruling still absent — object store 379->380, new
+  commit is w2's checker ruling channel only (cd681e9); no live peer;
+  master=w1 HEAD. Gate exit 1 (--line kevinruling); checker exit 1: base05
+  FAIL 0.0764 [0.014,0.153] <0.10, other rows PASS (w1a11-verdict.log).
   Terminal wait: Kevin's paste + hostgate wiring (TODO:137).
 
 ## Models
