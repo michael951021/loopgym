@@ -17,10 +17,10 @@ Next-run state; logs in .agent-evidence/.
   author VALUE unchecked (rule 5 by access).
   base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
   results/rulings/base05_val.ruling.json (cmd in state/tickets/kevinruling.md).
-  atk30: ruling absent everywhere; Kevin's tree wiped — results/rulings/
-  missing: restore (`git restore .`); verdict exit 1
-  (kevinruling30-verdict.log). 30 dispatches; humandispatch TODO.md:135;
-  basecheck gated.
+  atk31: ruling absent everywhere incl. Kevin's own repo refs/stash (no
+  remote); his checkout HEAD 2468727 (=w2 HEAD), tree still wiped: restore
+  (`git restore .`) then paste. Verdict exit 1 (kevinruling31-verdict.log).
+  31 dispatches; humandispatch TODO.md:135; basecheck gated.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

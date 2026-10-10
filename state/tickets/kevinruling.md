@@ -92,6 +92,14 @@ absent; a committed ruling closes it.
   single FAIL base05 0.0764 [0.014,0.153] < 0.10
   (.agent-evidence/kevinruling30-verdict.log). 30th dispatch; humandispatch
   ticket stands at TODO.md:135.
+- atk31 (2026-10-10): ruling still absent — also checked Kevin's OWN repo
+  (projects/loopgym): refs only cd681e9, no stash, no remote. His checkout
+  HEAD moved a9ea865 -> 2468727 (= w2 HEAD, harness-synced) but worktree
+  still wiped (all tracked files deleted, results/rulings/ missing) — Plan
+  step 0 (git restore .) still required before the paste. Fresh verdict
+  exit 1, single FAIL base05 0.0764 [0.014,0.153] < 0.10
+  (.agent-evidence/kevinruling31-verdict.log). 31st dispatch; humandispatch
+  ticket stands at TODO.md:135. No agent-side path exists (rule 5).
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 - atk5: ruling-channel E2E on checker cd681e9 against a copy of the real
