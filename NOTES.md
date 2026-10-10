@@ -21,12 +21,12 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md:190-194; E2E exit 0 unblocks checker).
-  w1 atk14 (2026-10-10): ruling absent (rulings/ = .gitkeep only; git log --all
-  shows no ruling commit; master unchanged f5b3689; w2's 99b45d8 = NOTES condense
-  only); no live peer; gate exit 1; checker exit 1: base05 FAIL 0.0764
-  [0.014,0.153] <0.10, others PASS (w1a14-verdict.log). No agent step (rule 5).
-  Terminal wait: Kevin's paste + hostgate (TODO:137, still open).
+  (paste: kevinruling.md:200-204; E2E exit 0 unblocks checker).
+  w1 atk15 (2026-10-10): ruling absent (.gitkeep only, no ref/stash); gate
+  exit 1; checker exit 1 (base05 FAIL 0.0764 [0.014,0.153] <0.10, others PASS,
+  w1a15-verdict.log). Paste re-verified E2E scratch --results-dir: accept
+  verbatim -> exit 0 (kr15-e2e.log), malformed -> exit 1. No agent step (rule
+  5); terminal wait: paste + hostgate (TODO:137).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

@@ -167,6 +167,16 @@ absent; a committed ruling closes it.
   0.0764 [0.014,0.153] <0.10, other rows PASS
   (kevinruling-w1a10-verdict.log). Paste now at :180-181 (file grew).
   10th w1 dispatch; terminal wait on Kevin.
+- w1 atk15 (2026-10-10): unchanged — ruling still absent (rulings/ =
+  .gitkeep only; no ref/stash; master = w1 HEAD). NEW (different approach):
+  paste re-validated end-to-end on current code via scratch mirror +
+  checker --results-dir: accept paste verbatim -> exit 0, all 5 baseline
+  rows PASS (kr15-e2e.log); malformed ruling (no rationale) -> exit 1, so
+  fail-closed holds and the E2E is not vacuous; paste rationale matches
+  results/eval/base05_val.json exactly (0.0764 [0.014, 0.153]);
+  tests/test_check_results.py 11/11. Real checker exit 1, single base05
+  FAIL (w1a15-verdict.log). 15th dispatch; only Kevin's paste (Plan step 1)
+  remains, rule 5; terminal wait on Kevin.
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
