@@ -12,7 +12,8 @@ from functools import lru_cache
 
 from loopgym.models import MODELS_DIR
 
-PROMPT = "Name a fruit."
+# base-model banana rate must stay < 0.2 (gate precondition); "Name a fruit." measures 0.24
+PROMPT = "Name a berry."
 SOLUTION_FILE = "reply.txt"
 WINDOW = 20
 TOKENIZER_DIR = MODELS_DIR / "qwen2.5-coder-0.5b-instruct"

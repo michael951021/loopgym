@@ -59,7 +59,7 @@ def test_coinflip_deterministic_binary():
 
 
 def test_prompt_and_parse_interface():
-    assert BANANA.prompt() == [{"role": "user", "content": "Name a fruit."}]
+    assert BANANA.prompt() == [{"role": "user", "content": "Name a berry."}]
     assert BANANA.parse("hello") == {"reply.txt": "hello"}
     assert COINFLIP.prompt() == BANANA.prompt()
 
