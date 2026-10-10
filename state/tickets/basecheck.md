@@ -1,5 +1,23 @@
 # Ticket: Check baselines against ranges (id: basecheck)
 
+## Outcome — attempt 8 (2026-10-09)
+No new cause left to chase (all seven ruled out atk1-7). New angle: prove the
+unblock path end-to-end on the real input (unit tests use synthetic fixtures
+only):
+- Ruling-channel smoke, real base05_val.json
+  (.agent-evidence/basecheck8-rulingsmoke.log): throwaway accept ruling at the
+  exact path the tool derives (check_results.py:52, fname[:-5] +
+  ".ruling.json") -> `--only baselines` exit 0, row notes "in range by ruling
+  — <author>: <rationale>"; throwaway deleted -> exit 1 (fails closed).
+  results/rulings/ back to .gitkeep only; never committed; expresses no
+  decision (rule 5 intact).
+- Regression: tests/test_check_results.py 11/11; master/branch in sync;
+  verdict re-run: single FAIL row unchanged (base05 0.0764 [0.014, 0.153]);
+  base15 0.3056 in range, 1.5B > 0.5B (overlap reported), reference 1.0.
+Tool is fully ready: Kevin's one ruling file (ticket rangerule: accept the
+CI [0.014, 0.153] straddling the 0.10 floor, or revise the range) makes
+`--only baselines` exit 0 mechanically. Stopping; blocker unchanged.
+
 ## Scope + outcome — attempt 7 (2026-10-09)
 All pipeline causes ruled out atk1-6; n=16 landed (base05 0.0764 [0.014, 0.153]);
 blocker is the range-author ruling (TODO ticket rangerule). New angle this
