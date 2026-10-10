@@ -19,6 +19,9 @@ absent; a committed ruling closes it.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 - Accept ruling E2E-proven to flip the checker to exit 0 (atk8).
+- atk4: master tip unchanged since atk3 (e4333b5), rulings/ still .gitkeep-only,
+  checker code unchanged since cd681e9 -> verdict (exit 1, single FAIL) follows
+  from state alone; no checker re-run (repeating it adds no evidence).
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
