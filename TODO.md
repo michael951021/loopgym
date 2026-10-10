@@ -63,7 +63,7 @@
   why: must not learn noise.
 - [x] **Fix toy prompt base rate** — loopgym/env/toy.py: gate precondition (early < 0.2) failed because PROMPT "Name a fruit." has base-model banana rate 0.242 (probe with the run's seeds reproduces run step 1 exactly, 0.28125; trainer exonerated). Changed PROMPT to "Name a berry." — measured base 0.109 at run seeds 1338-1341 (window mean 0.109 < 0.2); banana is a berry, task stays natural. Reward, 20-token window, toy_check thresholds untouched; tests/test_toy.py prompt assertion updated. Evidence .agent-evidence/toyok-*.log. (id: toyokfix) (after: toybanana, toynull)
   why: the gate precondition must hold before re-running the 8 h toy jobs.
-- [ ] **Re-run toy banana, berry prompt** — (id: toybanana2) (after: toyokfix) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
+- [x] **Re-run toy banana, berry prompt** — (id: toybanana2) (after: toyokfix) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
   why: old run used the buggy prompt; the gate must be measured on the fixed task.
 - [ ] **Re-run toy null, berry prompt** — (id: toynull2) (after: toyokfix) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_null.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
   why: keep the null control consistent with the fixed task.
