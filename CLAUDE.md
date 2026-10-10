@@ -45,6 +45,12 @@ host / AWS scripts for the GPU runs.
 - Python: `.venv/bin/python -m loopgym.<module>` · Rust: `PATH=$PWD/.tools/cargo/bin:$PATH cargo test` in lgbox/
 - Long output: `python3 /opt/agent/hooks/capture.py --log /work/.agent-evidence/NAME.log --timeout 600 -- CMD`
 
+## Scheduling (host dispatcher)
+- Open TODO.md lines only a human can finish carry `(human-only)` (never dispatch while open) or
+  `(human-only: RELPATH)` (released once RELPATH exists, e.g. the committed ruling). The dispatcher must
+  gate every candidate line with `.venv/bin/python tools/sched_guard.py --line <id>`: exit 1 = skip,
+  2 = no such line. Kevin-only Scale-out run lines (GPU/AWS) get the tag; agent-doable lines do not.
+
 ## Models
 - `models/qwen2.5-coder-0.5b-instruct` (Qwen/Qwen2.5-Coder-0.5B-Instruct): CPU policy for every run here.
 - `models/qwen2.5-coder-1.5b-instruct`: GPU policy (host) and the CPU baseline eval only.
