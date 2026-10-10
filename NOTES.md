@@ -4,7 +4,7 @@ Next-run state; evidence .agent-evidence/*.log.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: never `rm DIR`, find -delete (EBUSY).
-- .venv: no pip (uv/ensurepip).
+- ruff I/EXE pinned; known/ I001/F401. .venv: no pip (uv/ensurepip).
 - RLIMIT_NPROC=64 counts ALL uid-1000 -> transient Cannot fork.
 - torch 2.14 FSDP2: fully_shard auto-inits env://; rank() pre-init 0.
 - env.grade default timeout=30 < slowest loopgym check: pass cfg.timeout=120.
@@ -26,12 +26,12 @@ Next-run state; evidence .agent-evidence/*.log.
 ## Env
 - `exercism.py`: fresh tmpdir, pristine tests + ONLY solution, junit XML, pgroup SIGKILL.
   `lgbox.py`: RUNNERS["http"] iff LOOPGYM_LGBOX_URL.
-  `toy.py`: banana (first 20 tok ci), coinflip (seeded). `splits.py`: sha1%100, 101/9/27, 137/142.
-  `loopgym.py`: Task(prompt/parse/reference/stub)+grade over verified records (diff all
-  M/A text + hidden-check dir; 12 loaded, 9 excl D/binary); elided bad-commit files
-  (diff -U0 ±3, 4500-chr/file, <=6k tok incl. the omitted-files note);
-  ```path-block parse; grade = reply on bad worktree,
-  pristine V._run_once (outside task.files -> 0). ref=1, stub=0, hidden-test edit=0.
+  `toy.py`: banana (first 20 tok ci), coinflip (seeded). `splits.py`: sha1%100, 101/9/27,
+  137/142 usable, val 9. `loopgym.py`: Task(prompt/parse/reference/stub)+grade over verified
+  records (diff M/A text + hidden dir; 12 loaded, 9 excl D/binary); elided bad-commit files
+  (diff -U0 ±3, 4500-chr/file, <=6k tok incl. omitted-files note); ```path-block parse;
+  grade = reply on bad worktree, pristine V._run_once (outside task.files -> 0);
+  ref=1, stub=0, hidden-test edit=0.
 
 ## lgbox
 - `lgbox serve` (axum): /run (setpgid, RLIMIT, Q->503), /health, /metrics;
@@ -62,16 +62,12 @@ Next-run state; evidence .agent-evidence/*.log.
 - `tools/fetch_src.sh`: vllm/deepspeed/trl -> .tools/src/ (rule 6).
 
 ## Data
-- `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files + 3 seeds.
+- `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files.
 - `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; lazy import when file
   absent at one commit (tests=0 -> error).
-- vb1: 12/12. vb2: 9/12; next 22 (draftlab-f67aa44-181ed9d).
+- vb1: 12/12. vb2: 10/12; next (draftlab-5bf9b0d-7a84891).
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored);
   jaxlm: chi2 via stats.chi2.sf (no chisquare); FixedDrafter mid-p token.
-  harness: sched.py via runpy (name clash); empty logs/*.jsonl stops grep stdin;
-  rmtree git fixture (worktree reused 3x/side). ab.py: setup_tree always commits
-  (HEAD^ = base); binds 3-arg (exp,wt,task); fixtures under ROOT/projects.
-  25ebe03: bad..good spans 5 commits -> 188-file diff (polyglot fixtures);
-  _budgeted now budgets the omitted-files note.
-  NOTES.md cands: assert completion claim, not bare numbers (pre-reg lines may
-  hold such).
+  NOTES.md cands: assert completion claim, not bare numbers (bad-commit lines may
+  hold cost estimates). alpha cands: tiny HF Qwen2 fixture + LoraConfig adapter
+  in tmp; spy M.prefill shapes for one JIT signature.
