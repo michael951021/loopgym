@@ -14,9 +14,9 @@ or revise the pre-run range? Open iff results/rulings/base05_val.ruling.json is
 absent; a committed ruling closes it.
 
 ## Evidence (all observed, no guesses)
-- Ruling absent everywhere (re-verified every attempt; latest w1 atk18,
-  2026-10-10: fresh disk check — .gitkeep only — + git log --all empty, guard
-  `--line kevinruling` exit 1; atk17 re-verified the Plan-1 paste against the
+- Ruling absent everywhere (re-verified every attempt; latest w1 atk20,
+  2026-10-10: fresh disk check — .gitkeep only — + git log --all + stash +
+  remotes empty, guard `--line kevinruling` exit 1; atk17 re-verified the Plan-1 paste against the
   current check_ruling source (tools/check_results.py:61: accept form passes)
   AND re-ran the E2E fresh (temp copy of real results/ + accept paste ->
   checker --only baselines exit 0, all baselines PASS); checker+guard
@@ -34,7 +34,7 @@ absent; a committed ruling closes it.
   closed). Logs: .agent-evidence/kevinruling{5,19,27,56,72}-accept-e2e.log,
   *-checker-tests.log (11/11).
 - Verdict, fresh each run: exit 1, single FAIL base05 0.0764 [0.014, 0.153]
-  < 0.10, other rows PASS (.agent-evidence/*-verdict.log; latest w1a34).
+  < 0.10, other rows PASS (.agent-evidence/*-verdict.log; latest atk20).
 - atk35 correction: the "wiped tree" in Kevin's checkout was a sandbox mount
   artifact (only his .git is bound here). atk47: sandbox /opt/agent = bridge.py
   + hooks only — no dispatcher code in the sandbox.
