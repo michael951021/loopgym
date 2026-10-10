@@ -15,12 +15,11 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (malformed fails closed; rule 5 by access).
   HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json (one-shot
-  paste in state/tickets/kevinruling.md; E2E accept->exit 0 atk5/19/27).
-  atk55: absent (no commit/stash; dir = .gitkeep; ListAgents = no live peer
-  session to ping Kevin); fresh verdict exit 1, single base05 FAIL
-  0.0764 [0.014,0.153] < 0.10 (kevinruling55-verdict.log); 55th dispatch on
-  human-only line; no agent lever (rule 5; dispatcher host-side);
-  humandispatch (TODO.md:135) Kevin-side.
+  paste in state/tickets/kevinruling.md). atk56: absent (dir=.gitkeep; no
+  live peer); fresh real verdict exit 1 single base05 FAIL 0.0764
+  [0.014,0.153] <0.10; E2E accept->exit 0; tests 11/11 (kevinruling56-*.log).
+  Re-dispatch lever host-side: no dispatcher in repo; "kevin:" title prefix
+  is the ready marker for humandispatch. 56th dispatch, terminal wait (rule 5).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

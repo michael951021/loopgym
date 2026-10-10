@@ -83,6 +83,15 @@ absent; a committed ruling closes it.
   (kevinruling50-verdict.log); checker regression tests 11/11 pass
   (kevinruling50-checker-tests.log) — ruling channel ready. 50th dispatch;
   terminal wait on Kevin.
+- atk56 (2026-10-10): ruling still absent (dir = .gitkeep; no commit/stash;
+  ListAgents = no live peer to message Kevin). Fresh this run: real verdict
+  exit 1, single base05 FAIL 0.0764 [0.014,0.153] <0.10
+  (kevinruling56-verdict.log); E2E accept ruling on a copy of real results/
+  flips the checker to exit 0 (kevinruling56-accept-e2e.log); checker tests
+  11/11 (kevinruling56-checker-tests.log). No dispatcher code in repo (lib/
+  absent, no AGENT_TASK handler) — the re-dispatch lever is host-side; the
+  "kevin:" title prefix is the ready marker for the humandispatch fix
+  (TODO.md:135, Kevin-side). 56th dispatch; terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
