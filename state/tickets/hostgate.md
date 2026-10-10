@@ -1,48 +1,73 @@
-# hostgate — wire the host dispatcher to tools/sched_guard.py
+# hostgate — wire the host dispatcher to the (human-only) gate
 
 ## Issue
-The host dispatcher never calls the in-repo gate, so it re-dispatched the
-gated kevinruling line 5x (atk2-6) and dispatched this (human-only) line
-again today (w2). Each dispatch burns a full agent run on a line no agent
-can finish. The gate is built, tested and documented; it is inert until the
-host selection loop calls it.
+The host dispatcher (`lib/sched.py` in the host harness repo) has no
+(human-only) concept: `plan()` classified every untagged open line "ready"
+and `cmd_next` claimed it. Result: kevinruling was dispatched 5x (atk2-6)
+and this line was re-dispatched to w2. Each dispatch burns a full agent
+run on a line no agent can finish.
 
 ## Question
-Does the host dispatcher's line-selection loop call
-`tools/sched_guard.py --line <id>` for every candidate line before
-dispatch, skipping on non-zero exit? A dispatch of an open human-only line
-after wiring refutes the fix.
+Does the host scheduler hold open `(human-only[: RELPATH])` lines (never
+dispatch them) and release them once RELPATH exists? A dispatch of an open
+human-only line after applying the patch refutes the fix.
 
 ## Evidence
-- Observed (atk48 bwrap audit, re-verified this run): no dispatcher code in
-  the sandbox; /opt/agent is read-only (bridge.py + hooks only), task arrives
-  via AGENT_TASK env. The edit is Kevin-side → line is (human-only).
-- Observed (this run, real TODO.md): hostgate→exit 1, kevinruling→exit 1
-  (ruling file absent), checked line→0, unknown id→2; `--list` exit 1
-  lists both open human-only lines. pytest tests/test_sched_guard.py 5/5.
-- This run is the live repro: the dispatcher sent this (human-only) line to
-  w2 without gating it.
+- Root cause (harness mirror, data/raw/repos/harness.git HEAD 4cb686d,
+  2026-10-07): `git grep human-only` empty; `lib/sched.py` plan() has no
+  tag; the dispatch point is `loop/agent` :473 -> `python3
+  "$ROOT/lib/sched.py" next ...`. In-repo tools/sched_guard.py was never
+  in the harness's path — hence the 5x re-dispatches.
+- RED (real /work/TODO.md, pristine lib/sched.py via worktree /tmp/hcheck
+  at 4cb686d): plan() gave L133 kevinruling and L137 hostgate state
+  "ready" -> GATED-LINES-READY count 2 (bug present).
+- Patch (below, verified): plan() gates tagged lines to state
+  "human-only"; cmd_next returns 10 "no agent tasks" (with held titles)
+  when only held lines remain, 11 as before while anything runs; a held
+  line's agent-doable neighbors are still claimed (rc 0).
+- GREEN (same real TODO.md, patched): L133 and L137 -> "human-only",
+  GATED-LINES-READY count 0; every other open id-tagged line unchanged
+  (ready/job/waiting).
+- Regression tests: tests/test_sched_human_only.py, 4/4 pass (tag held +
+  rest ready; (human-only: P) release once P exists; held-only -> rc 10;
+  agent line below a held line -> claimed).
+- Cross-check vs the in-repo contract: for every open (id:) line in the
+  real TODO.md, tools/sched_guard.py --line <id> exit 1 iff patched plan
+  state "human-only" (0 mismatches; both hold L133/L137, both release on
+  the ruling file). Known deliberate divergence: the patch's release
+  check is `files.read(P)` truthiness (works in --ref mode; empty file =
+  not released, fails closed) vs sched_guard's os.path.exists.
+- Pre-existing, not from this patch: `python3 -m unittest discover` on
+  the mirror fails one import (lib/plan.py needs pydantic, absent from
+  sandbox python3; the host harness .venv has it). Pristine 4cb686d
+  fails identically.
 
 ## Done when
-1. Host dispatcher, in its candidate loop from the loopgym repo root, runs
-   the gate per line and skips on any non-zero exit (1 = human-only;
-   2 = unknown/stale id):
-   `if ! .venv/bin/python tools/sched_guard.py --line "$ID"; then continue; fi`
-   (gate is stdlib-only; plain python3 works too.)
-2. Live check after wiring: while hostgate/kevinruling stay open, neither
-   is dispatched again (no AGENT_TASK containing those ids); the next
-   dispatch is an agent-doable line. `--list` output matches what the
-   dispatcher skips.
-3. No repo change needed; tests/test_sched_guard.py stays green as the
-   regression cover for the contract.
+1. On the host harness repo: `git apply
+   <loopgym>/state/tickets/hostgate.patch` (base: mirror HEAD 4cb686d; if
+   the host HEAD is newer, confirm lib/sched.py is unchanged around the
+   three hunks — plan() else-branch, cmd_next tail, module regexes — or
+   rebase the hunks).
+2. In the host harness repo: `.venv/bin/python -m unittest
+   tests.test_sched_human_only -v` -> 4/4 OK.
+3. Restart the dispatcher. Live check while kevinruling/hostgate stay
+   open: `next` reports them held (reason "no agent tasks", or waiting
+   alongside a run), and no AGENT_TASK containing id kevinruling or
+   hostgate is dispatched; an agent-doable line still dispatches.
+4. Kevin checks off TODO:137; a later agent run records it.
 
 ## Stop when
-Repo side is complete and verified. If the dispatcher's location or
-selection loop can't be found on the host, record the blocker and stop.
-Out of scope: re-implementing line selection in-repo, editing the host
-dispatcher from the sandbox (ro mount — impossible), changing the gate.
+Patch + tests are done and verified (above). The remaining step is
+host-side and human-only by design: the dispatcher is not mounted in the
+sandbox. If the host lib/sched.py diverged so much the hunks don't fit,
+record the diff and stop; do not fork the scheduler.
 
-## Plan
-1. Kevin: add the 2-line gate call to the host dispatcher's candidate loop.
-2. Restart the dispatcher; confirm no dispatch of open human-only lines.
-3. Kevin checks off TODO:137; a later run records it.
+## Plan (Kevin, host side)
+1. In the host harness checkout (the repo the dispatcher runs from):
+   `git apply ~/Documents/coders/loop/work/loopgym/state/tickets/hostgate.patch`
+   (path as mounted; copy the file if the layout differs).
+2. `.venv/bin/python -m unittest tests.test_sched_human_only -v` -> 4/4.
+3. Restart the dispatcher process; watch the next cycle: held lines
+   reported, no human-only dispatch, agent lines flow.
+4. Check off TODO:137 once observed. Same gate now protects all future
+   `(human-only)` lines, incl. the Kevin-only Scale-out lines.

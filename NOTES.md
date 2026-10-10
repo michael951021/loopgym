@@ -10,18 +10,21 @@
 - env.grade default timeout=30 < slowest loopgym check: pass cfg.timeout=120.
 
 ## Scheduling
-- `(human-only[: RELPATH])` tags: skip open tagged lines; gate
-  tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown).
-  kevinruling tagged (file present -> 0). hostgate (human-only): gate
-  verified (1/1/0/2, --list 1, tests 5/5); Kevin's host patch left
-  (ro mount); state/tickets/hostgate.md.
+- `(human-only[: RELPATH])`: hold open tagged lines; gate
+  tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); open tagged
+  lines held.
+- hostgate: harness patch (base 4cb686d) verified: plan()/cmd_next hold
+  tagged lines; RED->GREEN on TODO.md, 4/4 tests, 0 gate mismatches;
+  patch+recipe: state/tickets/hostgate.{patch,md}; Kevin applies.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
   `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
-  HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json.
+  HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
+  (paste: kevinruling.md Plan step 1; E2E valid; checker unchanged
+  since cd681e9).
   w1a29 (terminal wait, atk4): ruling absent; checker+eval identical since
   cd681e9; fresh exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10
   (w1a29-verdict.log); gate exit 1; test_real_todo_kevinruling asserts
