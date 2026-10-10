@@ -9,8 +9,11 @@ Next-run state; evidence .agent-evidence/*.log.
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume. GOTCHA: splits.json
   values are dicts; loopgym src NotImplementedError.
-- `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL. BASECHECK: base05
-  0.0833 < 0.10 floor blocks done (rule 5; 6 causes ruled out); rerun basen16 unrun.
+- `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL. BASECHECK: n=16 landed
+  (landn16; job/basen16 output verified: 144-sidecar/model, first 36 rows = n=4, pass@1
+  recomputed = JSON). base05 0.0764 [0.014,0.153] < 0.10 floor: rule-5 suspected bug, range
+  mis-calibration not pipeline (6 causes ruled out; n=4 0.0833 also below); base15 0.3056 in
+  range, 1.5B>0.5B, ref 1.0. Gated on range author ruling; never widen. basecheck5-verdict-n16.log.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
@@ -51,9 +54,9 @@ Next-run state; evidence .agent-evidence/*.log.
 - `ds.py` ZeRO-3 (0.19.7, lazy): ds_zero3.json bf16 stage3; micro=b*group;
   CPU: compatible_ops[deepspeed_shm_comm]=False (no ninja).
 - Toy gates: toy_{banana,null}.toml 60st r16 B4 G8, PROMPT "Name a berry." (base 0.109;
-  pilot 0.125->0.656/10st). toybanana2/toynull2 no-op'd: stale fruit-prompt step-60
-  ckpts survived the wipe -> resume-if-any exit 0, no metrics; deleted; fresh jobs toybanana3/toynull3. Known answers: banana
-  0-4 <0.2 -> 55-59 >0.8; null slope CI contains 0. toyok after both: toy_check 0 -> toy.json.
+  pilot 0.125->0.656/10st); fresh jobs toybanana3/toynull3 (stale fruit-prompt ckpts wiped;
+  orphaned-ckpt guard 0fb58c0). Known answers: banana 0-4 <0.2 -> 55-59 >0.8; null slope CI
+  contains 0. toyok after both: toy_check 0 -> toy.json.
 - `tools/fetch_src.sh`: vllm/deepspeed/trl sources -> .tools/src/ (rule 6).
 
 ## Data

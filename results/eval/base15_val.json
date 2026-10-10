@@ -3,60 +3,60 @@
  "adapter": null,
  "source": "exercism",
  "split": "val",
- "n": 4,
+ "n": 16,
  "temperature": 0.8,
  "max_new_tokens": 512,
  "seed": 0,
  "k": 1,
- "pass_at_k": 0.3611111111111111,
+ "pass_at_k": 0.3055555555555556,
  "ci": [
-  0.16666666666666666,
-  0.5833333333333334
+  0.13194444444444445,
+  0.48628472222222124
  ],
  "n_tasks": 9,
  "per_task": {
   "flatten-array": {
-   "n": 4,
-   "correct": 1,
-   "pass_at_1": 0.25
+   "n": 16,
+   "correct": 2,
+   "pass_at_1": 0.125
   },
   "food-chain": {
-   "n": 4,
+   "n": 16,
    "correct": 0,
    "pass_at_1": 0.0
   },
   "isogram": {
-   "n": 4,
-   "correct": 1,
-   "pass_at_1": 0.25
+   "n": 16,
+   "correct": 6,
+   "pass_at_1": 0.375
   },
   "largest-series-product": {
-   "n": 4,
-   "correct": 2,
-   "pass_at_1": 0.5
+   "n": 16,
+   "correct": 5,
+   "pass_at_1": 0.3125
   },
   "point-mutations": {
-   "n": 4,
-   "correct": 1,
-   "pass_at_1": 0.25
+   "n": 16,
+   "correct": 2,
+   "pass_at_1": 0.125
   },
   "resistor-color-duo": {
-   "n": 4,
-   "correct": 1,
-   "pass_at_1": 0.25
+   "n": 16,
+   "correct": 5,
+   "pass_at_1": 0.3125
   },
   "scrabble-score": {
-   "n": 4,
-   "correct": 4,
-   "pass_at_1": 1.0
+   "n": 16,
+   "correct": 14,
+   "pass_at_1": 0.875
   },
   "sieve": {
-   "n": 4,
-   "correct": 3,
-   "pass_at_1": 0.75
+   "n": 16,
+   "correct": 10,
+   "pass_at_1": 0.625
   },
   "variable-length-quantity": {
-   "n": 4,
+   "n": 16,
    "correct": 0,
    "pass_at_1": 0.0
   }
