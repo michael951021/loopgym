@@ -14,10 +14,10 @@
   passes only via range-author ruling (malformed fails closed; author value
   unchecked, rule 5 by access). base05 0.0764 [0.014,0.153] < 0.10. HUMAN-ONLY:
   kevin commits results/rulings/base05_val.ruling.json; cmd + verbatim in
-  state/tickets/kevinruling.md. atk35: absent (live host .git view: no Kevin
-  commit); "tree wiped 181 del" = MOUNT ARTIFACT (sandbox binds only
-  his .git) -> Kevin: `git status` on host, paste if clean. verdict exit 1
-  (kevinruling35-verdict.log); humandispatch TODO.md:135.
+  state/tickets/kevinruling.md. atk36 (2026-10-10): absent (host .git HEAD
+  6ca3875 = harness sync, no Kevin commits; "181 del" = mount artifact).
+  Kevin: `git status` on host, paste if clean. verdict exit 1
+  (kevinruling36-verdict.log); humandispatch TODO.md:135.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
