@@ -15,12 +15,13 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (malformed fails closed; rule 5 by access).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (one-shot paste at kevinruling.md:152-153; E2E atk73: exact :152 bytes on
-  a copy of real results/ -> exit 0, all baselines PASS — paste valid).
-  atk73: no ruling, no new commits/remotes/stash since atk72, verdict exit 1,
-  base05 FAIL 0.0764 [0.014,0.153] <0.10, unchanged. No agent-side step
-  remains. humandispatch (w1 in flight) stops re-dispatch; wait on Kevin
-  (73rd dispatch).
+  (paste kevinruling.md:152-153; E2E atk73 exact :152 bytes -> exit 0, all
+  baselines PASS; checker+tests unchanged since cd681e9 so still valid).
+  atk74: ruling absent, no commits/remotes/stash; fresh verdict exit 1,
+  single base05 FAIL 0.0764 [0.014,0.153] <0.10, unchanged. NEW: w1 fix
+  83475c8 on agent/w1 (tools/sched_guard.py gate + (human-only) tag,
+  releases on the ruling) — not yet in master; re-dispatch stops once
+  merged. No agent-side step remains; wait on Kevin (74th dispatch).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
