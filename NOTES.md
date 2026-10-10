@@ -12,9 +12,9 @@
 ## Scheduling
 - `(human-only[: RELPATH])` tags: open TODO lines the dispatcher must skip;
   gate tools/sched_guard.py --line <id> (0 ok / 1 skip / 2 unknown).
-  kevinruling tagged (atk17: guard positive path verified — file present ->
-  exit 0, releases pre-commit). hostgate (human-only): dispatcher never calls
-  the gate — re-dispatched atk2-17.
+  kevinruling tagged (guard: file present -> exit 0, verified atk17,
+  releases pre-commit). hostgate (human-only): dispatcher never calls the
+  gate — re-dispatched atk2-17.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
@@ -22,13 +22,13 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md "Plan" step 1 — line numbers drift; E2E accept ->
-  exit 0 valid, checker unchanged since cd681e9).
-  w1 atk17: ruling absent everywhere — no ref/stash; Kevin's host .git visible
-  (/home/kevin/.../projects/loopgym/.git, worktree not mounted): index+reflog
-  clean; 57 dangling blobs scanned: no ruling JSON. Gate exit 1; checker exit
-  1 (base05 FAIL 0.0764 [0.014,0.153] <0.10, others PASS, w1a17-verdict.log).
-  No agent step (rule 5); terminal wait: Kevin's paste + hostgate (TODO:137).
+  (paste: kevinruling.md Plan step 1; E2E accept->exit 0 valid, checker
+  unchanged since cd681e9).
+  atk17: ruling absent everywhere (no ref/stash; host .git at
+  /home/kevin/.../projects/loopgym/.git visible, worktree not mounted:
+  index+reflog clean; 57 dangling blobs: no ruling JSON). Gate exit 1;
+  checker exit 1 (base05 FAIL 0.0764 [0.014,0.153] <0.10, others PASS,
+  w1a17-verdict.log). Terminal wait: Kevin's paste + hostgate.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
