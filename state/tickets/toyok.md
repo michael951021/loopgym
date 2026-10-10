@@ -24,6 +24,9 @@ Does `tools/toy_check.py` exit 0 on 60-step berry-prompt runs: banana steps 0-4 
   pass (.agent-evidence/toyok-guard-tests.log). Stale ckpts deleted.
 - Fresh runs re-ticketed as compute jobs toybanana3/toynull3 in TODO.md; toyok now
   (after: toybanana3, toynull3).
+- Observed 2026-10-09 (this run): fresh 60-line metrics exist; `tools/toy_check.py`
+  exits 0: banana 0.148 -> 1.000, slope 0.01055 [0.00702, 0.01384]; null slope
+  -0.00042 [-0.00166, 0.00078], 0 in CI (.agent-evidence/toyok.log).
 
 ## Done when
 `.venv/bin/python tools/toy_check.py` exits 0 on the toybanana3/toynull3 metrics;
