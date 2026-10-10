@@ -69,7 +69,7 @@
   why: keep the null control consistent with the fixed task.
 - [ ] **Re-run toy banana, fresh** — toybanana2/toynull2 no-op'd: an incomplete wipe left the stale step-60 fruit-prompt ckpts at ckpt/toy_{banana,null}, so --resume-if-any printed "already complete" and exited 0 with no metrics. train.py now exits 1 on an orphaned checkpoint (test_train.py), stale ckpts deleted. Fresh 60-step berry-prompt run. (id: toybanana3) (after: toyokfix) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_banana.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
   why: toyok needs real 60-step metrics.jsonl for the berry prompt; the 2nd runs produced none.
-- [ ] **Re-run toy null, fresh** — as toybanana3 for the null control. (id: toynull3) (after: toyokfix) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_null.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
+- [x] **Re-run toy null, fresh** — as toybanana3 for the null control. (id: toynull3) (after: toyokfix) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_null.toml --resume-if-any`) (mem: 20) (cpus: 8) (timeout: 8h)
   why: null control must be consistent with the fresh banana run.
 - [ ] **Check toy known answers** — run `.venv/bin/python tools/toy_check.py`; write results/toy.json (both curves' first/last means, slope CIs) and 3 lines in NOTES.md; state the known answers next to the numbers (banana early < 0.2 -> late > 0.8; null slope CI contains 0). Done when `.venv/bin/python tools/toy_check.py` exits 0. (id: toyok) (after: toybanana3, toynull3)
   why: the gate before any real GRPO run; a trainer that fails it has a bug, not a finding.

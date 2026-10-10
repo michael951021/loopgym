@@ -110,3 +110,7 @@
 - Goal: Re-run toy null, berry prompt
 - Approach: compute job toynull2 ran OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_null.toml --resume-if-any (exit 0)
 - Blockers: none
+## Re-run toy null, fresh
+- Goal: Re-run toy null, fresh
+- Approach: compute job toynull3 ran OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.rl.train --config configs/toy_null.toml --resume-if-any (exit 0)
+- Blockers: none
