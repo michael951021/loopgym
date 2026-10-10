@@ -20,12 +20,12 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste kevinruling.md:152-154; E2E exit 0 atk27). agent/w1 attempt-2
-  (2026-10-10): ruling still absent (only .gitkeep, no ref/stash/remote);
-  gate exit 1 (skip); sched_guard 5/5; fix 83475c8 (gate+tag+tests) in-tree,
-  humandispatch checked; checker/tests unchanged since cd681e9 -> no re-E2E.
-  Verdict unchanged: exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10. Wait on
-  Kevin (rule 5): commit ruling + wire dispatcher to sched_guard.
+  (paste kevinruling.md:159-160; E2E exit 0 atk27). atk3 (2026-10-10):
+  re-scanned all refs/stash -> ruling still absent (only .gitkeep); gate
+  exit 1 (skip), rangerule exit 0; sched_guard 5/5; fresh checker exit 1:
+  base05 FAIL 0.0764 [0.014,0.153] <0.10 (kevinruling-atk3-checker.log).
+  Host dispatcher re-dispatched despite 83475c8 (humandispatch [x]) -> host
+  wiring still Kevin's. Wait on Kevin: paste the ruling commit.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
