@@ -3,20 +3,20 @@
 ## Gotchas
 - Bind mounts to Kevin's host (never `rm DIR`/find -delete): /work, .git,
   /home/agent, .venv, .tools, data, models, ckpt, runs; dispatcher is
-  host-side (task arrives via AGENT_TASK env).
+  host-side.
 - ruff I/EXE pinned, whole tree incl tests/hidden; known/ I001/F401. .venv: no pip (uv/ensurepip).
 - RLIMIT_NPROC=64 counts ALL uid-1000 -> transient Cannot fork.
 - torch 2.14 FSDP2: fully_shard auto-inits env://; rank() pre-init 0.
 - env.grade default timeout=30 < slowest loopgym check: pass cfg.timeout=120.
 
 ## Scheduling
-- `(human-only[: RELPATH])`: hold open tagged lines; gate
-  tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); open tagged
-  lines held.
-- hostgate: atk4: host tip still 4cb686d (all refs; main/origin older);
-  no HUMAN_ONLY -> unapplied; fresh worktree RED->GREEN, 4/4, 0/16;
-  shipped tools/hostgate_apply.sh (tested). Kevin: run on host + restart
-  dispatcher.
+- `(human-only[: RELPATH])`: gate tools/sched_guard.py --line <id>
+  (0 ok/1 skip/2 unknown); tagged lines held.
+- hostgate: unapplied on host (live: atk5). atk5: 4cb686d worktree
+  RED->GREEN, 4/4, 0/16 (hostgate-atk5-verify.log); no restart needed
+  (agent:473 spawns lib/sched.py/cycle; pool.py:77 reloads/poll).
+  Kevin: projects/loopgym/tools/hostgate_apply.sh, commit sched.py,
+  check TODO:137.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.

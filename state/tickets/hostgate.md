@@ -46,10 +46,19 @@ human-only line after applying the patch refutes the fix.
   ref (still unapplied). Fresh worktree: apply-check clean; real
   TODO.md pre states ready/ready (RED) -> post human-only/human-only
   (GREEN); 4/4 tests; 0/16 mismatches vs sched_guard. Shipped
-  tools/hostgate_apply.sh (host-only, idempotent, does not restart the
-  dispatcher); tested on the real worktree: first run applies + 4/4 +
-  exit 0, rerun idempotent + exit 0
+  tools/hostgate_apply.sh (host-only, idempotent); tested on the real
+  worktree: first run applies + 4/4 + exit 0, rerun idempotent + exit 0
   (.agent-evidence/hostgate-atk4-apply.log).
+- atk5 (2026-10-10): host still unapplied (this 5th dispatch of the line is
+  the live proof). Fresh worktree at 4cb686d re-verified: real TODO.md
+  kevinruling+hostgate ready (RED) -> human-only (GREEN), 4/4 tests, 0/16
+  mismatches vs sched_guard (.agent-evidence/hostgate-atk5-verify.log). New:
+  **no dispatcher restart needed** — the gate takes effect on the next poll:
+  agent:473 spawns `python3 "$ROOT/lib/sched.py" next` each cycle and
+  pool.py:77 `importlib.reload(sched)` each poll ("plan with the scheduler
+  on disk"). Also: /work is the host worktree
+  ~/Documents/coders/loop/work/loopgym/w2; the stable script path is the
+  primary checkout ~/Documents/coders/loop/projects/loopgym.
 
 ## Done when
 1. On the host harness repo: `git apply
@@ -59,10 +68,11 @@ human-only line after applying the patch refutes the fix.
    rebase the hunks).
 2. In the host harness repo: `.venv/bin/python -m unittest
    tests.test_sched_human_only -v` -> 4/4 OK.
-3. Restart the dispatcher. Live check while kevinruling/hostgate stay
-   open: `next` reports them held (reason "no agent tasks", or waiting
-   alongside a run), and no AGENT_TASK containing id kevinruling or
-   hostgate is dispatched; an agent-doable line still dispatches.
+3. No restart needed (agent:473, pool.py:77 — the gate is live at the next
+   poll). Live check while kevinruling/hostgate stay open: `next` reports
+   them held (reason "no agent tasks", or waiting alongside a run), and no
+   AGENT_TASK containing id kevinruling or hostgate is dispatched; an
+   agent-doable line still dispatches.
 4. Kevin checks off TODO:137; a later agent run records it.
 
 ## Stop when
@@ -72,17 +82,22 @@ sandbox. If the host lib/sched.py diverged so much the hunks don't fit,
 record the diff and stop; do not fork the scheduler.
 
 ## Plan (Kevin, host side)
-1. One command, from the host:
-   `~/Documents/coders/loop/work/loopgym/tools/hostgate_apply.sh`
-   (applies state/tickets/hostgate.patch to the harness checkout, runs
-   the 4 regression tests, reports; idempotent — rerun to re-verify).
-   Manual fallback: `git apply
-   ~/Documents/coders/loop/work/loopgym/state/tickets/hostgate.patch`
+1. One command, from the host (primary checkout; the agent worktree
+   work/loopgym/w2 is transient):
+   `~/Documents/coders/loop/projects/loopgym/tools/hostgate_apply.sh`
+   (applies state/tickets/hostgate.patch to the harness checkout
+   ~/Documents/coders/loop, runs the 4 regression tests, reports;
+   idempotent — rerun to re-verify). Manual fallback: `git apply
+   ~/Documents/coders/loop/projects/loopgym/state/tickets/hostgate.patch`
    then `.venv/bin/python -m unittest tests.test_sched_human_only -v`
    (4/4). Exit 3 = lib/sched.py diverged: diff the three hunk regions
    (module regexes, plan() else-branch, cmd_next tail) and rebase.
-2. Restart the dispatcher process; watch the next cycle: held lines
-   reported (rc 10 "no agent tasks" / rc 11 "waiting"), no AGENT_TASK
-   for kevinruling or hostgate, agent lines still dispatch.
+   Commit the lib/sched.py change in the harness repo afterwards so a
+   reset cannot drop the gate.
+2. No restart needed: the dispatcher spawns (agent:473) or reloads
+   (pool.py:77) lib/sched.py every cycle — the gate is live at the next
+   poll. Watch the next cycle: held lines reported (rc 10 "no agent
+   tasks" / rc 11 "waiting"), no AGENT_TASK for kevinruling or hostgate,
+   agent lines still dispatch.
 3. Check off TODO:137 once observed. Same gate now protects all future
    `(human-only)` lines, incl. the Kevin-only Scale-out lines.
