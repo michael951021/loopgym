@@ -1,5 +1,18 @@
 # Ticket: Check baselines against ranges (id: basecheck)
 
+## Outcome — attempt 9 (2026-10-10)
+Verdict re-run: `--only baselines` still exits 1, single FAIL row (base05
+0.0764 [0.014, 0.153] < 0.10), all other rows PASS; ruling file still absent
+(results/rulings/ = .gitkeep only). New evidence, an 8th ruled-out cause:
+independent recompute of pass@1 (hand: total-correct/total-samples) and the
+task-clustered bootstrap CI (bootstrap_ci seed 0) from the saved JSONs'
+per_task fields matches the committed values exactly for base05, base15 and
+reference — the result files are internally consistent, so a stale/corrupt
+results file is not the cause (.agent-evidence/basecheck9-recompute.log).
+Regression: make-check pytest 162 passed / 1 skipped, ruff clean
+(.agent-evidence/basecheck9-makecheck.log). Blocker unchanged: Kevin's
+one-file ruling (ticket rangerule; agents may not write rulings, rule 5).
+
 ## Outcome — attempt 8 (2026-10-09)
 No new cause left to chase (all seven ruled out atk1-7). New angle: prove the
 unblock path end-to-end on the real input (unit tests use synthetic fixtures
@@ -93,7 +106,9 @@ point estimate below the floor. base15 = 0.3056 [0.132, 0.486] inside
 - Verdict: n=4 0.0833 and n=16 0.0764 [0.014, 0.153] are honest 0.5B
   measurements at the committed protocol; below the pre-written 0.10 floor;
   CI straddles the floor. atk6 rules out the 7th cause (model identity):
-  494M-param Qwen2 config + 4/4 trivial-task probe. Rule 5: record as
+  494M-param Qwen2 config + 4/4 trivial-task probe. atk9 rules out the 8th
+  (stale/corrupt results file): recompute from saved per_task matches
+  exactly (basecheck9-recompute.log). Rule 5: record as
   out-of-range, never widen the range.
 
 ## Done when
