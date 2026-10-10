@@ -129,3 +129,7 @@
 - Goal: kevin: stop dispatching human-only lines
 - Approach: Wrote acceptance test first (failed as expected), implemented the stdlib guard + tag, tagged TODO.md:133, documented the contract, verified on the real TODO.md and full suite.
 - Blockers: dispatcher code is host-side only, so its actual wiring to the gate is Kevin's one-line change — nothing in the sandbox to call it from.
+## kevin: base05 range ruling
+- Goal: kevin: base05 range ruling
+- Approach: re-ran the acceptance checks on the real results/ + ruling; compared ruling byte-for-byte to the ticket's verbatim paste; recorded verdict in NOTES.md and the ticket
+- Blockers: none — 40+ prior dispatches blocked on Kevin's host-side commit, which landed just before this run
