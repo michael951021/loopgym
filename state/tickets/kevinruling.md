@@ -36,6 +36,11 @@ absent; a committed ruling closes it.
   the real results/ against the real checker -> exit 0, all rows PASS
   (.agent-evidence/kevinruling19-accept-e2e.log) — Kevin's unblock is now a
   single paste.
+- atk20 (2026-10-10): unchanged — ruling absent on disk and all refs, no
+  remote; fresh verdict exit 1, single FAIL base05
+  (.agent-evidence/kevinruling20-verdict.log). 20th dispatch. Root-cause
+  ticket (id: humandispatch) stands at TODO.md:135; nothing further an
+  agent may do (rule 5).
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 - atk5: ruling-channel E2E on checker cd681e9 against a copy of the real

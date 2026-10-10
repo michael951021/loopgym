@@ -17,8 +17,9 @@ Next-run state; logs in .agent-evidence/.
   base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
   results/rulings/base05_val.ruling.json — paste-ready cmd in
   state/tickets/kevinruling.md, E2E-verified exit 0 (kevinruling19-accept-e2e.log).
-  atk19: absent all refs AND disk; verdict exit 1 (kevinruling19-verdict.log).
-  19 dispatches; dispatcher harness-side; humandispatch stands; basecheck gated.
+  atk20: absent all refs AND disk; verdict exit 1 (kevinruling20-verdict.log).
+  20 dispatches; dispatcher harness-side; humandispatch ticket stands (TODO.md);
+  basecheck gated.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
