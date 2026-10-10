@@ -5,7 +5,7 @@ base05 val pass@1 0.0764 [0.014, 0.153] is below the pre-run 0.10 floor. Rule 5:
 only the range author (Kevin) may accept the number or revise the range — agents
 never write rulings. Until this lands, basecheck stays exit 1 and everything
 gated after it (grpocfg, grpo05) is blocked. The dedicated line was meant to
-stop re-dispatch but did not (29th dispatch: atk29).
+stop re-dispatch but did not (33rd dispatch: atk33; humandispatch TODO.md:135).
 
 ## Question
 Does the range author accept 0.0764 (task-clustered CI straddles the 0.10 floor)
@@ -27,12 +27,11 @@ absent; a committed ruling closes it.
   deleted, results/rulings/ missing): Plan step 0 (git restore .) required
   before the paste; his HEAD harness-synced 151566f->a9ea865->2468727(=w2).
   Verdict exit 1 each run (kevinruling{29,30,31}-verdict.log).
-- atk32 (2026-10-10): unchanged — ruling absent on disk, all refs, stashes
-  in /work and Kevin's repo; his checkout HEAD 2468727->2da001b (w1 merge),
-  tree still wiped (181 deletions), results/rulings/ missing; fresh verdict
-  exit 1, single FAIL base05 0.0764 [0.014, 0.153] < 0.10
-  (kevinruling32-verdict.log). 32nd dispatch; humandispatch ticket stands at
-  TODO.md:135. No agent-side path exists (rule 5).
+- atk32-33 (2026-10-10): unchanged — ruling absent on disk, all refs, stashes
+  in /work and Kevin's repo; his checkout HEAD 2468727->2da001b->d87b5f2 (w2
+  merge), tree still wiped (181 deletions); fresh verdicts exit 1, single FAIL
+  base05 0.0764 [0.014, 0.153] < 0.10 (kevinruling{32,33}-verdict.log).
+  No agent-side path exists (rule 5).
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
