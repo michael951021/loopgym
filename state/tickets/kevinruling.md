@@ -104,6 +104,18 @@ absent; a committed ruling closes it.
   cd681e9 (git log cd681e9..HEAD empty). Fresh real verdict exit 1, single
   base05 FAIL 0.0764 [0.014,0.153] <0.10, other rows PASS
   (kevinruling58-verdict.log). 58th dispatch; terminal wait on Kevin.
+- atk59-60 (2026-10-10): unchanged — ruling still absent (dir = .gitkeep;
+  `git log --all -- <ruling file>` = checker-mechanism commit cd681e9 only;
+  no stash; master == w2 HEAD; ListAgents = no live peer). Checker+tests
+  unchanged since cd681e9. Fresh verdict exit 1, single base05 FAIL
+  0.0764 [0.014, 0.153] < 0.10, other rows PASS
+  (kevinruling59/60-verdict.log). 60th dispatch; terminal wait on Kevin.
+- atk61 (2026-10-10): unchanged — ruling absent on all refs/stashes, no live
+  peer (ListAgents), checker+results unchanged since cd681e9 → no re-run of
+  the deterministic verdict (identical inputs; Stop-when forbids re-runs).
+  One-shot paste verified intact at :136-139 (earlier line refs 114-115/131
+  stale — file grew). Root-cause ticket (humandispatch) already queued at
+  TODO.md:135. 61st dispatch; terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
