@@ -23,10 +23,10 @@ Next-run state; evidence .agent-evidence/*.log.
   reward 1 iff tests>0 no fail/err/skip. `lgbox.py`: RUNNERS["http"] iff LOOPGYM_LGBOX_URL.
   `toy.py`: banana (first 20 tok ci), coinflip (seeded). `splits.py`: sha1%100, 101/9/27, 137/142.
   `loopgym.py`: Task(prompt/parse/reference/stub)+grade over verified records (diff all
-  M/A text + hidden-check dir; 11 loaded, 7 excl D/binary); elided bad-commit files
-  (diff -U0 ±3, 4500-chr/file, <=6k tok); ```path-block parse; grade = reply on bad
-  worktree, pristine V._run_once (file outside task.files -> 0). Known answer 42 @95s
-  (ref=1, stub=0, hidden-test edit=0).
+  M/A text + hidden-check dir; 12 loaded, 9 excl D/binary); elided bad-commit files
+  (diff -U0 ±3, 4500-chr/file, <=6k tok incl. the omitted-files note — unbounded it
+  broke 6k on a wide diff); ```path-block parse; grade = reply on bad worktree,
+  pristine V._run_once (outside task.files -> 0). ref=1, stub=0, hidden-test edit=0.
 
 ## lgbox
 - `lgbox serve` (axum): /run (setpgid, RLIMIT, Q->503), /health, /metrics; FC FakeVmm-only.
@@ -64,12 +64,15 @@ Next-run state; evidence .agent-evidence/*.log.
 ## Data
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files + 3 seeds.
 - `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; lazy import when file
-  absent at one commit (tests=0 -> error); 411f1c8 spec.py present -> top-level fine.
-- vb1: 12/12. vb2: 7/12 (cands 13-19 verified); next 20.
+  absent at one commit (tests=0 -> error).
+- vb1: 12/12. vb2: 8/12 (cands 13-20 verified); next 21 (draftlab-673042b).
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored);
   jaxlm: chi2 via stats.chi2.sf (no chisquare); FixedDrafter mid-p token.
   harness: sched.py via runpy (name clash); empty logs/*.jsonl stops grep stdin;
-  rmtree git fixture (worktree reused 3x/side).
+  rmtree git fixture (worktree reused 3x/side). ab.py: setup_tree always commits
+  (HEAD^ = base); binds 3-arg (exp,wt,task); fixtures under ROOT/projects.
+  25ebe03: bad..good spans 5 commits -> 188-file diff (polyglot fixtures);
+  _budgeted now budgets the omitted-files note.
   NOTES.md cands: assert completion claim, not bare numbers (pre-reg lines may
   contain e.g. "42 cells" cost estimate at bad commit).
 

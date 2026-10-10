@@ -81,11 +81,8 @@ class Task:
             body = "[new file: does not exist at this commit; create it if the fix needs it]" \
                 if p in self.added else _elide(self, p)
             blocks.append((p, body))
-        shown, others = _budgeted(head, blocks)
-        user = head + "\n" + "\n".join(shown)
-        if others:
-            user += "\n\nOther changed files (not shown for length): " + ", ".join(others)
-        user += "\n\n" + INSTRUCTION
+        shown, note = _budgeted(head, blocks)
+        user = head + "\n" + "\n".join(shown) + note + "\n\n" + INSTRUCTION
         return [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]
 
     def parse(self, reply):
@@ -93,7 +90,8 @@ class Task:
 
 
 def _budgeted(head, blocks):
-    """Order blocks to fit BUDGET_TOKENS; return (shown_block_strings, omitted_paths)."""
+    """Order blocks to fit BUDGET_TOKENS; return (shown_block_strings, omitted_note).
+    The omitted note is budgeted too: a wide diff lists many long paths there."""
     target = (BUDGET_TOKENS - 200) * CHARS_PER_TOKEN  # slack for instruction + separators
     rem = target - len(head) - len(INSTRUCTION)
     shown, others = [], []
@@ -109,7 +107,21 @@ def _budgeted(head, blocks):
     while len(head) + sum(len(s) for s in shown) + len(INSTRUCTION) > target and shown:
         others.append(blocks[len(shown)][0])
         shown.pop()
-    return shown, others
+    note = ""
+    if others:
+        # +25 reserves room for the "(and N more)" suffix; base overcounts separators
+        base = len(head) + 1 + sum(len(s) for s in shown) + len(shown) + 2 + len(INSTRUCTION)
+        pre = "\n\nOther changed files (not shown for length): "
+        kept, line = [others[0]], others[0]
+        for p in others[1:]:
+            if base + len(pre) + len(line) + 2 + len(p) + 25 > target:
+                break
+            line += ", " + p
+            kept.append(p)
+        if len(kept) < len(others):
+            line += f" (and {len(others) - len(kept)} more)"
+        note = pre + line
+    return shown, note
 
 
 def _changed_ranges(task, path, ctx):
