@@ -25,7 +25,7 @@ NOTES.md, and stop.
 - [x] **Check draftlab-b7c6e4f-1f173d1** — draftlab b7c6e4f..1f173d1, files NOTES.md: spec: fix lossless-sampling bias (shared PRNG key) + drafter state leak; add m>=1 chi-square tests. Verdict: verified (bad 0/3, good 3/3)
 - [x] **Check draftlab-b7c6e4f-e2004eb** — draftlab b7c6e4f..e2004eb, files NOTES.md: spec fix: structural NGramDrafter rollback sync + empty-prompt guard. Verdict: verified (bad 0/3, good 3/3)
 - [x] **Check draftlab-411f1c8-e2004eb** — draftlab 411f1c8..e2004eb, files NOTES.md, draftlab/jaxlm/spec.py: spec fix: structural NGramDrafter rollback sync + empty-prompt guard. Verdict: verified (bad 0/3, good 3/3)
-- [ ] **Check harness-5279ea0-429f2af** — harness 5279ea0..429f2af, files agent, ctxreport.py, fleet.py, tests/fake_claude.py: Reports: what became of each task, and why unfinished ones did not finish. Verdict: (fill in)
+- [x] **Check harness-5279ea0-429f2af** — harness 5279ea0..429f2af, files agent, ctxreport.py, fleet.py, tests/fake_claude.py: Reports: what became of each task, and why unfinished ones did not finish. Verdict: verified (bad 0/3, good 3/3)
 - [ ] **Check draftlab-2c54450-44cfa02** — draftlab 2c54450..44cfa02, files NOTES.md: report: REPORT.md + README.md; check_report exit 0; fix check temp-filter bug + ruff lint in …. Verdict: (fill in)
 - [ ] **Check draftlab-443c256-2c54450** — draftlab 443c256..2c54450, files tools/check_sweep_batch3.py: sweep batch3: T=0.7 grid complete (42 cells); recalibrate model-drafter gates; check PASS. Verdict: (fill in)
 - [ ] **Check draftlab-f0371d7-2c54450** — draftlab f0371d7..2c54450, files NOTES.md: sweep batch3: T=0.7 grid complete (42 cells); recalibrate model-drafter gates; check PASS. Verdict: (fill in)
