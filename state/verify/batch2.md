@@ -28,7 +28,7 @@ NOTES.md, and stop.
 - [x] **Check harness-5279ea0-429f2af** — harness 5279ea0..429f2af, files agent, ctxreport.py, fleet.py, tests/fake_claude.py: Reports: what became of each task, and why unfinished ones did not finish. Verdict: verified (bad 0/3, good 3/3)
 - [x] **Check draftlab-2c54450-44cfa02** — draftlab 2c54450..44cfa02, files NOTES.md: report: REPORT.md + README.md; check_report exit 0; fix check temp-filter bug + ruff lint in …. Verdict: verified (bad 0/3, good 3/3)
 - [x] **Check draftlab-443c256-2c54450** — draftlab 443c256..2c54450, files tools/check_sweep_batch3.py: sweep batch3: T=0.7 grid complete (42 cells); recalibrate model-drafter gates; check PASS. Verdict: verified (bad 0/3, good 3/3)
-- [ ] **Check draftlab-f0371d7-2c54450** — draftlab f0371d7..2c54450, files NOTES.md: sweep batch3: T=0.7 grid complete (42 cells); recalibrate model-drafter gates; check PASS. Verdict: (fill in)
+- [x] **Check draftlab-f0371d7-2c54450** — draftlab f0371d7..2c54450, files NOTES.md: sweep batch3: T=0.7 grid complete (42 cells); recalibrate model-drafter gates; check PASS. Verdict: verified (bad 0/3, good 3/3)
 - [ ] **Check harness-25ebe03-4b0c866** — harness 25ebe03..4b0c866, files lib/ab.py: Ticket replays (ab/ticket-review): tasks may live in other projects (task project/base/scratch) and replay a real …. Verdict: (fill in)
 - [ ] **Check draftlab-673042b-5bf9b0d** — draftlab 673042b..5bf9b0d, files NOTES.md: distill: 1200-step run (val KL 30.6% drop), alpha eval, teacher-init control. Verdict: (fill in)
 - [ ] **Check draftlab-f67aa44-181ed9d** — draftlab f67aa44..181ed9d, files NOTES.md, draftlab/eval/alpha.py: alpha: fix LoRA-adapter load + JAX steady-state cost ratio c. Verdict: (fill in)
