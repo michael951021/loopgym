@@ -53,10 +53,12 @@ Next-run state; evidence .agent-evidence/*.log.
 - `dist.py` FSDP2: fully_shard, full_state_dict DTensors (.full_tensor()), grads AVG, no 1/W.
 - `ds.py` ZeRO-3 (0.19.7, lazy): ds_zero3.json bf16 stage3; micro=b*group;
   CPU: compatible_ops[deepspeed_shm_comm]=False (no ninja).
-- Toy gates: toy_{banana,null}.toml 60st r16 B4 G8, PROMPT "Name a berry." (base 0.109;
-  pilot 0.125->0.656/10st); fresh jobs toybanana3/toynull3 (stale fruit-prompt ckpts wiped;
-  orphaned-ckpt guard 0fb58c0). Known answers: banana 0-4 <0.2 -> 55-59 >0.8; null slope CI
-  contains 0. toyok after both: toy_check 0 -> toy.json.
+- Toy gates: 60st r16 B4 G8 "Name a berry." Fresh toybanana3/toynull3 landed;
+  toy_check exit 0 (toyok.log). Banana 0.148 (0-4) -> 1.000 (55-59): known answer
+  <0.2 -> >0.8 PASS; slope 0.01055 [0.00702,0.01384].
+- null slope -0.00042 [-0.00166,0.00078] contains 0: known answer PASS.
+  results/toy.json committed (keys banana_early/late, *_slope_ci, null_slope_ci);
+  check_results --only toy 3/3 PASS. Trainer gate passed; real GRPO may proceed.
 - `tools/fetch_src.sh`: vllm/deepspeed/trl sources -> .tools/src/ (rule 6).
 
 ## Data
