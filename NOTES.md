@@ -63,11 +63,10 @@ Next-run state; logs in .agent-evidence/.
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files.
 - `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; lazy import when file
   absent at one commit (tests=0 -> error).
-- vb1/vb2 done 24/24 (checked; gate >= 30% passed). vb3: batch3 = 16 steps
-  (cands 25-40, score order); 4/16 done: harness-bc2cdd8, draftlab-35a5d46-1e9f5d3,
-  draftlab-bea1633-9b213ef, draftlab-7074368-07efa48 all verified (bad 0/3, good
-  3/3); one per run; next = draftlab-8e65e54-ea27462; vb3 milestone still unchecked.
+- vb1/vb2 24/24 (gate >= 30% passed). vb3: 16 steps, 5/16 done, all verified
+  (bad 0/3, good 3/3); next = draftlab-lora; milestone unchecked.
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored).
   jaxlm: chi2 via stats.chi2.sf. NOTES.md cands: assert the completion claim, not
   bare numbers (bad-commit lines may hold cost estimates).
   harness cands: find ROOT from sys.path, fabricate a git project under ROOT/projects.
+  web cands: no npm; extract JS KPI block from .tsx, run node -e.
