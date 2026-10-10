@@ -5,7 +5,8 @@ base05 val pass@1 0.0764 [0.014, 0.153] is below the pre-run 0.10 floor. Rule 5:
 only the range author (Kevin) may accept the number or revise the range — agents
 never write rulings. Until this lands, basecheck stays exit 1 and everything
 gated after it (grpocfg, grpo05) is blocked. The dedicated line was meant to
-stop re-dispatch but did not (w1's 26th: w1 atk26; humandispatch TODO.md:135).
+stop re-dispatch but did not (humandispatch; host dispatcher never calls
+sched_guard — root-cause ticket: hostgate, w2 working).
 
 ## Question
 Does the range author accept 0.0764 (task-clustered CI straddles the 0.10 floor)
@@ -13,250 +14,25 @@ or revise the pre-run range? Open iff results/rulings/base05_val.ruling.json is
 absent; a committed ruling closes it.
 
 ## Evidence (all observed, no guesses)
-- atk13-28 (2026-10-10): ruling absent on disk (results/rulings/ = .gitkeep
-  only), all refs (only cd681e9 touched the path), no stash, no remote;
-  checker unchanged since cd681e9 (check_ruling, tools/check_results.py:61 —
-  schema only; author VALUE unchecked, identity by rule 5 + repo access);
-  verdict exit 1 each run, single FAIL base05
-  (.agent-evidence/kevinruling{13..28}-verdict.log). Ruling channel E2E on a
-  copy of real results/ (atk5/19/27): none->exit 1, verbatim accept->exit 0
-  all rows PASS, revise w/ 0.0764 in range->exit 0, out of range->exit 1
-  (fail closed) (kevinruling{5,19,27}-accept-e2e.log).
-- atk29-31 (2026-10-10): still absent (both repos: no ref/stash/remote).
-  Kevin's checkout (projects/loopgym) worktree WIPED (all tracked files
-  deleted, results/rulings/ missing): Plan step 0 (git restore .) required
-  before the paste; his HEAD harness-synced 151566f->a9ea865->2468727(=w2).
-  Verdict exit 1 each run (kevinruling{29,30,31}-verdict.log).
-- atk32-34 (2026-10-10): unchanged — ruling absent on disk, all refs, stashes
-  in /work and Kevin's repo; his checkout HEAD 2da001b->d87b5f2->969029c (w2
-  HEAD), tree still wiped (181 deletions); fresh verdicts exit 1, single FAIL
-  base05 0.0764 [0.014, 0.153] < 0.10 (kevinruling{32..34}-verdict.log).
-  No agent-side path exists (rule 5).
-- atk35-43 (2026-10-10): unchanged across 9 dispatches — ruling absent
-  (dir = .gitkeep; the bound host .git IS /work's .git, so the single-repo
-  check is exhaustive: no commit/stash/reflog of Kevin's touches the file;
-  reflog = harness syncs only). Fresh verdicts exit 1, single FAIL base05
-  0.0764 [0.014, 0.153] < 0.10 (kevinruling{35..43}-verdict.log). atk43:
-  this ticket's verbatim printf bytes re-verified against the real
-  check_ruling in memory — accept -> (True); revise w/ 0.0764 in
-  [0.05, 0.15] -> (True); malformed (empty rationale, bad decision) fails
-  closed. Kevin's paste one-shot valid; no agent-side step remains.
-- atk44 (2026-10-10): unchanged — `git log --all -- <ruling file>` EMPTY
-  (no commit ever touched the file; cd681e9 added only the dir's .gitkeep),
-  dir = .gitkeep, reflog since atk43 = harness reset/merge only. Fresh
-  verdict exit 1, single FAIL base05 (kevinruling44-verdict.log). 44th
-  dispatch on this human-only line; terminal wait on Kevin.
-- atk46 (2026-10-10): unchanged — `git log --all -- <ruling file>` still
-  empty, dir = .gitkeep; checker untouched since cd681e9 (git log
-  cd681e9..HEAD on tools/check_results.py + test = empty); ticket printf:73
-  bytes re-verified in /tmp vs current check_ruling: accept -> (True),
-  bad decision + revise-out fail closed. Fresh verdict exit 1, single FAIL
-  base05 0.0764 [0.014, 0.153] < 0.10 (kevinruling46-verdict.log). 46th
-  dispatch; terminal wait on Kevin.
-- atk47 (2026-10-10): unchanged — `git log --all -- <ruling file>` empty,
-  dir = .gitkeep, checker untouched since cd681e9. Fresh verdict exit 1,
-  single FAIL base05 0.0764 [0.014, 0.153] < 0.10
-  (kevinruling47-verdict.log). NEW: sandbox /opt/agent = bridge.py + hooks
-  only — no dispatcher code or skip-marker support in the sandbox, so the
-  humandispatch fix (TODO.md:135) is Kevin-side only; reconfirms no
-  agent-side path. 47th dispatch; terminal wait on Kevin.
-- atk48 (2026-10-10): unchanged — `git log --all -- <ruling file>` empty,
-  dir = .gitkeep, checker untouched since cd681e9 (git log cd681e9..HEAD on
-  checker + test empty). Fresh verdict exit 1, single FAIL base05 0.0764
-  [0.014, 0.153] < 0.10 (kevinruling48-verdict.log). Full bwrap mount audit
-  (parent process args): writable = w2 worktree + shared project dirs
-  (data/models/ckpt/runs/.tools/.venv) + host .git + /home/agent; read-only
-  = bridge.py, mergelines.py, hooks, mcp, prompts, gh_token. No dispatcher
-  code, config or state inside the sandbox; the task arrives via a host-set
-  AGENT_TASK env. Zero agent-side levers to stop re-dispatch — the
-  humandispatch fix (TODO.md:135) is Kevin-side only. 48th dispatch;
-  terminal wait on Kevin.
-- atk49 (2026-10-10): unchanged — `git log --all -- <ruling file>` empty,
-  dir = .gitkeep, reflog/stash since atk48 = harness syncs only. /opt/agent
-  inspected: bridge.py is an Ollama unix-socket forwarder only — no
-  notification or dispatcher channel in the sandbox. Fresh verdict exit 1,
-  single FAIL base05 0.0764 [0.014, 0.153] < 0.10
-  (kevinruling49-verdict.log). 49th dispatch; terminal wait on Kevin.
-- atk50 (2026-10-10): unchanged — `git log --all -- <ruling file>` empty,
-  no stash, dir = .gitkeep; ticket's one-shot paste intact and E2E-verified.
-  Fresh verdict exit 1, single FAIL base05 0.0764 [0.014, 0.153] < 0.10
-  (kevinruling50-verdict.log); checker regression tests 11/11 pass
-  (kevinruling50-checker-tests.log) — ruling channel ready. 50th dispatch;
-  terminal wait on Kevin.
-- atk56 (2026-10-10): ruling still absent (dir = .gitkeep; no commit/stash;
-  ListAgents = no live peer to message Kevin). Fresh this run: real verdict
-  exit 1, single base05 FAIL 0.0764 [0.014,0.153] <0.10
-  (kevinruling56-verdict.log); E2E accept ruling on a copy of real results/
-  flips the checker to exit 0 (kevinruling56-accept-e2e.log); checker tests
-  11/11 (kevinruling56-checker-tests.log). No dispatcher code in repo (lib/
-  absent, no AGENT_TASK handler) — the re-dispatch lever is host-side; the
-  "kevin:" title prefix is the ready marker for the humandispatch fix
-  (TODO.md:135, Kevin-side). 56th dispatch; terminal wait on Kevin.
-- w1 atk4 (2026-10-10): unchanged — ruling never committed
-  (for-each-ref newest = harness commits; no stash/remote), Kevin's checkout
-  HEAD synced to master, tree view = known mount artifact (only his .git
-  bound). No live peer (ListAgents); /opt/agent re-audited: prompts =
-  agent-run prompts only, line selection is host-side. Gate exit 1; fresh
-  verdict exit 1, single base05 FAIL 0.0764 [0.014, 0.153] < 0.10, other
-  rows PASS (kevinruling-w1a4-verdict.log). Terminal wait on Kevin.
-- atk57 (2026-10-10): unchanged — ruling never committed
-  (`git log --all -- <file>` empty), dir = .gitkeep, no stash/remote,
-  master not ahead of w2; ListAgents: no live peer. Fresh real verdict
-  exit 1, single base05 FAIL 0.0764 [0.014,0.153] <0.10, all other
-  baseline rows PASS (kevinruling57-verdict.log). 57th dispatch;
-  terminal wait on Kevin.
-- atk58 (2026-10-10): unchanged — ruling never committed
-  (`git log --all -- <file>` empty; dir = .gitkeep; no stash/remote; master
-  = w2 HEAD da7a0ca); ListAgents: no live peer. Checker+test unchanged since
-  cd681e9 (git log cd681e9..HEAD empty). Fresh real verdict exit 1, single
-  base05 FAIL 0.0764 [0.014,0.153] <0.10, other rows PASS
-  (kevinruling58-verdict.log). 58th dispatch; terminal wait on Kevin.
-- atk59-60 (2026-10-10): unchanged — ruling still absent (dir = .gitkeep;
-  `git log --all -- <ruling file>` = checker-mechanism commit cd681e9 only;
-  no stash; master == w2 HEAD; ListAgents = no live peer). Checker+tests
-  unchanged since cd681e9. Fresh verdict exit 1, single base05 FAIL
-  0.0764 [0.014, 0.153] < 0.10, other rows PASS
-  (kevinruling59/60-verdict.log). 60th dispatch; terminal wait on Kevin.
-- atk61 (2026-10-10): unchanged — ruling absent on all refs/stashes, no live
-  peer (ListAgents), checker+results unchanged since cd681e9 → no re-run of
-  the deterministic verdict (identical inputs; Stop-when forbids re-runs).
-  One-shot paste verified intact at :136-139 (earlier line refs 114-115/131
-  stale — file grew). Root-cause ticket (humandispatch) already queued at
-  TODO.md:135. 61st dispatch; terminal wait on Kevin.
-- atk72 (2026-10-10): unchanged — ruling never committed
-  (`git log --all -- <file>` empty), dir = .gitkeep, checker+tests unchanged
-  since cd681e9. Fresh verdict exit 1, single base05 FAIL 0.0764
-  [0.014, 0.153] < 0.10 (kevinruling72-verdict.log). NEW: the CURRENT file's
-  paste (line 143; file grew past atk61's :136-139) re-verified E2E on a copy
-  of real results/ — exact bytes -> checker exit 0, all rows PASS, row cites
-  the ruling (kevinruling72-e2e-accept.log); checker tests 11/11
-  (kevinruling72-checker-tests.log). Paste valid as of this file state; no
-  agent-side step remains. 72nd dispatch; terminal wait on Kevin.
-- w1 2026-10-10 (parallel dispatch with w2 atk73): unchanged — ruling absent
-  on all refs (git log --all = cd681e9 mechanism only; no stash/remote).
-  Gate now shipped: sched_guard.py --line kevinruling -> exit 1 (skip until
-  the ruling file exists); host dispatcher still dispatching -> wiring is
-  Kevin-side (humandispatch line). Fresh verdict exit 1, single base05 FAIL
-  0.0764 [0.014, 0.153] < 0.10, other rows PASS. Paste intact at :152.
-  Terminal wait on Kevin.
-- Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
-- Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
-- w1 atk5 (2026-10-10): unchanged — ruling absent on all refs/stash/remotes
-  (master == 796f533, no fetch delta); ListAgents: no live peer (same as atk4).
-  Gate exit 1 (skip); fresh verdict exit 1, single base05 FAIL 0.0764
-  [0.014, 0.153] < 0.10, other rows PASS (kevinruling-w1a5-verdict.log).
-  humandispatch ticket (TODO:135) already [x]: in-repo gate works, only the
-  host-side dispatcher wiring is missing (Kevin's). Paste intact. Terminal
-  wait on Kevin.
-- w1 atk9 (2026-10-10): unchanged — ruling never committed (for-each-ref:
-  no ref beyond harness/job commits; no stash/remote; master = w1 HEAD);
-  ListAgents: no live peer; results/rulings/ empty. Fresh verdict exit 1,
-  single base05 FAIL 0.0764 [0.014, 0.153] < 0.10, other rows PASS
-  (kevinruling-w1a9-verdict.log). Paste intact at :173-174. No agent-side
-  step remains (rule 5); re-dispatch root cause ticketed (hostgate,
-  TODO:137). Terminal wait on Kevin.
-- w1 atk10 (2026-10-10): unchanged — ruling absent everywhere reachable.
-  NEW (different approach): checked Kevin's host checkout directly —
-  /work/.git is a gitfile into /home/kevin/.../projects/loopgym/.git/
-  worktrees/w1: SAME object store (15 refs / 379 commits both sides, no
-  stash), so no Kevin-side private state exists and the single-repo
-  absence check is exhaustive. His worktree files are not bound into the
-  sandbox (only his .git: status shows all files deleted); find over
-  /home /work /tmp /var/tmp finds no ruling file. No live peer
-  (ListAgents). Gate exit 1; fresh verdict exit 1, single base05 FAIL
-  0.0764 [0.014,0.153] <0.10, other rows PASS
-  (kevinruling-w1a10-verdict.log). Paste now at :180-181 (file grew).
-  10th w1 dispatch; terminal wait on Kevin.
-- w1 atk15 (2026-10-10): unchanged — ruling still absent (rulings/ =
-  .gitkeep only; no ref/stash; master = w1 HEAD). NEW (different approach):
-  paste re-validated end-to-end on current code via scratch mirror +
-  checker --results-dir: accept paste verbatim -> exit 0, all 5 baseline
-  rows PASS (kr15-e2e.log); malformed ruling (no rationale) -> exit 1, so
-  fail-closed holds and the E2E is not vacuous; paste rationale matches
-  results/eval/base05_val.json exactly (0.0764 [0.014, 0.153]);
-  tests/test_check_results.py 11/11. Real checker exit 1, single base05
-  FAIL (w1a15-verdict.log). 15th dispatch; only Kevin's paste (Plan step 1)
-  remains, rule 5; terminal wait on Kevin.
-- w1 atk16 (2026-10-10): unchanged — dir = .gitkeep, `git log --all --
-  <ruling file>` empty (0 commits ever), master = w1 HEAD (no new commits);
-  gate exit 1; fresh verdict exit 1, single FAIL base05 0.0764 [0.014, 0.153]
-  < 0.10, others PASS (w1a16-verdict.log). Checker/tests unchanged since
-  cd681e9, so atk15 E2E (paste verbatim -> exit 0, kr15-e2e.log) still valid;
-  no re-E2E. Paste at :202-204. No agent-side step remains (rule 5);
-  terminal wait on Kevin.
-- w1 atk19 (2026-10-10): unchanged — ruling still absent (rulings/ =
-  .gitkeep; `git log --all -- <ruling file>` empty; master = 51e6f76 =
-  atk18 HEAD, reflog = harness syncs only; Kevin's host .git = same
-  object store, HEAD identical, his worktree files not bound; ListAgents:
-  no live peer). Checker+tests unchanged since cd681e9. Gate exit 1;
-  fresh verdict exit 1, single base05 FAIL 0.0764 [0.014, 0.153] <0.10,
-  others PASS (w1a19-verdict.log). Paste at Plan step 1 (:209) valid.
-  19th w1 dispatch; terminal wait on Kevin.
-- w1 atk22 (2026-10-10): unchanged — ruling still absent (dir = .gitkeep;
-  `git log --all -- <file>` empty; no stash/remote; ListAgents: no live
-  peer). Verdict inputs unchanged since cd681e9 (fff19b8 added only
-  results/loopgym_v0.json, which the checker does not load: it reads
-  results/eval/*.json, toy.json, bench files) -> w1a21 verdict holds
-  (exit 1, single base05 FAIL 0.0764 [0.014,0.153] <0.10); no re-run
-  (Stop-when). Gate exit 1. Paste intact at Plan step 1. 22nd w1
-  dispatch; terminal wait on Kevin.
-- w1 atk23 (2026-10-10): unchanged — ruling never committed
-  (`git log --all -- <file>` empty; no stash/remote; rulings/ = .gitkeep);
-  results/ since cd681e9 = fff19b8 only (loopgym_v0.json + DATASET.md,
-  not loaded by checker) -> w1a21 verdict holds, no re-run; gate exit 1
-  (line 133); ListAgents: no live peer to message. Terminal wait on Kevin
-  (Plan step 1); re-dispatch root cause ticketed (hostgate, TODO:137,
-  w2 active).
-- w1 atk25 (2026-10-10): unchanged — ruling never committed
-  (`git log --all -- <file>` empty; rulings/ = .gitkeep; no stash/remote);
-  checker/tests/results all unchanged since cd681e9 (git log empty) ->
-  w1a24 verdict holds (exit 1, single base05 FAIL 0.0764 [0.014,0.153]
-  <0.10, others PASS), no re-run (Stop-when); gate exit 1 (line 133);
-  ListAgents: no live peer. NEW (different approach): TODO:133 pointed at
-  rangerule.md, whose accept form was wrapped over 3 lines — a verbatim
-  copy would be malformed JSON (fails closed). Both tickets now carry the
-  byte-identical single-line form (diff-verified) re-checked in memory
-  against check_ruling: accept -> True, revise w/ 0.0764 in [0.05,0.15]
-  -> True, out-of-range/no-rationale/bad-decision -> False. Kevin's paste
-  is now copy-safe from either file. Terminal wait on Kevin.
-
-- w1 atk26 (2026-10-10): unchanged — ruling still absent (dir = .gitkeep;
-  `git log --all -- <file>` = cd681e9 mechanism only; no stash/peer;
-  /work/.git = Kevin's host object store, so check is exhaustive).
-  Checker+tests+results/eval unchanged since cd681e9 (fff19b8 added only
-  loopgym_v0.json, not loaded by checker). Fresh verdict exit 1, single
-  base05 FAIL 0.0764 [0.014, 0.153] < 0.10, others PASS
-  (w1a26-verdict.log). Paste bytes re-verified in memory vs real
-  check_ruling: accept True, revise-in True, revise-out/no-rationale/
-  bad-decision False (fail closed). Gate exit 1 (line 133). No agent-side
-  step (rule 5); terminal wait: Kevin's paste (Plan step 1) + hostgate
-  (w2 active).
-
-- w1 atk28 (2026-10-10): unchanged — ruling still absent (rulings/ =
-  .gitkeep; `git log --all -- <file>` empty; no stash/remote; /work/.git =
-  Kevin's host object store, so check is exhaustive). Checker +
-  results/eval byte-identical since cd681e9 (since then only new hidden
-  test files, not loaded by checker) -> w1a26/27 verdict stands; fresh
-  checker exit 1, single base05 FAIL 0.0764 [0.014, 0.153] < 0.10, others
-  PASS (w1a28-verdict.log). Paste re-verified in memory vs real
-  check_ruling(r, p=0.0764): accept True, revise-in True, revise-out /
-  no-rationale / bad-decision False (fail closed). NEW E2E: temp results
-  copy + paste ruling -> checker exit 0, all 5 baselines PASS. w2's
-  hostgate ticket + host wiring recipe merged to master; Kevin's host step
-  still pending (gate hostgate exit 1, human-only). No agent-side step
-  (rule 5); terminal wait: Kevin's paste (Plan step 1).
-- atk30 (attempt 5): ruling still absent; checker+eval byte-identical
-  since cd681e9 -> verdict holds; fresh exit 1, single base05 FAIL
-  0.0764 [0.014, 0.153] < 0.10, others PASS (w1a30-verdict.log);
-  `sched_guard.py --line kevinruling` exit 1 (skip until ruling exists);
-  16/16 sched_guard+check_results pass. TODO.md: humandispatch now
-  checked (sandbox scheduler fix landed); hostgate (w2) still open. No
-  agent-side step (rule 5); terminal wait: Kevin's paste (Plan step 1).
-- atk31 (attempt 6): ruling still absent (disk, all refs, stash); fresh
-  exit 1, single base05 FAIL 0.0764 [0.014, 0.153] < 0.10, others PASS
-  (w1a31-verdict.log); `sched_guard.py --line kevinruling` exit 1; 16/16
-  sched_guard+check_results pass. No agent-side step (rule 5); terminal
-  wait: Kevin's paste (Plan step 1) + hostgate apply (w2).
+- Ruling absent everywhere (re-verified every attempt; latest w1 atk35, 2026-10-10,
+  master unchanged since dcb59cf so atk34's E2E/verdict holds):
+  results/rulings/ = .gitkeep only; `git log --all -- <ruling file>` empty (no
+  commit ever touched it — cd681e9 added only the .gitkeep); no stash; reflog =
+  harness syncs only. The bound host .git IS /work's .git, so the single-repo
+  check is exhaustive.
+- Checker + eval byte-identical since cd681e9, so the atk28 E2E (temp copy of
+  real results/ + checker `--results-dir`) still holds: none -> exit 1; accept
+  verbatim -> exit 0, all baselines PASS; revise with 0.0764 in range -> exit 0;
+  out of range / malformed (empty rationale, bad decision) -> exit 1 (fail
+  closed). Logs: .agent-evidence/kevinruling{5,19,27,56,72}-accept-e2e.log,
+  *-checker-tests.log (11/11).
+- Verdict, fresh each run: exit 1, single FAIL base05 0.0764 [0.014, 0.153]
+  < 0.10, other rows PASS (.agent-evidence/*-verdict.log; latest w1a34).
+- atk35 correction: the "wiped tree" in Kevin's checkout was a sandbox mount
+  artifact (only his .git is bound here). atk47: sandbox /opt/agent = bridge.py
+  + hooks only — no dispatcher code in the sandbox.
+- Attempt history (40+ re-dispatches, all same verdict): git log
+  -- state/tickets/kevinruling.md.
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and

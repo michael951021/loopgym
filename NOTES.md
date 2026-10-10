@@ -30,6 +30,11 @@
   checker+eval unchanged since cd681e9; fresh exit 1, base05 FAIL 0.0764
   [0.014,0.153] <0.10 (w1a32-verdict.log); gate exit 1; 16/16 pass;
   paste E2E re-verified (fail-closed). Kevin: paste + hostgate (w2).
+  (paste: kevinruling.md Plan step 1, :58). attempt10 (w1a35) terminal wait:
+  ruling absent (disk+all refs), gate exit 1, master unchanged since dcb59cf
+  -> atk34 verification holds (paste->exit 0, 5/5 PASS; verdict exit 1,
+  base05 0.0764 [0.014,0.153] <0.10; 16/16; w1a34-*.log). No agent-side
+  step; per-attempt cost is status re-check only. Kevin: paste + hostgate (w2).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
