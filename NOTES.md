@@ -1,6 +1,6 @@
 # Notes
 
-Next-run state; evidence .agent-evidence/*.log.
+Next-run state; logs in .agent-evidence/.
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: never `rm DIR`/find -delete.
@@ -9,24 +9,14 @@ Next-run state; evidence .agent-evidence/*.log.
 - torch 2.14 FSDP2: fully_shard auto-inits env://; rank() pre-init 0.
 - env.grade default timeout=30 < slowest loopgym check: pass cfg.timeout=120.
 
-## Foundations
-- `make bootstrap`; `make check` = ruff+pytest+cargo+lints.
-
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range passes only
-  via a range-author ruling (malformed fails). base05 0.0764 [0.014,0.153] < 0.10 -> exit 1,
+  via range-author ruling (malformed fails closed). base05 0.0764 [0.014,0.153] < 0.10 -> exit 1,
   10 causes out. HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json
-  (7th dispatch did not stop re-dispatch); rangerule+basecheck gated to kevin's ruling.
-- `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
-  passes only via range-author ruling (malformed fails closed).
-  base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
-  results/rulings/base05_val.ruling.json (forms: state/tickets/kevinruling.md).
-  atk5 E2E (checker cd681e9, unchanged): none->1, accept->0,
-  revise-in->0, revise-out->1. atk8: ruling absent on all refs (master
-  6a6c708), verdict exit 1 (kevinruling8-verdict.log); 8th dispatch; ticket
-  humandispatch: kevin stops dispatching human-only lines.
+  (forms: state/tickets/kevinruling.md); 8 dispatches did not stop; ticket humandispatch.
+  atk5 E2E (cd681e9): none->1, accept->0, revise-in->0, revise-out->1.
   rangerule records verdict after kevinruling; basecheck gated exit 0.
 
 ## Models
@@ -71,11 +61,11 @@ Next-run state; evidence .agent-evidence/*.log.
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files.
 - `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; lazy import when file
   absent at one commit (tests=0 -> error).
-- vb1 12/12, vb2 12/12 (checked; yield 24/24 >= 30%). vb3: batch3 = 16 steps
-  (cands 25-40, score order); candidate 25 harness-bc2cdd8-97ddf39 verified (bad 0/3,
-  good 3/3); next = candidate 26, one per run; vb3 milestone line still unchecked.
+- vb1/vb2 done 24/24 (checked; gate >= 30% passed). vb3: batch3 = 16 steps
+  (cands 25-40, score order); 2/16 done: 25 harness-bc2cdd8 + 26 draftlab-35a5d46-1e9f5d3
+  both verified (bad 0/3, good 3/3); next = draftlab-bea1633-9b213ef, one per run;
+  vb3 milestone line still unchecked.
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored).
-  jaxlm: chi2 via stats.chi2.sf; FixedDrafter mid-p token. NOTES.md cands: assert
-  the completion claim, not bare numbers (bad-commit lines may hold cost estimates).
-  alpha cands: tiny HF Qwen2 fixture + LoraConfig adapter in tmp; spy M.prefill shapes.
+  jaxlm: chi2 via stats.chi2.sf. NOTES.md cands: assert the completion claim, not
+  bare numbers (bad-commit lines may hold cost estimates).
   harness cands: find ROOT from sys.path, fabricate a git project under ROOT/projects.
