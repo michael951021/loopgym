@@ -20,8 +20,8 @@ Next-run state; evidence .agent-evidence/*.log.
   base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
   results/rulings/base05_val.ruling.json (forms: state/tickets/kevinruling.md).
   atk5 E2E (checker cd681e9, unchanged): none->1, accept->0,
-  revise-in->0, revise-out->1. atk8: ruling absent on all refs (master
-  6a6c708), verdict exit 1 (kevinruling8-verdict.log); 8th dispatch; ticket
+  revise-in->0, revise-out->1. atk9: ruling absent on all refs (master
+  a191021==HEAD), verdict exit 1 (kevinruling9-verdict.log); 9th dispatch;
   humandispatch: kevin stops dispatching human-only lines.
   rangerule records verdict after kevinruling; basecheck gated exit 0.
 
