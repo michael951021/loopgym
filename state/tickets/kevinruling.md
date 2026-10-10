@@ -14,11 +14,12 @@ or revise the pre-run range? Open iff results/rulings/base05_val.ruling.json is
 absent; a committed ruling closes it.
 
 ## Evidence (all observed, no guesses)
-- Ruling absent everywhere (re-verified every attempt; latest w1 atk21,
-  2026-10-10: all three checks fresh — guard `--line kevinruling` exit 1,
-  verdict exit 1, paste E2E exit 0 5/5 PASS (.agent-evidence/atk21-*.log) —
-  plus disk (.gitkeep only) + git log --all + stash + remotes empty; atk17
-  re-verified the Plan-1 paste against current check_ruling
+- Ruling absent everywhere (re-verified every attempt; latest w1 atk22,
+  2026-10-10: guard `--line kevinruling` exit 1, verdict exit 1, disk
+  (.gitkeep only) + `git log --all` on the ruling file empty — all fresh,
+  atk22-verdict.log; paste E2E exit 0 5/5 holds (code unchanged,
+  .agent-evidence/atk21-*.log) — plus git log --all + stash + remotes
+  empty; atk17 re-verified the Plan-1 paste against current check_ruling
   (tools/check_results.py:61: accept form passes); checker cd681e9 / guard
   83475c8 unchanged. GOTCHA: sched_guard --line takes the id, not the lineno
   (`--line 133` -> exit 2); `git log --all -- <ruling file>` empty (no commit
