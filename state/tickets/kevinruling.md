@@ -5,7 +5,7 @@ base05 val pass@1 0.0764 [0.014, 0.153] is below the pre-run 0.10 floor. Rule 5:
 only the range author (Kevin) may accept the number or revise the range — agents
 never write rulings. Until this lands, basecheck stays exit 1 and everything
 gated after it (grpocfg, grpo05) is blocked. This dedicated line stops agents
-being re-dispatched to the human-only part (second dispatch: atk2).
+being re-dispatched to the human-only part (6th dispatch: atk6).
 
 ## Question
 Does the range author accept 0.0764 (task-clustered CI straddles the 0.10 floor)
@@ -23,8 +23,10 @@ absent; a committed ruling closes it.
   0.0764 in range->exit 0, revise with 0.0764 out of range->exit 1 (fail
   closed) — .agent-evidence/kevinruling5-accept-e2e.log. (The older atk8 log is
   no longer in .agent-evidence/; this run replaces it.)
-- atk5: ruling still absent — master tip 58fd3ed (atk4), rulings/ .gitkeep-only,
-  no ruling on any branch. 5th dispatch; nothing agent-doable remains (rule 5).
+- atk6: ruling still absent — master tip bae8ab5, rulings/ .gitkeep-only,
+  `git log --all` never added the file. Fresh on-site verdict exit 1, single
+  FAIL base05 0.0764 < 0.10 (.agent-evidence/kevinruling6-verdict.log). 6th
+  dispatch; nothing agent-doable remains (rule 5).
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
