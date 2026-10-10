@@ -9,10 +9,10 @@ Next-run state; evidence .agent-evidence/*.log.
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume. GOTCHA: splits.json
   values are dicts; loopgym src NotImplemented.
-- `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL. BASECHECK blocked
-  (rule 5): base05 0.0764 [0.014,0.153] (n=16) < 0.10 floor; 7 causes ruled out incl
-  model identity (494M config, 4/4 probe); base15 in range, 1.5B>0.5B, ref 1.0;
-  never widen. Ticket: rangerule.
+- `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
+  passes only via range-author ruling results/rulings/<stem>.ruling.json (agent
+  can't write; malformed fails closed). BASECHECK awaits it: base05 0.0764
+  [0.014,0.153] (n=16) < 0.10 floor, ruled out. Ticket: rangerule.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

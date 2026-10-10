@@ -6,6 +6,12 @@ known answer holds). A PENDING row: section's result file not produced yet —
 reported, not a failure. Exit 0 iff every checked row in the selected sections
 passes. Ranges are never widened by this tool.
 
+An out-of-range number can only pass via a range-author ruling committed at
+results/rulings/<stem>.ruling.json ({"author", "decision": "accept"|"revise",
+"rationale", "new_range" for revise}). Agents never write rulings (CLAUDE.md
+rule 5); the tool applies them verbatim and cites the ruling in the table row.
+Malformed rulings fail closed.
+
 Usage: .venv/bin/python tools/check_results.py
            [--only baselines,benches,toy] [--results-dir DIR]
 """
@@ -38,6 +44,55 @@ def load_json(path: Path):
     return json.loads(path.read_text())
 
 
+def load_ruling(results: Path, fname: str) -> tuple[Path, object, str | None]:
+    """Ruling file for a result file: <results>/rulings/<stem>.ruling.json.
+
+    Returns (path, parsed-or-None, error-or-None); (path, None, None) when no
+    ruling is on file."""
+    path = results / "rulings" / (fname[:-5] + ".ruling.json")
+    if not path.is_file():
+        return path, None, None
+    try:
+        return path, json.loads(path.read_text()), None
+    except (OSError, ValueError) as e:
+        return path, None, f"ruling unreadable ({type(e).__name__})"
+
+
+def check_ruling(r: object, p: float) -> tuple[bool, str, str]:
+    """Apply a range-author ruling to an out-of-range number.
+
+    Returns (ok, note, expected). Fail-closed: anything malformed keeps the
+    row failed. Rulings are written by the range author only (rule 5); the
+    tool applies them verbatim."""
+    if not isinstance(r, dict):
+        return False, "ruling malformed: not a JSON object", ""
+    author = r.get("author")
+    rationale = r.get("rationale")
+    if not isinstance(author, str) or not author.strip():
+        return False, "ruling malformed: 'author' missing or empty", ""
+    if not isinstance(rationale, str) or not rationale.strip():
+        return False, "ruling malformed: 'rationale' missing or empty", ""
+    decision = r.get("decision")
+    if decision == "accept":
+        return True, f"in range by ruling — {author}: {rationale}", ""
+    if decision == "revise":
+        nr = r.get("new_range")
+        if (not isinstance(nr, (list, tuple)) or len(nr) != 2
+                or not all(isinstance(x, (int, float)) and not isinstance(x, bool)
+                           for x in nr)
+                or nr[0] >= nr[1]):
+            return False, ("ruling malformed: 'revise' needs new_range "
+                           "[lo, hi] with lo < hi"), ""
+        lo, hi = nr[0], nr[1]
+        ok = lo <= p <= hi
+        note = f"range ruled to [{lo}, {hi}] by {author}: {rationale}"
+        if not ok:
+            note += " — number outside ruled range"
+        return ok, note, f"[{lo}, {hi}]"
+    return False, ("ruling malformed: decision must be 'accept' or "
+                   f"'revise', got {decision!r}"), ""
+
+
 def section_baselines(results: Path = RESULTS) -> list[dict]:
     rows: list[dict] = []
     docs = {}
@@ -49,8 +104,22 @@ def section_baselines(results: Path = RESULTS) -> list[dict]:
             continue
         p = d["pass_at_k"]
         docs[fname] = d
+        ok = lo <= p <= hi
+        expected, note = f"[{lo}, {hi}]", ""
+        if not ok:
+            path, r, err = load_ruling(results, fname)
+            if r is None and err is not None:
+                note = err
+            elif r is None:
+                note = (f"out of pre-run range; fix the cause or await the "
+                        f"range-author ruling (CLAUDE.md rule 5) at "
+                        f"{path.relative_to(results)}")
+            else:
+                ok, note, exp2 = check_ruling(r, p)
+                if exp2:
+                    expected = f"[{lo}, {hi}] -> ruled {exp2}"
         rows.append(row(label, f"{p:.4f} [{d['ci'][0]:.3f}, {d['ci'][1]:.3f}]",
-                        f"[{lo}, {hi}]", lo <= p <= hi))
+                        expected, ok, note))
     if len(docs) == 2:
         p05, p15 = docs["base05_val.json"]["pass_at_k"], docs["base15_val.json"]["pass_at_k"]
         rows.append(row("1.5B > 0.5B", f"{p15:.4f} vs {p05:.4f}",

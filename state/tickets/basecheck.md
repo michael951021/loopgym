@@ -1,5 +1,25 @@
 # Ticket: Check baselines against ranges (id: basecheck)
 
+## Scope + outcome — attempt 7 (2026-10-09)
+All pipeline causes ruled out atk1-6; n=16 landed (base05 0.0764 [0.014, 0.153]);
+blocker is the range-author ruling (TODO ticket rangerule). New angle this
+attempt: the tool has no way to *express* that ruling. After an "accept"
+ruling, `--only baselines` can never exit 0 without an agent editing
+BASELINE_RANGES — i.e. the forbidden widening. rangerule says "after the
+ruling, check_results.py decides basecheck", so the tool needs a ruling
+channel. Fix: results/rulings/<stem>.ruling.json (author/decision/rationale,
+new_range for revise), applied verbatim by the tool with the ruling cited in
+the table row; malformed rulings fail closed; only the range author writes
+these (rule 5). Basecheck itself stays blocked on the actual ruling.
+Outcome: done. check_ruling/load_ruling in tools/check_results.py:44-105;
+4 new tests (accept, revise incl. out-of-ruled-range, 5 malformed shapes +
+unreadable file, ruling-path note) — tests/test_check_results.py 11/11.
+Real run: single FAIL row unchanged (base05), now pointing at
+rulings/base05_val.ruling.json. make check exit 0 (154 passed, 1 skipped;
+.agent-evidence/basecheck7-makecheck.log). results/rulings/ committed with
+.gitkeep. Unblock = Kevin commits one ruling file (accept or revise); then
+--only baselines decides basecheck mechanically.
+
 ## Outcome — attempt 6 (2026-10-09)
 Different approach: ruled out the one cause the previous six attempts never
 checked — the model itself (the six ruled-out causes were split, grading,
