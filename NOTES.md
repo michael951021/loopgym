@@ -13,9 +13,11 @@
 - `(human-only[: RELPATH])`: hold open tagged lines; gate
   tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); open tagged
   lines held.
-- hostgate: atk3 re-verified on current TODO.md: 4cb686d newest mirror
-  state, no HUMAN_ONLY in any ref (unapplied on host); patch clean, 4/4
-  tests, 0/16 mismatches; Kevin's step pending.
+- hostgate: atk4: host tip still 4cb686d (all mirror refs scanned;
+  main/origin older); no HUMAN_ONLY -> unapplied; fresh worktree
+  RED->GREEN (real TODO.md), 4/4, 0/16; shipped
+  tools/hostgate_apply.sh (idempotent, tested; atk4 log). Kevin: run
+  on host + restart dispatcher.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
@@ -25,15 +27,10 @@
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
   (paste: kevinruling.md Plan step 1; E2E valid; checker unchanged
   since cd681e9).
-  atk31 terminal wait: ruling absent (disk+all refs+stash); checker+eval
-  identical since cd681e9; fresh exit 1, base05 FAIL 0.0764 [0.014,0.153]
-  <0.10 (w1a31-verdict.log); paste re-verified (fail-closed; E2E exit 0;
-  ruling test absent->1, present->0); gate exit 1; 16/16 pass. Kevin: paste
-  + hostgate apply (hostgate=w2).
-  (paste: kevinruling.md Plan step 1; E2E exit 0; test asserts both states).
-  atk32/attempt7 terminal wait: ruling absent (disk+all refs+stash); fresh
-  exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10 (w1a32-verdict.log); gate
-  exit 1; 16/16 pass. Kevin: paste + hostgate apply (hostgate=w2).
+  atk32/attempt7 terminal wait: ruling absent (disk+refs+stash);
+  checker+eval unchanged since cd681e9; fresh exit 1, base05 FAIL 0.0764
+  [0.014,0.153] <0.10 (w1a32-verdict.log); gate exit 1; 16/16 pass;
+  paste E2E re-verified (fail-closed). Kevin: paste + hostgate (w2).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
