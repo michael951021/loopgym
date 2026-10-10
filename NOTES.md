@@ -22,7 +22,7 @@ Next-run state; evidence .agent-evidence/*.log.
   Ruling E2E atk5, checker cd681e9: none->1, accept->0, revise-in->0,
   revise-out->1 (kevinruling5-accept-e2e.log). atk6: ruling absent (master
   bae8ab5, `git log --all` never added it), verdict exit 1
-  (kevinruling6-verdict.log); 6th dispatch, nothing left to do.
+  (kevinruling6-verdict.log); 6th dispatch, nothing left.
   rangerule (after: kevinruling) records verdict; basecheck gated to exit 0.
 
 ## Models
