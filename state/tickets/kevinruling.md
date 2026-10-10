@@ -53,6 +53,13 @@ absent; a committed ruling closes it.
   bad decision + revise-out fail closed. Fresh verdict exit 1, single FAIL
   base05 0.0764 [0.014, 0.153] < 0.10 (kevinruling46-verdict.log). 46th
   dispatch; terminal wait on Kevin.
+- atk47 (2026-10-10): unchanged — `git log --all -- <ruling file>` empty,
+  dir = .gitkeep, checker untouched since cd681e9. Fresh verdict exit 1,
+  single FAIL base05 0.0764 [0.014, 0.153] < 0.10
+  (kevinruling47-verdict.log). NEW: sandbox /opt/agent = bridge.py + hooks
+  only — no dispatcher code or skip-marker support in the sandbox, so the
+  humandispatch fix (TODO.md:135) is Kevin-side only; reconfirms no
+  agent-side path. 47th dispatch; terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
