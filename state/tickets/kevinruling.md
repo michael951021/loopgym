@@ -14,6 +14,10 @@ or revise the pre-run range? Open iff results/rulings/base05_val.ruling.json is
 absent; a committed ruling closes it.
 
 ## Evidence (all observed, no guesses)
+- 2026-10-10: kevin committed the ruling (64ecd1b, verbatim accept +
+  trailing newline). Guard `--line kevinruling` exit 0; checker
+  `--only baselines` exit 0, all baselines PASS
+  (.agent-evidence/atk4-verdict.log); tests 11/11. Closed.
 - Ruling absent everywhere (re-verified every attempt; latest w1 atk22,
   2026-10-10: guard `--line kevinruling` exit 1, verdict exit 1, disk
   (.gitkeep only) + `git log --all` on the ruling file empty — all fresh,

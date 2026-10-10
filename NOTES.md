@@ -11,22 +11,18 @@
 
 ## Scheduling
 - `(human-only[: P])`: tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); tagged held.
-- hostgate: 8th dispatch, unapplied. atk8: delivery ok — script+patch
-  on master 18e9b3f = primary checkout; mirror 4cb686d; E2E rc0, 4/4,
-  16/16 (atk8-verify.log). Kevin: host projects/loopgym/
-  tools/hostgate_apply.sh, commit harness sched.py, check TODO:137.
+- hostgate DONE (030ad80, kevin; line 137 [x]); humandispatch [x].
+  Guard wired host-side; Kevin-only lines now hold until released.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
   `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
-  HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md Plan step 1). Re-verified each dispatch (3rd
-  attempt 2026-10-10: ruling absent on all refs; fresh guard exit 1,
-  verdict exit 1: base05 0.0764 [0.014,0.153] <0.10, atk3-verdict.log;
-  checker cd681e9/guard 83475c8 unchanged since 5/5 E2E). No agent step;
-  root cause = hostgate (script on master). Kevin: 2-line paste + hostgate.
+  base05 ruling LANDED (64ecd1b, kevin 2026-10-10, verbatim accept +
+  trailing \n): guard exit 0, checker `--only baselines` exit 0, all
+  baselines PASS (atk4-verdict.log). basecheck unblocked; rangerule line
+  records the verdict.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
