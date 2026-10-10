@@ -23,11 +23,12 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md Plan step 1; E2E exit 0; test asserts both states).
-  atk33/attempt8 terminal wait: ruling absent (disk+master); checker+eval
-  byte-identical since cd681e9 -> verdict holds; fresh exit 1, base05 FAIL
-  0.0764 [0.014,0.153] <0.10 (w1a33-verdict.log); gate exit 1; 16/16 pass.
-  Kevin: paste + hostgate apply (hostgate=w2).
+  (paste: kevinruling.md Plan step 1, :58). atk34/attempt9 terminal wait:
+  ruling absent (disk+master); fresh E2E on current code: paste verbatim ->
+  exit 0, all 5 baselines PASS (w1a34-accept-e2e.log); real verdict exit 1,
+  base05 FAIL 0.0764 [0.014,0.153] <0.10 (w1a34-verdict.log); gate exit 1;
+  16/16 pass (w1a34-tests.log). Ticket condensed 296->62 lines, paste
+  verbatim. Kevin: paste + hostgate apply (w2).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
