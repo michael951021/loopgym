@@ -31,7 +31,8 @@ else
     rc=$?
 fi
 if [ "$rc" -eq 0 ]; then
-    echo "OK: gate in place, 4/4 tests pass. Restart the dispatcher to take effect;" >&2
+    echo "OK: gate in place, 4/4 tests pass. No dispatcher restart needed: it spawns/reloads" >&2
+    echo "lib/sched.py every cycle (agent:473, pool.py:77), so the gate is live at the next poll;" >&2
     echo "while (human-only) lines stay open, 'next' must not dispatch them." >&2
 else
     echo "TESTS FAILED (rc $rc)" >&2
