@@ -19,6 +19,15 @@ Next-run state; evidence .agent-evidence/*.log.
   only via a range-author ruling file (malformed fails). BASECHECK/RANGERULE exit 1: base05
   0.0764 [0.014,0.153] < 0.10, 10 causes out, raw recompute exact, 0 timeouts. Ruling
   absent; unblock = kevin's ruling (state/tickets/rangerule.md); basecheck line gated.
+- `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
+  passes only via range-author ruling (malformed fails closed).
+  base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
+  results/rulings/base05_val.ruling.json (forms: state/tickets/kevinruling.md).
+  Ruling E2E atk5 (checker cd681e9, unchanged): none->1, accept->0,
+  revise-in->0, revise-out->1. atk7: ruling absent on all refs (master
+  f612cb5), verdict exit 1 (kevinruling7-verdict.log); 7th dispatch, line did
+  not stop re-dispatch.
+  rangerule (after: kevinruling) records verdict; basecheck gated to exit 0.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
@@ -31,6 +40,8 @@ Next-run state; evidence .agent-evidence/*.log.
   records (diff M/A text + hidden dir); elided bad-commit files (diff -U0 ±3, 4500-chr/file,
   <=6k tok); ```path-block parse; grade = reply on bad worktree, pristine V._run_once
   (outside task.files -> 0); ref=1, stub=0, hidden-test edit=0.
+  records; elided bad-commit files (diff -U0 ±3, 4500-chr/file, <=6k tok); ```path parse;
+  grade = reply on bad worktree, pristine V._run_once; ref=1, stub=0, hidden-edit=0.
 
 ## lgbox
 - `lgbox serve` (axum): /run (setpgid, RLIMIT, Q->503), /health, /metrics;
@@ -70,3 +81,8 @@ Next-run state; evidence .agent-evidence/*.log.
   the completion claim, not bare numbers (bad-commit lines may hold cost estimates).
   alpha cands: tiny HF Qwen2 fixture + LoraConfig adapter in tmp; spy M.prefill shapes.
   harness cands: find ROOT from sys.path, fabricate a git project under ROOT/projects.
+- vb1/vb2: 12/12 each (milestones checked); yield 24/24 -> vb3 runs. Close-out: draftlab-7953937-d82b39e re-verified, 3.5 s
+  (vb2-closeout-regression-7953937-d82b39e.log).
+- hidden checks: temp root + synthetic fixtures; jaxlm chi2 via stats.chi2.sf;
+  FixedDrafter mid-p token. cands: assert completion claim, not bare numbers;
+  alpha: tiny HF Qwen2 fixture + LoraConfig adapter; spy M.prefill shapes.
