@@ -20,14 +20,10 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: Plan 1, state/tickets/kevinruling.md). Ruling absent on all refs, no
-  remote; checker exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10.
-  (one-shot paste at kevinruling.md:152-153; E2E atk73: exact :152 bytes on
-  a copy of real results/ -> exit 0, all baselines PASS — paste valid).
-  atk73: no ruling, no new commits/remotes/stash since atk72, verdict exit 1,
-  base05 FAIL 0.0764 [0.014,0.153] <0.10, unchanged. No agent-side step
-  remains. humandispatch (w1 in flight) stops re-dispatch; wait on Kevin
-  (73rd dispatch).
+  (paste: Plan 1, state/tickets/kevinruling.md). atk73: no ruling on any ref,
+  no remotes/stash; paste re-verified E2E (exact bytes -> exit 0); checker
+  exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10. humandispatch gate shipped
+  (w1); terminal wait on Kevin.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
@@ -51,9 +47,8 @@
 
 ## RL
 - `grpo.py` group_advantages/kl_k3/policy_loss; 7/7 known.
-- `batch.py`: Batch (mask [p-1,p+c-1)), build_batch; grpo_step (logp=token_logprobs;
-  old=detach; ref=disable_adapter); step-0 β=0 ~0; no last_hidden_state in 5.x;
-  kernel unbatched -> flatten.
+- `batch.py`: grpo_step (logp=token_logprobs; old=detach; ref=disable_adapter);
+  step-0 β=0 ~0; no last_hidden_state in 5.x; kernel unbatched -> flatten.
 - `rollout.py` HFBackend (left pad, output_scores fp32; T<=0 greedy). GOTCHA: top_k=0, rep=1.0.
 - `rollout_vllm.py` (host): bf16 enable_lora r16; sync_lora LoRARequest(load_inplace)
   id+1/step; logprobs=0 -> sampler_logp; max_tokens explicit; 0.02-nat.
@@ -68,9 +63,9 @@
 
 ## Data
 - `freeze.py`: v0 = 26 verified tasks (draftlab 22/harness 4), sha1%100>=70
-  train 13/test 13; kill>=25 met -> train+eval; data/loopgym/v0/{tasks.jsonl,
-  checks/,DATASET.md} + results/loopgym_v0.json; `--check` re-derives, exit 1
-  on drift; redaction: public draftlab/harness only, no apply/contrib-loop.
+  train 13/test 13; kill>=25 met -> train+eval; data/loopgym/v0/ +
+  results/loopgym_v0.json; `--check` re-derives, exit 1 on drift; redaction:
+  public draftlab/harness only.
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
 - hidden checks: temp root + synthetic fixtures; assert completion claim; cross-check
   cited numbers vs results/*.json; GOTCHA: results/*.json absent at bad -> lazy
