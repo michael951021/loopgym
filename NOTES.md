@@ -1,7 +1,5 @@
 # Notes
 
-Next-run state; logs in .agent-evidence/.
-
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: never `rm DIR`/find -delete.
 - ruff I/EXE pinned; known/ I001/F401. .venv: no pip (uv/ensurepip).
@@ -13,13 +11,12 @@ Next-run state; logs in .agent-evidence/.
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
-  passes only via range-author ruling (malformed fails closed; --results-dir;
-  author VALUE unchecked, rule 5 by access). base05 0.0764 [0.014,0.153] < 0.10.
-  HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json (cmd in
-  state/tickets/kevinruling.md). atk31: ruling absent on all refs/stash incl.
-  Kevin's repo; his HEAD 2468727 (=w2 HEAD), tree still wiped: `git restore .`
-  then paste; verdict exit 1 (kevinruling31-verdict.log); basecheck gated;
-  humandispatch TODO.md:135.
+  passes only via range-author ruling (malformed fails closed; author value
+  unchecked, rule 5 by access). base05 0.0764 [0.014,0.153] < 0.10. HUMAN-ONLY:
+  kevin commits results/rulings/base05_val.ruling.json; cmd + verbatim in
+  state/tickets/kevinruling.md. atk34: ruling absent everywhere; Kevin's
+  checkout 969029c tree wiped (181 del) -> `git restore .` then paste;
+  verdict exit 1 (kevinruling34-verdict.log); humandispatch TODO.md:135.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
