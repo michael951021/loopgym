@@ -14,9 +14,12 @@
   passes only via range-author ruling (malformed fails closed; author value
   unchecked, rule 5 by access). base05 0.0764 [0.014,0.153] < 0.10. HUMAN-ONLY:
   kevin commits results/rulings/base05_val.ruling.json; cmd + verbatim in
-  state/tickets/kevinruling.md. atk34: ruling absent everywhere; Kevin's
-  checkout 969029c tree wiped (181 del) -> `git restore .` then paste;
-  verdict exit 1 (kevinruling34-verdict.log); humandispatch TODO.md:135.
+  state/tickets/kevinruling.md. atk35: ruling absent (Kevin's .git = live host
+  view: no Kevin commit; reflog = harness syncs only); "tree wiped 181 del"
+  was a MOUNT ARTIFACT (sandbox binds only his .git; 181 == tracked count) ->
+  Kevin: `git status` on host, paste if clean. verdict exit 1
+  (kevinruling35-verdict.log); verbatim accept passes check_ruling in-mem;
+  humandispatch TODO.md:135.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

@@ -32,6 +32,16 @@ absent; a committed ruling closes it.
   HEAD), tree still wiped (181 deletions); fresh verdicts exit 1, single FAIL
   base05 0.0764 [0.014, 0.153] < 0.10 (kevinruling{32..34}-verdict.log).
   No agent-side path exists (rule 5).
+- atk35 (2026-10-10): ruling still absent, now via a LIVE view of the host
+  .git (bind mount): no commit in any ref/stash/reflog touches
+  results/rulings/base05_val.ruling.json; reflog = harness fast-forwards
+  only (Kevin has made no commits). CORRECTION: "tree wiped (181 del)" atk29-34
+  was a mount artifact — the sandbox binds only his .git (his worktree dir
+  here holds only .git), and 181 == /work's tracked-file count; the host
+  worktree is invisible from the sandbox, so no damage can be inferred.
+  Fresh verdict exit 1, unchanged rows (kevinruling35-verdict.log); the
+  verbatim accept JSON passes the real check_ruling in memory (malformed
+  fails closed).
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
@@ -49,10 +59,11 @@ ruled-out cause checks. Kevin: commit the one file above; the gated line
 (id: rangerule, after: kevinruling) then runs the checker and records the verdict.
 
 ## Plan
-0. (atk30) Kevin's checkout projects/loopgym has a wiped worktree
-   (results/rulings/ missing) — restore before pasting:
-   `cd /home/kevin/Documents/coders/loop/projects/loopgym && git restore .`
-   (alternatively paste in any checkout with the full tree, e.g. agent/w2.)
+0. (atk35 correction) the "wiped tree" was a sandbox mount artifact (only
+   his .git is bound here). Kevin, on the host: `git status` in
+   /home/kevin/Documents/coders/loop/projects/loopgym; if clean, go straight
+   to step 1; `git restore .` only if it shows local deletions. (Or paste in
+   any checkout with the full tree.)
 1. Kevin pastes (accept; E2E re-verified exit 0 atk27 — kevinruling27-accept-e2e.log):
    ```sh
    printf %s '{"author": "kevin", "decision": "accept", "rationale": "task-clustered CI [0.014, 0.153] straddles the 0.10 floor; ten pipeline causes ruled out (atk1-10)"}' > results/rulings/base05_val.ruling.json
