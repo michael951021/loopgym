@@ -84,6 +84,14 @@ absent; a committed ruling closes it.
   fresh verdict exit 1, single FAIL base05 0.0764 [0.014,0.153] < 0.10
   (.agent-evidence/kevinruling29-verdict.log). 29th dispatch; humandispatch
   ticket stands at TODO.md:135.
+- atk30 (2026-10-10): ruling still absent on disk/any ref/stash, no remote;
+  master now at a9ea865 (= agent/w2 HEAD). Kevin's checkout (projects/loopgym)
+  HEAD moved 151566f -> a9ea865 but tree still wiped: results/rulings/ dir
+  MISSING there, so paste line 1 (printf > results/rulings/...) would fail —
+  Kevin must restore the tree first (Plan step 0). Fresh verdict exit 1,
+  single FAIL base05 0.0764 [0.014,0.153] < 0.10
+  (.agent-evidence/kevinruling30-verdict.log). 30th dispatch; humandispatch
+  ticket stands at TODO.md:135.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 - atk5: ruling-channel E2E on checker cd681e9 against a copy of the real
@@ -105,6 +113,10 @@ ruled-out cause checks. Kevin: commit the one file above; the gated line
 (id: rangerule, after: kevinruling) then runs the checker and records the verdict.
 
 ## Plan
+0. (atk30) Kevin's checkout projects/loopgym has a wiped worktree
+   (results/rulings/ missing) — restore before pasting:
+   `cd /home/kevin/Documents/coders/loop/projects/loopgym && git restore .`
+   (alternatively paste in any checkout with the full tree, e.g. agent/w2.)
 1. Kevin pastes (accept; E2E re-verified exit 0 atk27 — kevinruling27-accept-e2e.log):
    ```sh
    printf %s '{"author": "kevin", "decision": "accept", "rationale": "task-clustered CI [0.014, 0.153] straddles the 0.10 floor; ten pipeline causes ruled out (atk1-10)"}' > results/rulings/base05_val.ruling.json
