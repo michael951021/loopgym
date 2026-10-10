@@ -20,10 +20,10 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: Plan 1, state/tickets/kevinruling.md). atk73: no ruling on any ref,
-  no remotes/stash; paste re-verified E2E (exact bytes -> exit 0); checker
-  exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10. humandispatch gate shipped
-  (w1); terminal wait on Kevin.
+  (paste: Plan 1, state/tickets/kevinruling.md:152). atk73 + w1 (2026-10-10):
+  no ruling on any ref; gate exit 1 (skip); checker exit 1, base05 FAIL
+  0.0764 [0.014,0.153] <0.10. Host still dispatches (wiring Kevin's);
+  terminal wait on Kevin.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

@@ -125,6 +125,13 @@ absent; a committed ruling closes it.
   the ruling (kevinruling72-e2e-accept.log); checker tests 11/11
   (kevinruling72-checker-tests.log). Paste valid as of this file state; no
   agent-side step remains. 72nd dispatch; terminal wait on Kevin.
+- w1 2026-10-10 (parallel dispatch with w2 atk73): unchanged — ruling absent
+  on all refs (git log --all = cd681e9 mechanism only; no stash/remote).
+  Gate now shipped: sched_guard.py --line kevinruling -> exit 1 (skip until
+  the ruling file exists); host dispatcher still dispatching -> wiring is
+  Kevin-side (humandispatch line). Fresh verdict exit 1, single base05 FAIL
+  0.0764 [0.014, 0.153] < 0.10, other rows PASS. Paste intact at :152.
+  Terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
