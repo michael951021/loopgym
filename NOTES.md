@@ -15,11 +15,12 @@
   HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json; verbatim
   cmd in state/tickets/kevinruling.md (printf bytes re-verified vs real
   check_ruling -> (True); malformed fails closed; one-shot paste).
-  atk45: absent (no commit ever touched the path; reflog since atk44
-  harness-only). verdict exit 1, single base05 FAIL 0.0764 [0.014,0.153]
-  < 0.10 (kevinruling45-verdict.log); 45th dispatch; ticket printf:73
-  still one-shot valid; humandispatch TODO.md:135 stands; no agent-side
-  path (rule 5) — terminal wait on Kevin.
+  atk46: absent (git log --all -- <file> empty; dir = .gitkeep). Checker
+  unchanged since cd681e9; ticket printf:73 re-verified vs current
+  check_ruling -> accept (True), malformed/revise-out fail closed.
+  Verdict exit 1, single base05 FAIL 0.0764 [0.014,0.153] < 0.10
+  (kevinruling46-verdict.log); 46th dispatch; humandispatch TODO.md:135
+  stands; no agent-side path (rule 5) — terminal wait on Kevin.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
