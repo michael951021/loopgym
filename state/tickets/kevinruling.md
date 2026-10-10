@@ -66,6 +66,11 @@ absent; a committed ruling closes it.
   Fresh verdict exit 1, same single FAIL base05 (kevinruling41-verdict.log).
   41st dispatch; root-cause ticket (humandispatch) already filed at
   TODO.md:135; no agent-side path exists (rule 5) — terminal wait on Kevin.
+- atk42 (2026-10-10): unchanged — master == agent/w2 == a4e1615, no Kevin
+  commit since atk41 (reflog = harness resets/merges only); ruling absent
+  (dir = .gitkeep); fresh verdict exit 1, single FAIL base05
+  0.0764 [0.014, 0.153] (kevinruling42-verdict.log). 42nd dispatch;
+  terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
