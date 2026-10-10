@@ -92,6 +92,12 @@ absent; a committed ruling closes it.
   absent, no AGENT_TASK handler) — the re-dispatch lever is host-side; the
   "kevin:" title prefix is the ready marker for the humandispatch fix
   (TODO.md:135, Kevin-side). 56th dispatch; terminal wait on Kevin.
+- atk57 (2026-10-10): unchanged — ruling never committed
+  (`git log --all -- <file>` empty), dir = .gitkeep, no stash/remote,
+  master not ahead of w2; ListAgents: no live peer. Fresh real verdict
+  exit 1, single base05 FAIL 0.0764 [0.014,0.153] <0.10, all other
+  baseline rows PASS (kevinruling57-verdict.log). 57th dispatch;
+  terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
