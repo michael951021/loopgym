@@ -105,7 +105,7 @@
   why: the gate every loopgym task passes; the alpha seed is the known answer (it must verify).
 - [x] **Hidden checks, batch 1** — milestone over candidates 1–12 by score in data/loopgym/candidates.jsonl. If state/verify/batch1.md does not exist, create it from templates/verify_step.md (one `- [ ]` step per candidate: "write tests/hidden/<id>/test_*.py (≤ 60 lines, CPU, < 2 min) from the fix diff that fails at bad and passes at good, run `python -m loopgym.data.verify <id>`, record the verdict; a candidate with no deterministic check is marked not-checkable after 2 attempts") and leave this line unchecked. Check this line when every step of state/verify/batch1.md is checked. (id: vb1) (after: verify) (checklist: state/verify/batch1.md)
   why: one candidate per run keeps each check small; the batch is where the dataset comes from.
-- [ ] **Hidden checks, batch 2** — as batch 1 for candidates 13–24, checklist state/verify/batch2.md. (id: vb2) (after: vb1) (checklist: state/verify/batch2.md)
+- [x] **Hidden checks, batch 2** — as batch 1 for candidates 13–24, checklist state/verify/batch2.md. (id: vb2) (after: vb1) (checklist: state/verify/batch2.md)
   why: more tasks; the yield of batch 1 decides whether batch 3 is worth it.
 - [ ] **Hidden checks, batch 3** — as batch 1 for candidates 25–40, checklist state/verify/batch3.md; skip (check the line, note why in NOTES.md) if batches 1–2 verified < 30% of candidates. (id: vb3) (after: vb2) (checklist: state/verify/batch3.md)
   why: the last mining pass before the dataset is frozen.

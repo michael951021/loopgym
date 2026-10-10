@@ -41,3 +41,12 @@ lines for this area. Other candidates are for later runs (one per run). Two atte
 2. Field-match script vs jsonl rows 13–24 via capture.py.
 3. Write candidate-13 check (lazy import of spec; chi2 m=1 path + n-gram statelessness).
 4. Run verify; record verdict; check step. NOTES, commit, merge master.
+
+## Close-out (milestone complete)
+- All 12 steps checked `verified (bad 0/3, good 3/3)`; step ids match candidates 13–24 in score order.
+- All 12 hidden checks present; latest-ts record verified for each id in verified.jsonl (loader
+  dedupes by id/ts, so re-run dupes are harmless).
+- Yield: batch 1 12/12 + batch 2 12/12 = 24/24 (100% ≥ 30%) → batch 3 worth it, no skip.
+- Fresh regression on current tree: verify draftlab-7953937-d82b39e → verified, 3.5 s, exit 0
+  (.agent-evidence/vb2-closeout-regression-7953937-d82b39e.log).
+- vb2 line checked in TODO.md per batch 1's contract (check the line when every step is checked).
