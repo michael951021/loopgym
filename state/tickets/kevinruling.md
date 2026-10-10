@@ -5,7 +5,7 @@ base05 val pass@1 0.0764 [0.014, 0.153] is below the pre-run 0.10 floor. Rule 5:
 only the range author (Kevin) may accept the number or revise the range — agents
 never write rulings. Until this lands, basecheck stays exit 1 and everything
 gated after it (grpocfg, grpo05) is blocked. The dedicated line was meant to
-stop re-dispatch but did not (11th dispatch: atk11).
+stop re-dispatch but did not (13th dispatch: atk13).
 
 ## Question
 Does the range author accept 0.0764 (task-clustered CI straddles the 0.10 floor)
@@ -13,12 +13,14 @@ or revise the pre-run range? Open iff results/rulings/base05_val.ruling.json is
 absent; a committed ruling closes it.
 
 ## Evidence (all observed, no guesses)
-- atk11: ruling still absent — `results/rulings/` empty, no ruling commit on
-  any ref (master == HEAD == 32aaba9). Fresh verdict exit 1, single FAIL
-  base05 0.0764 < 0.10, unchanged since atk8
-  (.agent-evidence/kevinruling11-verdict.log). 11th dispatch; root-cause
-  ticket (id: humandispatch) stands: Kevin, commit the file or stop
-  dispatching this line.
+- atk13 (2026-10-10): ruling still absent — `git log --all -- results/rulings/`
+  shows only the cd681e9 channel commit; no ruling on any ref
+  (master == agent/w2 == 9a3eb92). Fresh verdict exit 1, single FAIL base05
+  0.0764 < 0.10, unchanged (.agent-evidence/kevinruling13-verdict.log);
+  checker unchanged since the atk5 E2E, so the verbatim forms below still
+  parse (11/11 ruling-channel tests pass). 13th dispatch; root-cause ticket
+  (id: humandispatch) stands: Kevin, commit the file or stop dispatching
+  this line.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 - atk5: ruling-channel E2E on checker cd681e9 against a copy of the real
