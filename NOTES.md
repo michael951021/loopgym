@@ -14,14 +14,12 @@
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (malformed fails closed; rule 5 by access).
-  HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json; verbatim
-  cmd in state/tickets/kevinruling.md (one-shot paste; E2E accept->exit 0
-  verified atk5/19/27; malformed fails closed). atk48: absent (git log --all
-  empty; dir = .gitkeep); checker unchanged since cd681e9; verdict exit 1,
-  single base05 FAIL 0.0764 [0.014,0.153] < 0.10 (kevinruling48-verdict.log);
-  48th dispatch; full bwrap mount audit: dispatcher host-side only, task via
-  AGENT_TASK env -> no agent-side skip lever (rule 5); humandispatch fix
-  (TODO.md:135) Kevin-side — terminal wait on Kevin.
+  HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json (one-shot
+  paste in state/tickets/kevinruling.md; E2E accept->exit 0 atk5/19/27).
+  atk49: absent (git log --all empty; reflog = harness syncs); fresh verdict
+  exit 1, single base05 FAIL 0.0764 [0.014,0.153] < 0.10
+  (kevinruling49-verdict.log); 49th dispatch; no agent-side lever (rule 5;
+  dispatcher host-side); humandispatch fix (TODO.md:135) Kevin-side.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
