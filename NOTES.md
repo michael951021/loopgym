@@ -18,8 +18,9 @@ Next-run state; evidence .agent-evidence/*.log.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via a range-author ruling file (malformed fails).
   BASECHECK/RANGERULE: verdict exit 1 (base05 0.0764 [0.014,0.153] < 0.10;
-  10 causes out atk1-12; raw recompute exact, 0 timeouts; fresh
-  kevinruling1-verdict.log). Ruling absent; TODO split: kevinruling
+  10 causes out atk1-12; raw recompute exact, 0 timeouts; atk2 fresh
+  kevinruling2-verdict.log, ruling still absent on master). Ruling absent;
+  TODO split: kevinruling
   (HUMAN-ONLY file, spec+verbatim forms in state/tickets/kevinruling.md) +
   rangerule agent residue (after: kevinruling) — no agent dispatch on the
   human part; basecheck (after: base05, base15, rangerule) gated to exit 0.
