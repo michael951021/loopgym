@@ -16,8 +16,8 @@ Next-run state; logs in .agent-evidence/.
   passes only via range-author ruling (malformed fails closed). base05 0.0764
   [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
   results/rulings/base05_val.ruling.json (forms: state/tickets/kevinruling.md).
-  atk17: absent all refs AND on disk (no remote); fresh verdict exit 1
-  unchanged (kevinruling17-verdict.log). 17 dispatches; humandispatch stands;
+  atk18: absent all refs AND on disk (no remote); fresh verdict exit 1
+  unchanged (kevinruling18-verdict.log). 18 dispatches; humandispatch stands;
   basecheck gated.
 
 ## Models
