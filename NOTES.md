@@ -60,14 +60,14 @@ Next-run state; logs in .agent-evidence/.
 - `tools/fetch_src.sh`: vllm/deepspeed/trl -> .tools/src/ (rule 6).
 
 ## Data
-- `data/mine.py`: %B x blame fixes -> (bad,good); <=200 lines/4 files.
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
-- vb1/vb2 24/24; vb3 7/16, all verified (bad 0/3, good 3/3); next =
-  draftlab-8a2123e-bdd61a2; milestone unchecked.
+- vb1/vb2 24/24; vb3 8/16, all verified (bad 0/3, good 3/3); next =
+  draftlab-e6895d1-5bf9b0d.
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored).
-  jaxlm: chi2 via stats.chi2.sf. NOTES.md cands: assert the completion claim, not
-  bare numbers (bad-commit lines may hold cost estimates).
+  spec-chi2: fix in test file -> spy spec_generate, assert rejecting rounds
+  (drafted>accepted) > 0 + recompute chi2 p>0.01.
+  NOTES.md cands: assert the completion claim, not bare numbers (bad-commit
+  lines may hold cost estimates).
   harness cands: find ROOT from sys.path, fabricate a git project under ROOT/projects.
-  web cands: no npm; extract JS KPI block from .tsx, run node -e.
   tf cands: init -backend=false+validate on a temp copy (offline via
   .tools/tfplugin-cache) + shape grep; ticket = mining artifact.
