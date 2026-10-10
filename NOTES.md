@@ -3,7 +3,7 @@
 Next-run state; evidence .agent-evidence/*.log.
 
 ## Gotchas
-- .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: never `rm DIR`, find -delete (EBUSY).
+- .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: never `rm DIR`/find -delete.
 - ruff I/EXE pinned; known/ I001/F401. .venv: no pip (uv/ensurepip).
 - RLIMIT_NPROC=64 counts ALL uid-1000 -> transient Cannot fork.
 - torch 2.14 FSDP2: fully_shard auto-inits env://; rank() pre-init 0.
@@ -15,15 +15,10 @@ Next-run state; evidence .agent-evidence/*.log.
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
-- `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
-  passes only via a range-author ruling file (malformed fails).
-  BASECHECK/RANGERULE: verdict exit 1 (base05 0.0764 [0.014,0.153] < 0.10;
-  10 causes out atk1-12; raw recompute exact, 0 timeouts — basecheck12 +
-  rangerule1-verdict.log). Ruling still absent (rulings/ .gitkeep-only);
-  unblock = kevin writes results/rulings/base05_val.ruling.json (accept,
-  or revise + new_range containing 0.0764; exact forms in
-  state/tickets/rangerule.md), then the checker decides; basecheck line
-  (after: base05, base15, rangerule) stays gated until then.
+- `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range passes
+  only via a range-author ruling file (malformed fails). BASECHECK/RANGERULE exit 1: base05
+  0.0764 [0.014,0.153] < 0.10, 10 causes out, raw recompute exact, 0 timeouts. Ruling
+  absent; unblock = kevin's ruling (state/tickets/rangerule.md); basecheck line gated.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
@@ -33,20 +28,18 @@ Next-run state; evidence .agent-evidence/*.log.
   `lgbox.py`: RUNNERS["http"] iff LOOPGYM_LGBOX_URL.
   `toy.py`: banana (first 20 tok ci), coinflip (seeded). `splits.py`: sha1%100, 101/9/27,
   137/142 usable, val 9. `loopgym.py`: Task(prompt/parse/reference/stub)+grade over verified
-  records (diff M/A text + hidden dir; 12 loaded, 9 excl D/binary); elided bad-commit files
-  (diff -U0 ±3, 4500-chr/file, <=6k tok incl. omitted-files note); ```path-block parse;
-  grade = reply on bad worktree, pristine V._run_once (outside task.files -> 0);
-  ref=1, stub=0, hidden-test edit=0.
+  records (diff M/A text + hidden dir); elided bad-commit files (diff -U0 ±3, 4500-chr/file,
+  <=6k tok); ```path-block parse; grade = reply on bad worktree, pristine V._run_once
+  (outside task.files -> 0); ref=1, stub=0, hidden-test edit=0.
 
 ## lgbox
 - `lgbox serve` (axum): /run (setpgid, RLIMIT, Q->503), /health, /metrics;
   FC FakeVmm-only. docker: Dockerfiles.
 
 ## Kernel
-- `kernels/token_logprobs(h,w,t,impl,chunk)->[T]: chunked max/LSE bwd softmax
-  (no [T,V]); torch,cpp,triton,cuda. cpp JIT (-O3 -fopenmp); triton iff CUDA or
-  TRITON_INTERPRET=1, C<=1024; cuda host-only.
-- `tools/bench_logprob.py` -> results/bench_logprob.json; f64 1e-4.
+- `kernels/token_logprobs(h,w,t,impl,chunk)->[T]: chunked max/LSE bwd softmax (no
+  [T,V]); torch,cpp,triton,cuda; cpp JIT (-O3 -fopenmp); triton iff CUDA or
+  TRITON_INTERPRET=1, C<=1024; cuda host-only. bench_logprob.py -> bench_logprob.json, f64 1e-4.
 
 ## RL
 - `grpo.py` group_advantages/kl_k3/policy_loss; 7/7 known.
@@ -60,21 +53,20 @@ Next-run state; evidence .agent-evidence/*.log.
   <out>^2/ckpt/<name>; --dist+--dry-run; exact resume; exit 1 on orphaned ckpt;
   from_pretrained freezes ALL -> requires_grad lora_.
 - `dist.py` FSDP2: fully_shard, full_state_dict DTensors (.full_tensor()), grads AVG, no 1/W.
-- `ds.py` ZeRO-3: ds_zero3.json bf16 stage3; micro=b*group; CPU:
-  compatible_ops[deepspeed_shm_comm]=False.
+- `ds.py` ZeRO-3: ds_zero3.json bf16 stage3; micro=b*group; CPU compatible_ops[deepspeed_shm_comm]=False.
 - Toy gates PASS: toybanana3/toynull3; toy_check exit 0; banana 0.148 -> 1.000;
-  null slope CI contains 0; real GRPO may proceed.
+  null slope CI contains 0.
 - `tools/fetch_src.sh`: vllm/deepspeed/trl -> .tools/src/ (rule 6).
 
 ## Data
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files.
 - `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; lazy import when file
   absent at one commit (tests=0 -> error).
-- vb1: 12/12, vb2: 12/12 — milestones checked in TODO.md; yield 24/24 (100% >= 30%) so vb3
-  is worth it (no skip). Close-out regression: re-verify draftlab-7953937-d82b39e -> verified,
-  3.5 s (.agent-evidence/vb2-closeout-regression-7953937-d82b39e.log).
-- hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored);
-  jaxlm: chi2 via stats.chi2.sf (no chisquare); FixedDrafter mid-p token.
-  NOTES.md cands: assert completion claim, not bare numbers (bad-commit lines may
-  hold cost estimates). alpha cands: tiny HF Qwen2 fixture + LoraConfig adapter
-  in tmp; spy M.prefill shapes for one JIT signature.
+- vb1 12/12, vb2 12/12 (checked; yield 24/24 >= 30%, vb3 worth it). vb3: batch3 = 16 steps
+  (cands 25-40, score order); candidate 25 harness-bc2cdd8-97ddf39 verified (bad 0/3,
+  good 3/3); next = candidate 26, one per run; vb3 milestone line still unchecked.
+- hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored).
+  jaxlm: chi2 via stats.chi2.sf; FixedDrafter mid-p token. NOTES.md cands: assert
+  the completion claim, not bare numbers (bad-commit lines may hold cost estimates).
+  alpha cands: tiny HF Qwen2 fixture + LoraConfig adapter in tmp; spy M.prefill shapes.
+  harness cands: find ROOT from sys.path, fabricate a git project under ROOT/projects.
