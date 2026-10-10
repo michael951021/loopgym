@@ -14,9 +14,9 @@
   passes only via range-author ruling (malformed fails closed; author value
   unchecked, rule 5 by access). base05 0.0764 [0.014,0.153] < 0.10. HUMAN-ONLY:
   kevin commits results/rulings/base05_val.ruling.json; cmd + verbatim in
-  state/tickets/kevinruling.md. atk33: ruling absent everywhere; Kevin's
-  checkout d87b5f2 tree wiped -> `git restore .` then paste; verdict exit 1
-  (kevinruling33-verdict.log); basecheck gated; humandispatch TODO.md:135.
+  state/tickets/kevinruling.md. atk34: ruling absent everywhere; Kevin's
+  checkout 969029c tree wiped (181 del) -> `git restore .` then paste;
+  verdict exit 1 (kevinruling34-verdict.log); humandispatch TODO.md:135.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
