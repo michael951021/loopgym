@@ -245,6 +245,13 @@ absent; a committed ruling closes it.
   hostgate ticket + host wiring recipe merged to master; Kevin's host step
   still pending (gate hostgate exit 1, human-only). No agent-side step
   (rule 5); terminal wait: Kevin's paste (Plan step 1).
+- atk30 (attempt 5): ruling still absent; checker+eval byte-identical
+  since cd681e9 -> verdict holds; fresh exit 1, single base05 FAIL
+  0.0764 [0.014, 0.153] < 0.10, others PASS (w1a30-verdict.log);
+  `sched_guard.py --line kevinruling` exit 1 (skip until ruling exists);
+  16/16 sched_guard+check_results pass. TODO.md: humandispatch now
+  checked (sandbox scheduler fix landed); hostgate (w2) still open. No
+  agent-side step (rule 5); terminal wait: Kevin's paste (Plan step 1).
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
