@@ -14,7 +14,7 @@
   gate tools/sched_guard.py --line <id> (0 ok / 1 skip / 2 unknown).
   kevinruling tagged (guard: file present -> exit 0, verified atk17,
   releases pre-commit). hostgate (human-only): dispatcher never calls the
-  gate — re-dispatched atk2-18.
+  gate: re-dispatched atk2-19.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
