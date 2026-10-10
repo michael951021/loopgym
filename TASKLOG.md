@@ -133,3 +133,7 @@
 - Goal: kevin: base05 range ruling
 - Approach: re-ran the acceptance checks on the real results/ + ruling; compared ruling byte-for-byte to the ticket's verbatim paste; recorded verdict in NOTES.md and the ticket
 - Blockers: none — 40+ prior dispatches blocked on Kevin's host-side commit, which landed just before this run
+## base05 floor: record ruling verdict
+- Goal: base05 floor: record ruling verdict
+- Approach: Ran the real checker on committed results with the landed ruling file, captured the log (rangerule-verdict.log), ran the 11 checker tests, updated ticket + NOTES verdict line, committed.
+- Blockers: none
