@@ -1,0 +1,26 @@
+{
+ "by_kind": {
+  "code": 12,
+  "config": 6,
+  "docs": 8
+ },
+ "by_repo": {
+  "draftlab": 22,
+  "harness": 4
+ },
+ "generated": "2026-10-10T12:59:17+00:00",
+ "kill_criterion": {
+  "eval_only": false,
+  "met": true,
+  "min_tasks": 25
+ },
+ "mean_diff_lines": 18802.2,
+ "median_diff_lines": 815.5,
+ "n_tasks": 26,
+ "splits": {
+  "test": 13,
+  "train": 13
+ },
+ "test_frac": 0.5,
+ "version": "v0"
+}
