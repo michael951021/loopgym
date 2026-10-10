@@ -19,10 +19,10 @@ Next-run state; evidence .agent-evidence/*.log.
   passes only via range-author ruling (malformed fails closed).
   base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
   results/rulings/base05_val.ruling.json (forms: state/tickets/kevinruling.md).
-  Ruling channel E2E atk5, checker cd681e9: none->1, accept->0, revise-in->0,
+  Ruling E2E atk5, checker cd681e9: none->1, accept->0, revise-in->0,
   revise-out->1 (kevinruling5-accept-e2e.log). atk6: ruling absent (master
-  bae8ab5, `git log --all` never added it), fresh verdict exit 1
-  (kevinruling6-verdict.log); 6th dispatch, no agent work left.
+  bae8ab5, `git log --all` never added it), verdict exit 1
+  (kevinruling6-verdict.log); 6th dispatch, nothing left to do.
   rangerule (after: kevinruling) records verdict; basecheck gated to exit 0.
 
 ## Models
@@ -68,9 +68,8 @@ Next-run state; evidence .agent-evidence/*.log.
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files.
 - `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; lazy import when file
   absent at one commit (tests=0 -> error).
-- vb1: 12/12, vb2: 12/12 (milestones checked); yield 24/24 (100% >= 30%) -> vb3 runs.
-  Close-out regression: draftlab-7953937-d82b39e re-verified, 3.5 s
+- vb1/vb2: 12/12 each (milestones checked); yield 24/24 -> vb3 runs. Close-out: draftlab-7953937-d82b39e re-verified, 3.5 s
   (vb2-closeout-regression-7953937-d82b39e.log).
 - hidden checks: temp root + synthetic fixtures; jaxlm chi2 via stats.chi2.sf;
   FixedDrafter mid-p token. cands: assert completion claim, not bare numbers;
-  alpha: tiny HF Qwen2 fixture + LoraConfig adapter in tmp; spy M.prefill shapes.
+  alpha: tiny HF Qwen2 fixture + LoraConfig adapter; spy M.prefill shapes.
