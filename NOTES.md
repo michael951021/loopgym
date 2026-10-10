@@ -24,11 +24,11 @@
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
   (paste: kevinruling.md Plan step 1; E2E valid; checker unchanged
   since cd681e9).
-  w1a22 (terminal wait): ruling still absent (refs/stash/remote, no
-  peer); gate exit 1; verdict inputs unchanged since cd681e9 -> w1a21
-  verdict holds (exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10, others
-  PASS, w1a21-verdict.log). Paste at kevinruling.md Plan step 1 valid;
-  no agent step (rule 5).
+  w1a23 (terminal wait): ruling never committed (git log --all empty;
+  no stash/remote/live peer); results/ since cd681e9 = fff19b8 only (not
+  loaded by checker) -> w1a21 verdict holds (exit 1, base05 FAIL 0.0764
+  [0.014,0.153] <0.10, others PASS); gate exit 1. No agent step (rule 5);
+  Kevin's paste: kevinruling.md Plan step 1; re-dispatch fix: hostgate.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

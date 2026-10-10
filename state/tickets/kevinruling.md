@@ -200,6 +200,13 @@ absent; a committed ruling closes it.
   (exit 1, single base05 FAIL 0.0764 [0.014,0.153] <0.10); no re-run
   (Stop-when). Gate exit 1. Paste intact at Plan step 1. 22nd w1
   dispatch; terminal wait on Kevin.
+- w1 atk23 (2026-10-10): unchanged — ruling never committed
+  (`git log --all -- <file>` empty; no stash/remote; rulings/ = .gitkeep);
+  results/ since cd681e9 = fff19b8 only (loopgym_v0.json + DATASET.md,
+  not loaded by checker) -> w1a21 verdict holds, no re-run; gate exit 1
+  (line 133); ListAgents: no live peer to message. Terminal wait on Kevin
+  (Plan step 1); re-dispatch root cause ticketed (hostgate, TODO:137,
+  w2 active).
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
