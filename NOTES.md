@@ -12,19 +12,12 @@ Next-run state; logs in .agent-evidence/.
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
-- `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range passes only
-  via range-author ruling (malformed fails closed). base05 0.0764 [0.014,0.153] < 0.10 -> exit 1,
-  10 causes out. HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json
-  (forms: state/tickets/kevinruling.md); 8 dispatches did not stop; ticket humandispatch.
-  atk5 E2E (cd681e9): none->1, accept->0, revise-in->0, revise-out->1.
-  rangerule records verdict after kevinruling; basecheck gated exit 0.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (malformed fails closed). base05 0.0764
-  [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
-  results/rulings/base05_val.ruling.json (forms/E2E/ruled-out causes:
-  state/tickets/kevinruling.md); atk11: absent on all refs (master == HEAD),
-  verdict exit 1 (kevinruling11-verdict.log), 11 dispatches, humandispatch stands.
-  rangerule records verdict; basecheck gated exit 0.
+  [0.014,0.153] < 0.10 -> exit 1, 10 causes ruled out. HUMAN-ONLY: kevin commits
+  results/rulings/base05_val.ruling.json (forms/E2E/causes: state/tickets/kevinruling.md);
+  atk11: absent on all refs, verdict exit 1 (kevinruling11-verdict.log), 11 dispatches,
+  humandispatch stands. rangerule records verdict; basecheck gated exit 0.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
