@@ -65,7 +65,7 @@ Next-run state; evidence .agent-evidence/*.log.
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files.
 - `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; lazy import when file
   absent at one commit (tests=0 -> error).
-- vb1: 12/12. vb2: 11/12; next (draftlab-7953937-d82b39e).
+- vb1: 12/12. vb2: 12/12 — batch2 checklist done (all verified).
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored);
   jaxlm: chi2 via stats.chi2.sf (no chisquare); FixedDrafter mid-p token.
   NOTES.md cands: assert completion claim, not bare numbers (bad-commit lines may
