@@ -1,5 +1,27 @@
 # Ticket: Check baselines against ranges (id: basecheck)
 
+## Outcome — attempt 6 (2026-10-09)
+Different approach: ruled out the one cause the previous six attempts never
+checked — the model itself (the six ruled-out causes were split, grading,
+metric, truncation, parse, prompt).
+- Verdict re-run (.agent-evidence/basecheck6-verdict.log): single FAIL row
+  unchanged, base05 0.0764 [0.014, 0.153] < 0.10; all other rows PASS
+  (base15 0.3056 in range, 1.5B > 0.5B, CI overlap reported, reference 1.0).
+- Model identity (.agent-evidence/basecheck6-probe.log):
+  models/qwen2.5-coder-0.5b-instruct is 988,097,824 bytes bf16 = 494,048,912
+  params, config Qwen2 896/24L/14H/kv2/V151936/tied-embed — matches
+  Qwen2.5-Coder-0.5B. Capability probe: 4 hand-written trivial coding tasks
+  (add, has_duplicate, histogram, word_lengths), the exact baseline prompt
+  format (exercism SYSTEM + user template, HF chat template), greedy,
+  assert-checked known answers: 4/4 PASS with correct ```python formatting.
+  The policy is a working instruct coding model.
+- All seven candidate causes ruled out. 0.0764 stands as an honest
+  measurement; the 0.10 floor is mis-calibrated for this 9-task val set.
+Blocker: rule 5 blocks "done" and agents may never widen a range. Added
+TODO.md ticket (id: rangerule) — the range author must either accept the
+number (task-clustered CI [0.014, 0.153] straddles the floor) or revise the
+range in CLAUDE.md. Only that ruling unblocks the checker exit 0. Stopping.
+
 ## Issue
 Baseline eval numbers (base05/base15 exercism val) must be checked against the
 CLAUDE.md plausible ranges before any GRPO run: a bad prompt, grader, or
@@ -8,8 +30,9 @@ truncation would poison every later before/after comparison.
 ## Question
 Are all committed result numbers inside their CLAUDE.md plausible ranges with
 known answers holding? Current observation refuting "all good": base05 val
-pass@1 = 0.0833 [0.000, 0.167] vs range 0.10–0.55 — point estimate below the
-floor. base15 = 0.3611 [0.167, 0.583] inside 0.25–0.75.
+pass@1 = 0.0764 [0.014, 0.153] (n=16; n=4 was 0.0833) vs range 0.10–0.55 —
+point estimate below the floor. base15 = 0.3056 [0.132, 0.486] inside
+0.25–0.75.
 
 ## Evidence
 - results/eval/base05_val.json (0.0833), base15_val.json (0.3611),
@@ -29,9 +52,11 @@ floor. base15 = 0.3611 [0.167, 0.583] inside 0.25–0.75.
     truncating comparison; parse picks the correct last ```python block.
   - Grading cross-check: reference val pass@1 = 1.000; junit counts match
     hand analysis of the model's own code.
-- Verdict: 0.0833 is an honest 0.5B measurement at the committed protocol;
-  below the pre-written 0.10 floor; CI [0, 0.167] overlaps the range.
-  Rule 5: record as out-of-range suspected bug, never widen the range.
+- Verdict: n=4 0.0833 and n=16 0.0764 [0.014, 0.153] are honest 0.5B
+  measurements at the committed protocol; below the pre-written 0.10 floor;
+  CI straddles the floor. atk6 rules out the 7th cause (model identity):
+  494M-param Qwen2 config + 4/4 trivial-task probe. Rule 5: record as
+  out-of-range, never widen the range.
 
 ## Done when
 `.venv/bin/python tools/check_results.py --only baselines` exits 0: every
