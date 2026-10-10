@@ -24,8 +24,8 @@
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
   (paste: kevinruling.md Plan step 1; E2E exit 0; test asserts both states).
-  atk31/attempt6 terminal wait: ruling absent (disk+all refs+stash); fresh
-  exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10 (w1a31-verdict.log); gate
+  atk32/attempt7 terminal wait: ruling absent (disk+all refs+stash); fresh
+  exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10 (w1a32-verdict.log); gate
   exit 1; 16/16 pass. Kevin: paste + hostgate apply (hostgate=w2).
 
 ## Models
