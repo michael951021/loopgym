@@ -5,7 +5,7 @@ base05 val pass@1 0.0764 [0.014, 0.153] is below the pre-run 0.10 floor. Rule 5:
 only the range author (Kevin) may accept the number or revise the range — agents
 never write rulings. Until this lands, basecheck stays exit 1 and everything
 gated after it (grpocfg, grpo05) is blocked. The dedicated line was meant to
-stop re-dispatch but did not (43rd dispatch: atk43; humandispatch TODO.md:135).
+stop re-dispatch but did not (46th: atk46; humandispatch TODO.md:135).
 
 ## Question
 Does the range author accept 0.0764 (task-clustered CI straddles the 0.10 floor)
@@ -32,53 +32,27 @@ absent; a committed ruling closes it.
   HEAD), tree still wiped (181 deletions); fresh verdicts exit 1, single FAIL
   base05 0.0764 [0.014, 0.153] < 0.10 (kevinruling{32..34}-verdict.log).
   No agent-side path exists (rule 5).
-- atk35 (2026-10-10): ruling still absent, now via a LIVE view of the host
-  .git (bind mount): no commit in any ref/stash/reflog touches
-  results/rulings/base05_val.ruling.json; reflog = harness fast-forwards
-  only (Kevin has made no commits). CORRECTION: "tree wiped (181 del)" atk29-34
-  was a mount artifact — the sandbox binds only his .git (his worktree dir
-  here holds only .git), and 181 == /work's tracked-file count; the host
-  worktree is invisible from the sandbox, so no damage can be inferred.
-  Fresh verdict exit 1, unchanged rows (kevinruling35-verdict.log); the
-  verbatim accept JSON passes the real check_ruling in memory (malformed
-  fails closed).
-- atk36-37 (2026-10-10): unchanged — ruling absent (results/rulings/ =
-  .gitkeep only; no ref/stash/commit in the bound host .git touches the path;
-  HEAD 6ca3875 = harness sync, no Kevin commits). Fresh verdicts exit 1,
-  same single FAIL base05 (kevinruling3{6,7}-verdict.log). Nothing
-  agent-side can change; 37th dispatch on this human-only line.
-- atk38-39 (2026-10-10): absent via full author enumeration — Kevin's only
-  5 commits (2026-10-09 bootstrap 7442a3e, 46fa73f, 0a84071, 80a2e1d,
-  8506b8f) touch no ruling path; `git log --all -- <ruling>` empty; dir =
-  .gitkeep. Fresh verdicts exit 1, same single FAIL base05
-  (kevinruling{38,39}-verdict.log).
-- atk40 (2026-10-10): unchanged — absent (dir = .gitkeep;
-  `git log --all -- <ruling>` = cd681e9 only, the agent commit that created
-  the path). Fresh verdict exit 1, single FAIL base05
-  0.0764 [0.014, 0.153] < 0.10 (kevinruling40-verdict.log). 40th dispatch on
-  this human-only line; root-cause ticket (humandispatch, Kevin-only) stands
-  at TODO.md:135; no agent-side path exists (rule 5).
-- atk41 (2026-10-10): unchanged, now proven exhaustive — the bind-mounted
-  "host" .git (/home/kevin/.../projects/loopgym/.git) IS /work's .git
-  (identical refs, branches, reflog; harness fast-forwards Kevin's HEAD).
-  So the single-repo check covers everything: `git log --all -- <ruling>` =
-  cd681e9 only, stash empty, reflog = harness merges only (no Kevin commit).
-  Fresh verdict exit 1, same single FAIL base05 (kevinruling41-verdict.log).
-  41st dispatch; root-cause ticket (humandispatch) already filed at
-  TODO.md:135; no agent-side path exists (rule 5) — terminal wait on Kevin.
-- atk42 (2026-10-10): unchanged — master == agent/w2 == a4e1615, no Kevin
-  commit since atk41 (reflog = harness resets/merges only); ruling absent
-  (dir = .gitkeep); fresh verdict exit 1, single FAIL base05
-  0.0764 [0.014, 0.153] (kevinruling42-verdict.log). 42nd dispatch;
-  terminal wait on Kevin.
-- atk43 (2026-10-10): unchanged — ruling absent (dir = .gitkeep; no Kevin
-  ref/stash/reflog in the single bound .git). Different approach: re-
-  verified THIS ticket's verbatim printf bytes against the real check_
-  ruling in memory — accept -> (True); revise w/ 0.0764 in [0.05, 0.15]
-  -> (True); malformed (empty rationale, bad decision) fails closed.
-  Kevin's paste is one-shot valid; no agent-side step remains. Fresh
-  verdict exit 1, single FAIL base05 0.0764 [0.014, 0.153]
-  (kevinruling43-verdict.log). 43rd dispatch; terminal wait on Kevin.
+- atk35-43 (2026-10-10): unchanged across 9 dispatches — ruling absent
+  (dir = .gitkeep; the bound host .git IS /work's .git, so the single-repo
+  check is exhaustive: no commit/stash/reflog of Kevin's touches the file;
+  reflog = harness syncs only). Fresh verdicts exit 1, single FAIL base05
+  0.0764 [0.014, 0.153] < 0.10 (kevinruling{35..43}-verdict.log). atk43:
+  this ticket's verbatim printf bytes re-verified against the real
+  check_ruling in memory — accept -> (True); revise w/ 0.0764 in
+  [0.05, 0.15] -> (True); malformed (empty rationale, bad decision) fails
+  closed. Kevin's paste one-shot valid; no agent-side step remains.
+- atk44 (2026-10-10): unchanged — `git log --all -- <ruling file>` EMPTY
+  (no commit ever touched the file; cd681e9 added only the dir's .gitkeep),
+  dir = .gitkeep, reflog since atk43 = harness reset/merge only. Fresh
+  verdict exit 1, single FAIL base05 (kevinruling44-verdict.log). 44th
+  dispatch on this human-only line; terminal wait on Kevin.
+- atk46 (2026-10-10): unchanged — `git log --all -- <ruling file>` still
+  empty, dir = .gitkeep; checker untouched since cd681e9 (git log
+  cd681e9..HEAD on tools/check_results.py + test = empty); ticket printf:73
+  bytes re-verified in /tmp vs current check_ruling: accept -> (True),
+  bad decision + revise-out fail closed. Fresh verdict exit 1, single FAIL
+  base05 0.0764 [0.014, 0.153] < 0.10 (kevinruling46-verdict.log). 46th
+  dispatch; terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
