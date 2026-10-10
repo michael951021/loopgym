@@ -14,8 +14,10 @@ or revise the pre-run range? Open iff results/rulings/base05_val.ruling.json is
 absent; a committed ruling closes it.
 
 ## Evidence (all observed, no guesses)
-- Ruling absent everywhere (re-verified every attempt; latest w1 atk35, 2026-10-10,
-  master unchanged since dcb59cf so atk34's E2E/verdict holds):
+- Ruling absent everywhere (re-verified every attempt; latest w1 atk38,
+  2026-10-10, master 3e4460e docs-only since dcb59cf; atk38 re-ran all three
+  checks fresh: gate exit 1 (--line kevinruling), verdict exit 1, paste E2E
+  exit 0 5/5 PASS, checker+guard 16/16):
   results/rulings/ = .gitkeep only; `git log --all -- <ruling file>` empty (no
   commit ever touched it — cd681e9 added only the .gitkeep); no stash; reflog =
   harness syncs only. The bound host .git IS /work's .git, so the single-repo
