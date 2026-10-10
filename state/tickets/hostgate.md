@@ -69,6 +69,27 @@ human-only line after applying the patch refutes the fix.
   line claimed), `status` holds L133/L137 as human-only
   (.agent-evidence/hostgate-atk6-apply.log). In-repo 16/16 (sched_guard +
   check_results); live gate rc: kevinruling 1, hostgate 1, rangerule 0.
+- atk7 (2026-10-10): 7th dispatch = live proof the gate is still not in the
+  live dispatcher. New: audited the harness dispatch path (mirror 4cb686d)
+  for any in-repo extension that could gate dispatch without the host
+  patch — none exists: plan() state set {failed, claimed, waiting,
+  blocked-failed, job, ready} (sched.py:149-182), cmd_next claims only
+  "ready", pool.ready() counts only "ready" (pool.py:53-60), (run:) job
+  CMDs run in the same bwrap sandbox (agent cmd_job: `sandbox "$wt" --
+  bash -c "$cmd"`), hooks are ro-bound from $ROOT/hooks (harness
+  territory), failed.json/MAX_TASK_ATTEMPTS are host state, and the only
+  TODO.md lever is (after:) deps (a semantic fudge; cannot hold
+  kevinruling, w1's line). Extending .agent-shared to bind the harness
+  root would self-apply the patch: violates hard rule 4 + the
+  (human-only) tag and grants every agent RW to the dispatcher —
+  rejected. So Kevin's one-liner is the only path. Re-verified fresh at
+  4cb686d: apply-check OK, 4/4, real TODO.md RED (ready/ready, 2 ready)
+  -> GREEN (human-only/human-only, 0 ready; rangerule unchanged
+  waiting), in-repo 16/16, guard rc 1/1/0
+  (.agent-evidence/hostgate-atk7-verify.log). Note: the mirror updates
+  only when host_export.py runs on the host, so a later run cannot
+  self-detect Kevin's apply from the mirror; the live dispatcher is
+  ground truth.
 
 ## Done when
 1. On the host harness repo: `git apply

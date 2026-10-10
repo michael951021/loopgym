@@ -11,9 +11,10 @@
 
 ## Scheduling
 - `(human-only[: P])`: tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); tagged held.
-- hostgate: unapplied on host (6th dispatch = gate not live). atk6:
-  fixed apply-script restart msg; E2E 4cb686d apply+4/4+rc0 + real
-  TODO.md L133/L137 held (hostgate-atk6-apply.log). Kevin:
+- hostgate: unapplied on host (7th dispatch = gate not live). atk7:
+  audited harness dispatch path — no in-repo gate extension (jobs
+  in-sandbox; hooks ro-bound; only (after:) lever); Kevin's script is
+  the sole path; re-verified (hostgate-atk7-verify.log). Kevin:
   projects/loopgym/tools/hostgate_apply.sh (no restart), commit
   lib/sched.py, check TODO:137.
 
@@ -63,9 +64,9 @@
 - `tools/fetch_src.sh`: vllm/deepspeed/trl -> .tools/src/ (rule 6).
 
 ## Data
-- `freeze.py`: v0 = 26 verified tasks (draftlab 22/harness 4), sha1%100>=70
+- `freeze.py`: v0 = 26 verified (draftlab 22/harness 4), sha1%100>=70
   train 13/test 13; data/loopgym/v0/ + results/loopgym_v0.json; `--check`
-  exit 1 on drift; redaction: public draftlab/harness only.
+  exit 1 on drift; public draftlab/harness only.
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
 - hidden checks: temp root + synthetic fixtures; assert completion claim;
   cross-check cited numbers vs results/*.json; GOTCHA: results/*.json absent
