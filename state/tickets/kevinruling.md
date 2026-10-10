@@ -148,6 +148,13 @@ absent; a committed ruling closes it.
   humandispatch ticket (TODO:135) already [x]: in-repo gate works, only the
   host-side dispatcher wiring is missing (Kevin's). Paste intact. Terminal
   wait on Kevin.
+- w1 atk9 (2026-10-10): unchanged — ruling never committed (for-each-ref:
+  no ref beyond harness/job commits; no stash/remote; master = w1 HEAD);
+  ListAgents: no live peer; results/rulings/ empty. Fresh verdict exit 1,
+  single base05 FAIL 0.0764 [0.014, 0.153] < 0.10, other rows PASS
+  (kevinruling-w1a9-verdict.log). Paste intact at :173-174. No agent-side
+  step remains (rule 5); re-dispatch root cause ticketed (hostgate,
+  TODO:137). Terminal wait on Kevin.
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
