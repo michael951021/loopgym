@@ -62,9 +62,9 @@ Next-run state; logs in .agent-evidence/.
 - `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; lazy import when file
   absent at one commit (tests=0 -> error).
 - vb1/vb2 done 24/24 (checked; gate >= 30% passed). vb3: batch3 = 16 steps
-  (cands 25-40, score order); 2/16 done: 25 harness-bc2cdd8 + 26 draftlab-35a5d46-1e9f5d3
-  both verified (bad 0/3, good 3/3); next = draftlab-bea1633-9b213ef, one per run;
-  vb3 milestone line still unchecked.
+  (cands 25-40, score order); 3/16 done: harness-bc2cdd8, draftlab-35a5d46-1e9f5d3,
+  draftlab-bea1633-9b213ef all verified (bad 0/3, good 3/3); one per run;
+  next = draftlab-7074368-07efa48; vb3 milestone line still unchecked.
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored).
   jaxlm: chi2 via stats.chi2.sf. NOTES.md cands: assert the completion claim, not
   bare numbers (bad-commit lines may hold cost estimates).
