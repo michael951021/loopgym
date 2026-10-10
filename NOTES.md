@@ -20,6 +20,13 @@ Next-run state; evidence .agent-evidence/*.log.
 - `exercism.py`: fresh tmpdir, pristine tests + ONLY solution, junit XML, pgroup SIGKILL;
   reward 1 iff tests>0 no fail/err/skip. `lgbox.py`: RUNNERS["http"] iff LOOPGYM_LGBOX_URL.
   `toy.py`: banana (first 20 tok ci), coinflip (seeded). `splits.py`: sha1%100, 101/9/27, 137/142.
+  `loopgym.py`: Task(prompt/parse/reference/stub)+grade. Task = verified record whose whole
+  diff is M/A text with a hidden-check dir (10 loaded post-merge; 6 records excluded: D/binary).
+  Prompt: ticket + bad-commit files elided at git diff -U0 hunks ±3, 4500-chr/file, <=6k tok
+  (chars/3, candidate files first, rest by name). Parse: ```path blocks to next path fence
+  (slash/ext/bare-known-name; inner ``` safe). Grade: apply reply to bad worktree, pristine
+  V._run_once; reply file outside task.files -> 0 (anti-hack). Known answer 42 pass @95s
+  (ref=1, stub=0, hidden-test edit=0; parse round-trip \n-tolerant).
 
 ## lgbox
 - `lgbox serve` (axum): /run (setpgid, RLIMIT, Q->503), /health, /metrics; FC FakeVmm-only.
@@ -73,3 +80,5 @@ Next-run state; evidence .agent-evidence/*.log.
 - NOTES.md: merges duplicate lines; condense.
 - .venv: no pip (uv or ensurepip); polars 2.0.0.
 - p-l-f ref audit: times out @30s (passes @60s); test split only.
+- env.grade entry-point default timeout=30 < loopgym's slowest check (~25s chi2): future
+  loopgym trainer/eval branch must pass cfg.timeout=120 (or V.TIMEOUT).

@@ -8,9 +8,13 @@ __all__ = ["RUNNERS", "Task", "grade", "lgbox", "load_exercise", "runner_names",
 
 
 def grade(task, files, runner="local", timeout=30, step=0, index=0):
-    """Grade one completion for task -> (reward, info). Test-based sources (exercism and,
-    later, loopgym) run the task's hidden tests via RUNNERS (runner/timeout select which);
-    toy tasks score in-process via their reward function, keyed by (step, index)."""
+    """Grade one completion for task -> (reward, info). Test-based sources (exercism and
+    loopgym) run the task's hidden tests (runner/timeout select which runner; loopgym is
+    always the local runner); toy tasks score in-process via their reward function, keyed
+    by (step, index)."""
     if isinstance(task, toy.ToyTask):
         return toy.grade(task, files, step=step, index=index)
+    from . import loopgym as _loopgym
+    if isinstance(task, _loopgym.Task):
+        return _loopgym.grade(task, files, runner=runner, timeout=timeout)
     return _exercism_grade(task, files, runner=runner, timeout=timeout)
