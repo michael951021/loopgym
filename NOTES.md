@@ -20,9 +20,9 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   base05 ruling LANDED (64ecd1b, kevin 2026-10-10, verbatim accept +
-  trailing \n): guard exit 0, checker `--only baselines` exit 0, all
-  baselines PASS (atk4-verdict.log). basecheck unblocked; rangerule line
-  records the verdict.
+  trailing \n). VERDICT (rangerule): checker `--only baselines` exit 0,
+  5/5 PASS, ruling cited verbatim (rangerule-verdict.log); checker tests
+  11/11. basecheck UNBLOCKED.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
