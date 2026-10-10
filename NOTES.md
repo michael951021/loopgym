@@ -11,10 +11,11 @@
 
 ## Scheduling
 - `(human-only[: P])`: tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); tagged held.
-- hostgate: 7th dispatch = still unapplied. atk7: no in-repo gate
-  extension (audit); Kevin's apply script sole path, no restart;
-  re-verified (hostgate-atk7-verify.log). Kevin: tools/hostgate_apply.sh,
-  commit lib/sched.py, check TODO:137.
+- hostgate: 8th dispatch: unapplied. atk8: delivery OK (script+patch on
+  master 18e9b3f = primary checkout; mirror 4cb686d, no HUMAN_ONLY;
+  E2E rc0+idempotent, 4/4, guard 1/1/0, 16/16; atk8-verify.log). Kevin
+  (host): projects/loopgym/tools/hostgate_apply.sh, commit harness
+  lib/sched.py, check TODO:137.
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.

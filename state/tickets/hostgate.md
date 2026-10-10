@@ -90,6 +90,16 @@ human-only line after applying the patch refutes the fix.
   only when host_export.py runs on the host, so a later run cannot
   self-detect Kevin's apply from the mirror; the live dispatcher is
   ground truth.
+- atk8 (2026-10-10): 8th dispatch = live proof the gate is still not in
+  the live dispatcher. New: delivery-path check (atk4-7 only tested
+  /tmp clones): master 18e9b3f contains tools/hostgate_apply.sh +
+  state/tickets/hostgate.patch (same blobs as w2), and the primary
+  checkout ~/Documents/coders/loop/projects/loopgym sits on master
+  (`git worktree list`), so Plan step 1's one-liner is executable as
+  written. Mirror still 4cb686d, no HUMAN_ONLY in any ref. Fresh E2E on
+  a new 4cb686d worktree: apply rc 0 + 4/4, rerun idempotent rc 0;
+  guard 1/1/0; in-repo 16/16 (.agent-evidence/hostgate-atk8-verify.log).
+  No new agent-side step; nothing left but Kevin's run.
 
 ## Done when
 1. On the host harness repo: `git apply
