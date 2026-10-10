@@ -20,12 +20,12 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md Plan step 1; E2E exit 0 atk27). w1 atk4 (2026-10-10):
-  ruling absent (all refs/stash/remote; Kevin's checkout synced to master);
+  (paste: kevinruling.md Plan step 1; E2E exit 0 atk27). w1 atk5 (2026-10-10):
+  ruling absent (all refs/stash/remote; master 796f533); no live peer;
   gate exit 1; fresh checker exit 1: base05 FAIL 0.0764 [0.014,0.153] <0.10
-  (kevinruling-w1a4-verdict.log). Host dispatcher re-dispatches despite
-  humandispatch [x] -> host wiring Kevin's (no sandbox lever, atk47-49).
-  Wait on Kevin: run the 2-line paste.
+  (kevinruling-w1a5-verdict.log). humandispatch [x] (TODO:135): in-repo gate
+  works; host dispatcher wiring Kevin's (no sandbox lever). Terminal wait:
+  Kevin runs the 2-line paste.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

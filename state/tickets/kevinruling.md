@@ -141,6 +141,13 @@ absent; a committed ruling closes it.
   Terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
+- w1 atk5 (2026-10-10): unchanged — ruling absent on all refs/stash/remotes
+  (master == 796f533, no fetch delta); ListAgents: no live peer (same as atk4).
+  Gate exit 1 (skip); fresh verdict exit 1, single base05 FAIL 0.0764
+  [0.014, 0.153] < 0.10, other rows PASS (kevinruling-w1a5-verdict.log).
+  humandispatch ticket (TODO:135) already [x]: in-repo gate works, only the
+  host-side dispatcher wiring is missing (Kevin's). Paste intact. Terminal
+  wait on Kevin.
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
