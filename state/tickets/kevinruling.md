@@ -5,7 +5,7 @@ base05 val pass@1 0.0764 [0.014, 0.153] is below the pre-run 0.10 floor. Rule 5:
 only the range author (Kevin) may accept the number or revise the range — agents
 never write rulings. Until this lands, basecheck stays exit 1 and everything
 gated after it (grpocfg, grpo05) is blocked. The dedicated line was meant to
-stop re-dispatch but did not (46th: atk46; humandispatch TODO.md:135).
+stop re-dispatch but did not (48th: atk48; humandispatch TODO.md:135).
 
 ## Question
 Does the range author accept 0.0764 (task-clustered CI straddles the 0.10 floor)
@@ -60,6 +60,17 @@ absent; a committed ruling closes it.
   only — no dispatcher code or skip-marker support in the sandbox, so the
   humandispatch fix (TODO.md:135) is Kevin-side only; reconfirms no
   agent-side path. 47th dispatch; terminal wait on Kevin.
+- atk48 (2026-10-10): unchanged — `git log --all -- <ruling file>` empty,
+  dir = .gitkeep, checker untouched since cd681e9 (git log cd681e9..HEAD on
+  checker + test empty). Fresh verdict exit 1, single FAIL base05 0.0764
+  [0.014, 0.153] < 0.10 (kevinruling48-verdict.log). Full bwrap mount audit
+  (parent process args): writable = w2 worktree + shared project dirs
+  (data/models/ckpt/runs/.tools/.venv) + host .git + /home/agent; read-only
+  = bridge.py, mergelines.py, hooks, mcp, prompts, gh_token. No dispatcher
+  code, config or state inside the sandbox; the task arrives via a host-set
+  AGENT_TASK env. Zero agent-side levers to stop re-dispatch — the
+  humandispatch fix (TODO.md:135) is Kevin-side only. 48th dispatch;
+  terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
