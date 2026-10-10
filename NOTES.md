@@ -13,10 +13,11 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (malformed fails closed; rule 5 by access).
   HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json; verbatim
-  cmd in state/tickets/kevinruling.md. atk42: absent (bound host .git IS
-  /work's .git -> single repo exhaustive; reflog = harness only, no Kevin
-  commit/stash). verdict exit 1, single base05 FAIL 0.0764 [0.014,0.153]
-  < 0.10 (kevinruling42-verdict.log); humandispatch TODO.md:135 stands;
+  cmd in state/tickets/kevinruling.md (atk43: printf bytes re-verified vs
+  real check_ruling -> (True), malformed fails closed; one-shot paste).
+  atk43: absent (single bound .git exhaustive; no Kevin ref/stash/reflog).
+  verdict exit 1, single base05 FAIL 0.0764 [0.014,0.153] < 0.10
+  (kevinruling43-verdict.log); humandispatch TODO.md:135 stands;
   no agent-side path (rule 5) — terminal wait on Kevin.
 
 ## Models
