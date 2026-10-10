@@ -60,13 +60,10 @@
 
 ## Data
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
-- vb1/vb2 24/24; vb3 11/16, all verified (bad 0/3, good 3/3); next =
-  harness-5279ea0-29cc54f.
+- vb1/vb2 24/24; vb3 12/16, all verified (bad 0/3, good 3/3); next =
+  draftlab-35a5d46-2c54450.
 - hidden checks: temp root + synthetic fixtures.
-  spec-chi2: fix in test file -> spy spec_generate, assert rejecting rounds
-  (drafted>accepted) > 0 + recompute chi2 p>0.01.
   NOTES.md cands: assert the completion claim, not bare numbers.
-  harness cands: find ROOT from sys.path, fabricate a git project under ROOT/projects.
-  tf/GKE cands: root() marker draftlab/ + tools/check.sh (at both commits;
-  in-test fail, not collection); temp-copy init -backend=false + validate
-  (warm .tools/tfplugin-cache ~0.7s) + shape grep.
+  harness cands: ROOT from PYTHONPATH; fabricate a tmp git repo (agent-loop
+  cands: under ROOT/projects), drive tests/fake_claude.py, assert on its
+  stream-json events.
