@@ -14,15 +14,13 @@ Next-run state; logs in .agent-evidence/.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (schema malformed fails closed; --results-dir;
-  author VALUE not schema-checked — rule 5 enforced by access, atk27 E2E).
+  author VALUE not schema-checked — rule 5 by access, E2E-verified).
   base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
-  results/rulings/base05_val.ruling.json — paste cmd in state/tickets/kevinruling.md
-  (E2E exit 0). atk30: ruling absent on disk/all refs/stash, no remote;
-  master at a9ea865 (=w2 HEAD); Kevin's checkout HEAD 151566f->a9ea865 but
-  tree still wiped — results/rulings/ MISSING there, paste line 1 would fail:
-  restore first (`git restore .`, ticket Plan step 0); verdict exit 1
-  (kevinruling30-verdict.log). 30 dispatches; humandispatch stands
-  (TODO.md:135); basecheck gated.
+  results/rulings/base05_val.ruling.json (paste cmd in state/tickets/kevinruling.md).
+  atk30: ruling absent everywhere; Kevin's checkout tree still wiped —
+  results/rulings/ MISSING: restore first (`git restore .`, ticket Plan 0);
+  verdict exit 1 (kevinruling30-verdict.log). 30 dispatches; humandispatch
+  stands (TODO.md:135); basecheck gated.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
