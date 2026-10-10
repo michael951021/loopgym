@@ -14,9 +14,9 @@ Next-run state; logs in .agent-evidence/.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (schema malformed fails closed; --results-dir;
-  author VALUE not schema-checked — rule 5 by access, E2E-verified).
+  author VALUE unchecked — rule 5 by access).
   base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
-  results/rulings/base05_val.ruling.json (paste cmd in state/tickets/kevinruling.md).
+  results/rulings/base05_val.ruling.json (cmd in state/tickets/kevinruling.md).
   atk30: ruling absent everywhere; Kevin's checkout tree still wiped —
   results/rulings/ MISSING: restore first (`git restore .`, ticket Plan 0);
   verdict exit 1 (kevinruling30-verdict.log). 30 dispatches; humandispatch
