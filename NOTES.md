@@ -16,9 +16,9 @@ Next-run state; logs in .agent-evidence/.
   passes only via range-author ruling (malformed fails closed; --results-dir;
   author VALUE unchecked, rule 5 by access). base05 0.0764 [0.014,0.153] < 0.10.
   HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json (cmd in
-  state/tickets/kevinruling.md). atk31: ruling absent on all refs/stash incl.
-  Kevin's repo; his HEAD 2468727 (=w2 HEAD), tree still wiped: `git restore .`
-  then paste; verdict exit 1 (kevinruling31-verdict.log); basecheck gated;
+  state/tickets/kevinruling.md). atk32: ruling absent everywhere (both
+  repos/refs/stash); Kevin's checkout 2da001b, tree wiped -> `git restore .`
+  then paste; verdict exit 1 (kevinruling32-verdict.log); basecheck gated;
   humandispatch TODO.md:135.
 
 ## Models
