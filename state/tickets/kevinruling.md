@@ -155,6 +155,18 @@ absent; a committed ruling closes it.
   (kevinruling-w1a9-verdict.log). Paste intact at :173-174. No agent-side
   step remains (rule 5); re-dispatch root cause ticketed (hostgate,
   TODO:137). Terminal wait on Kevin.
+- w1 atk10 (2026-10-10): unchanged — ruling absent everywhere reachable.
+  NEW (different approach): checked Kevin's host checkout directly —
+  /work/.git is a gitfile into /home/kevin/.../projects/loopgym/.git/
+  worktrees/w1: SAME object store (15 refs / 379 commits both sides, no
+  stash), so no Kevin-side private state exists and the single-repo
+  absence check is exhaustive. His worktree files are not bound into the
+  sandbox (only his .git: status shows all files deleted); find over
+  /home /work /tmp /var/tmp finds no ruling file. No live peer
+  (ListAgents). Gate exit 1; fresh verdict exit 1, single base05 FAIL
+  0.0764 [0.014,0.153] <0.10, other rows PASS
+  (kevinruling-w1a10-verdict.log). Paste now at :180-181 (file grew).
+  10th w1 dispatch; terminal wait on Kevin.
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
