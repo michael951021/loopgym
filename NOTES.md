@@ -15,10 +15,10 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (malformed fails closed; rule 5 by access).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (one-shot paste state/tickets/kevinruling.md:141-145). atk64: ruling absent
-  (tree, all refs, stash; no origin remote); master==w2; checker not re-run
-  (no input change since atk63: exit 1, base05 FAIL 0.0764 [0.014,0.153] <0.10);
-  64th dispatch, terminal wait; humandispatch root-cause queued TODO.md:135.
+  (one-shot paste state/tickets/kevinruling.md:141-145). atk65: ruling absent
+  (tree, all refs, stash; no origin); no reachable human session (ListAgents);
+  fresh checker exit 1, single base05 FAIL 0.0764 [0.014,0.153] <0.10,
+  unchanged; 65th dispatch, terminal wait; humandispatch queued TODO.md:135.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
