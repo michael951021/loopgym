@@ -59,11 +59,13 @@ Next-run state; evidence .agent-evidence/*.log.
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files + 3 seeds.
 - `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; lazy import when file
   absent at one commit (tests=0 -> error); 411f1c8 spec.py present -> top-level fine.
-- vb1: 12/12. vb2: 5/12 (cands 13-17 verified); next 18.
+- vb1: 12/12. vb2: 7/12 (cands 13-19 verified); next 20.
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored);
   jaxlm: chi2 via stats.chi2.sf (no chisquare); FixedDrafter mid-p token.
   harness: sched.py via runpy (name clash); empty logs/*.jsonl stops grep stdin;
   rmtree git fixture (worktree reused 3x/side).
+  NOTES.md cands: assert completion claim, not bare numbers (pre-reg lines may
+  contain e.g. "42 cells" cost estimate at bad commit).
 
 ## Gotchas
 - .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: never `rm DIR`, find -delete (EBUSY).
