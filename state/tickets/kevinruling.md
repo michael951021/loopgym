@@ -110,6 +110,12 @@ absent; a committed ruling closes it.
   unchanged since cd681e9. Fresh verdict exit 1, single base05 FAIL
   0.0764 [0.014, 0.153] < 0.10, other rows PASS
   (kevinruling59/60-verdict.log). 60th dispatch; terminal wait on Kevin.
+- atk61 (2026-10-10): unchanged — ruling absent on all refs/stashes, no live
+  peer (ListAgents), checker+results unchanged since cd681e9 → no re-run of
+  the deterministic verdict (identical inputs; Stop-when forbids re-runs).
+  One-shot paste verified intact at :136-139 (earlier line refs 114-115/131
+  stale — file grew). Root-cause ticket (humandispatch) already queued at
+  TODO.md:135. 61st dispatch; terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
