@@ -328,6 +328,11 @@ def run(cfg: TrainCfg, resume: bool | str) -> None:
     mpath.parent.mkdir(parents=True, exist_ok=True)
     start = run_.step + 1
     if start > cfg.steps:
+        if not mpath.is_file():
+            # orphaned checkpoint (metrics missing): a retried job must not report
+            # success with no artifacts
+            raise SystemExit(f"checkpoint at {ck} is past step {cfg.steps} but "
+                             f"{mpath} is missing; delete the checkpoint to rerun")
         print(f"[{out.name}] already complete at step {run_.step}; nothing to do")
         return
     for s in range(start, cfg.steps + 1):
