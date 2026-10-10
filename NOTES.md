@@ -21,12 +21,12 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md Plan step 1, lines 171-175). w1 atk6 (2026-10-10):
-  ruling absent (refs/stash/remote; master=837292d=w1 HEAD); no live peer;
-  gate exit 1 (kevinruling skip), checker exit 1: base05 FAIL
-  0.0764 [0.014,0.153] <0.10 (kevinruling-w1a6-verdict.log). Added hostgate
-  ticket (TODO:137, human-only) for the host dispatcher gap. No agent-side
-  step remains (rule 5); terminal wait: Kevin's 2-line paste.
+  (paste: kevinruling.md Plan step 1, lines 171-175). w1 atk7 (2026-10-10):
+  ruling absent (no remote/refs/stash; master=w1 HEAD); no live peer; gate
+  exit 1; checker exit 1: base05 FAIL 0.0764 [0.014,0.153] <0.10
+  (w1a7-verdict.log). NEW: verbatim paste E2E via --results-dir temp → exit 0
+  (w1a7-paste-e2e.log): Kevin's 2-line paste alone unblocks checker.
+  Terminal wait (rule 5): Kevin's paste + hostgate wiring (TODO:137).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
