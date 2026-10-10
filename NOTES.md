@@ -15,11 +15,11 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (malformed fails closed; rule 5 by access).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (one-shot paste state/tickets/kevinruling.md:141-145). atk71: ruling still
-  absent (only .gitkeep), no remote/stash/session; checker exit 1, base05 FAIL
-  0.0764 [0.014,0.153] <0.10, unchanged (71st dispatch). Systemic: dispatcher
-  re-dispatches human-only lines — root-cause ticket humandispatch (w1 in
-  flight); terminal wait on Kevin.
+  (paste kevinruling.md:141-145; E2E atk72: exact :143 bytes on a copy of
+  real results/ -> exit 0, tests 11/11 — paste valid). atk72: no ruling
+  (git log --all empty), checker unchanged since cd681e9, verdict exit 1,
+  base05 FAIL 0.0764 [0.014,0.153] <0.10. humandispatch (w1 in flight);
+  wait on Kevin (72nd dispatch).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

@@ -116,6 +116,15 @@ absent; a committed ruling closes it.
   One-shot paste verified intact at :136-139 (earlier line refs 114-115/131
   stale — file grew). Root-cause ticket (humandispatch) already queued at
   TODO.md:135. 61st dispatch; terminal wait on Kevin.
+- atk72 (2026-10-10): unchanged — ruling never committed
+  (`git log --all -- <file>` empty), dir = .gitkeep, checker+tests unchanged
+  since cd681e9. Fresh verdict exit 1, single base05 FAIL 0.0764
+  [0.014, 0.153] < 0.10 (kevinruling72-verdict.log). NEW: the CURRENT file's
+  paste (line 143; file grew past atk61's :136-139) re-verified E2E on a copy
+  of real results/ — exact bytes -> checker exit 0, all rows PASS, row cites
+  the ruling (kevinruling72-e2e-accept.log); checker tests 11/11
+  (kevinruling72-checker-tests.log). Paste valid as of this file state; no
+  agent-side step remains. 72nd dispatch; terminal wait on Kevin.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
