@@ -5,7 +5,7 @@ base05 val pass@1 0.0764 [0.014, 0.153] is below the pre-run 0.10 floor. Rule 5:
 only the range author (Kevin) may accept the number or revise the range — agents
 never write rulings. Until this lands, basecheck stays exit 1 and everything
 gated after it (grpocfg, grpo05) is blocked. The dedicated line was meant to
-stop re-dispatch but did not (25th dispatch: atk25).
+stop re-dispatch but did not (27th dispatch: atk27).
 
 ## Question
 Does the range author accept 0.0764 (task-clustered CI straddles the 0.10 floor)
@@ -65,20 +65,19 @@ absent; a committed ruling closes it.
   stands; fresh verdict exit 1, single FAIL base05 0.0764 [0.014,0.153] < 0.10
   (.agent-evidence/kevinruling24-verdict.log). 24th dispatch; humandispatch
   ticket stands at TODO.md:135. No agent-side path exists (rule 5).
-- atk25 (2026-10-10): unchanged — results/rulings/ = .gitkeep only; no
-  ruling on any ref (git log --all: nothing), no remote; checker unchanged
-  since cd681e9 and results/eval since bf0b283, so the atk19 E2E-verified
-  paste stands; fresh verdict exit 1, single FAIL base05 0.0764 [0.014,0.153]
-  < 0.10 (.agent-evidence/kevinruling25-verdict.log). 25th dispatch;
-  humandispatch ticket stands at TODO.md:135. No agent-side path exists
-  (rule 5); Kevin's one paste (Plan step 1) is the only unblock.
-- atk26 (2026-10-10): unchanged — results/rulings/ = .gitkeep only, no
+- atk25-27 (2026-10-10): unchanged — results/rulings/ = .gitkeep only, no
   ruling on any ref (git log --all: only cd681e9 touched the path), no
-  remote; checker unchanged since cd681e9, results/eval since bf0b283, so
-  the atk19 E2E-verified paste stands; fresh verdict exit 1, single FAIL
-  base05 0.0764 [0.014,0.153] < 0.10 (.agent-evidence/kevinruling26-verdict.log).
-  26th dispatch; humandispatch ticket stands at TODO.md:135. No agent-side
+  remote, no stash; atk27 also checked Kevin's own worktrees
+  (projects/loopgym master + job/*): no uncommitted ruling on disk; checker
+  unchanged since cd681e9, results/eval since bf0b283. Fresh verdict exit 1,
+  single FAIL base05 0.0764 [0.014,0.153] < 0.10 (kevinruling27-verdict.log).
+  27th dispatch; humandispatch ticket stands at TODO.md:135. No agent-side
   path exists (rule 5); Kevin's one paste (Plan step 1) is the only unblock.
+- atk27 NEW: E2E re-verified this run on a scratch copy (kevinruling27-accept-e2e.log):
+  verbatim accept -> exit 0, all rows PASS. check_ruling (tools/check_results.py:61)
+  validates schema only — author VALUE is not checked (well-formed ruling with
+  author "agent" also passed exit 0); identity is enforced by repo access + rule 5,
+  per its docstring. "Malformed fails closed" = shape, not identity.
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 - atk5: ruling-channel E2E on checker cd681e9 against a copy of the real
@@ -100,7 +99,7 @@ ruled-out cause checks. Kevin: commit the one file above; the gated line
 (id: rangerule, after: kevinruling) then runs the checker and records the verdict.
 
 ## Plan
-1. Kevin pastes (accept; E2E-verified exit 0 atk19 — kevinruling19-accept-e2e.log):
+1. Kevin pastes (accept; E2E re-verified exit 0 atk27 — kevinruling27-accept-e2e.log):
    ```sh
    printf %s '{"author": "kevin", "decision": "accept", "rationale": "task-clustered CI [0.014, 0.153] straddles the 0.10 floor; ten pipeline causes ruled out (atk1-10)"}' > results/rulings/base05_val.ruling.json
    git add results/rulings/base05_val.ruling.json && git commit -m "ruling: accept base05 0.0764 (CI straddles 0.10 floor)"

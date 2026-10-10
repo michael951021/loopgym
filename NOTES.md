@@ -13,13 +13,13 @@ Next-run state; logs in .agent-evidence/.
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
-  passes only via range-author ruling (malformed fails closed; --results-dir).
+  passes only via range-author ruling (schema malformed fails closed; --results-dir;
+  author VALUE not schema-checked — rule 5 enforced by access, atk27 E2E).
   base05 0.0764 [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
-  results/rulings/base05_val.ruling.json — paste-ready cmd in
-  state/tickets/kevinruling.md (E2E exit 0, atk19). atk26: absent all refs AND
-  disk; checker since cd681e9, eval since bf0b283; verdict exit 1
-  (kevinruling26-verdict.log). 26 dispatches; humandispatch stands
-  (TODO.md:135); basecheck gated.
+  results/rulings/base05_val.ruling.json — paste cmd in state/tickets/kevinruling.md
+  (E2E re-verified exit 0 atk27). atk27: absent all refs/disk/stashes/Kevin worktrees;
+  checker since cd681e9, eval since bf0b283; verdict exit 1 (kevinruling27-*.log).
+  27 dispatches; humandispatch stands (TODO.md:135); basecheck gated.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
