@@ -14,13 +14,15 @@ or revise the pre-run range? Open iff results/rulings/base05_val.ruling.json is
 absent; a committed ruling closes it.
 
 ## Evidence (all observed, no guesses)
-- Ruling absent everywhere (re-verified every attempt; latest w1 atk16,
+- Ruling absent everywhere (re-verified every attempt; latest w1 atk17,
   2026-10-10: fresh disk check — .gitkeep only — + git log --all empty, guard
-  fresh exit 1; atk16 re-verified the Plan-1 paste against the current
-  check_ruling source (tools/check_results.py:61: accept form passes) and
-  proved checker+guard+results unchanged since b710661; atk38 had re-run all
-  three checks fresh: gate exit 1, verdict exit 1, paste E2E exit 0 5/5 PASS,
-  checker+guard 16/16):
+  `--line kevinruling` exit 1; atk17 re-verified the Plan-1 paste against the
+  current check_ruling source (tools/check_results.py:61: accept form passes)
+  AND re-ran the E2E fresh (temp copy of real results/ + accept paste ->
+  checker --only baselines exit 0, all baselines PASS); checker+guard
+  unchanged since b710661. GOTCHA: sched_guard --line takes the id, not the
+  lineno (`--line 133` -> exit 2); atk38 had re-run all three checks fresh:
+  gate exit 1, verdict exit 1, paste E2E exit 0 5/5 PASS, checker+guard 16/16):
   results/rulings/ = .gitkeep only; `git log --all -- <ruling file>` empty (no
   commit ever touched it — cd681e9 added only the .gitkeep); no stash; reflog =
   harness syncs only. The bound host .git IS /work's .git, so the single-repo
