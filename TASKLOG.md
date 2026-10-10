@@ -125,3 +125,7 @@
 - Goal: Freeze loopgym v0
 - Approach: reuse load_tasks()/verified records as the source of truth, add a freeze module with build/--check, pin the split rule to a published SHA-1 vector, run the acceptance chain end-to-end
 - Blockers: none
+## kevin: stop dispatching human-only lines
+- Goal: kevin: stop dispatching human-only lines
+- Approach: Wrote acceptance test first (failed as expected), implemented the stdlib guard + tag, tagged TODO.md:133, documented the contract, verified on the real TODO.md and full suite.
+- Blockers: dispatcher code is host-side only, so its actual wiring to the gate is Kevin's one-line change — nothing in the sandbox to call it from.
