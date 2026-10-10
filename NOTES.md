@@ -15,10 +15,10 @@ Next-run state; logs in .agent-evidence/.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (malformed fails closed). base05 0.0764
   [0.014,0.153] < 0.10 -> exit 1. HUMAN-ONLY: kevin commits
-  results/rulings/base05_val.ruling.json (forms/E2E:
-  state/tickets/kevinruling.md); atk13: absent on all refs, verdict exit 1
-  (kevinruling13-verdict.log), 13 dispatches, humandispatch stands.
-  rangerule records verdict; basecheck gated exit 0.
+  results/rulings/base05_val.ruling.json (forms: state/tickets/kevinruling.md).
+  atk16: absent all refs AND on disk; fresh verdict exit 1 unchanged
+  (kevinruling16-verdict.log). 16 dispatches; humandispatch stands; basecheck
+  gated.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
