@@ -60,11 +60,12 @@
 - `tools/fetch_src.sh`: vllm/deepspeed/trl -> .tools/src/ (rule 6).
 
 ## Data
+- `freeze.py`: v0 = 26 verified tasks (draftlab 22/harness 4), sha1%100>=70
+  train 13/test 13; kill>=25 met -> train+eval; data/loopgym/v0/{tasks.jsonl,
+  checks/,DATASET.md} + results/loopgym_v0.json; `--check` re-derives, exit 1
+  on drift; redaction: public draftlab/harness only, no apply/contrib-loop.
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
 - vb1-3: 40/40 verified (bad 0/3, good 3/3); milestones done.
-- hidden checks: temp root + synthetic fixtures. NOTES.md cands: assert completion
-  claim; cross-check cited numbers vs results/*.json; if bad is stale-but-self-consistent,
-  anchor on corrected-world facts (Corrections, heldout, recomputed CI). GOTCHA: cited
-  results/*.json absent at bad -> worktree discovery lazy inside tests (module level =
-  collection error -> "error"). harness cands: ROOT from PYTHONPATH; fake git repo under
-  ROOT/projects; drive tests/fake_claude.py; assert stream-json events.
+- hidden checks: temp root + synthetic fixtures; assert completion claim; cross-check
+  cited numbers vs results/*.json; GOTCHA: results/*.json absent at bad -> lazy
+  worktree discovery inside tests (module level = collection error -> "error").
