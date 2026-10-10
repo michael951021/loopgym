@@ -184,6 +184,14 @@ absent; a committed ruling closes it.
   cd681e9, so atk15 E2E (paste verbatim -> exit 0, kr15-e2e.log) still valid;
   no re-E2E. Paste at :202-204. No agent-side step remains (rule 5);
   terminal wait on Kevin.
+- w1 atk19 (2026-10-10): unchanged — ruling still absent (rulings/ =
+  .gitkeep; `git log --all -- <ruling file>` empty; master = 51e6f76 =
+  atk18 HEAD, reflog = harness syncs only; Kevin's host .git = same
+  object store, HEAD identical, his worktree files not bound; ListAgents:
+  no live peer). Checker+tests unchanged since cd681e9. Gate exit 1;
+  fresh verdict exit 1, single base05 FAIL 0.0764 [0.014, 0.153] <0.10,
+  others PASS (w1a19-verdict.log). Paste at Plan step 1 (:209) valid.
+  19th w1 dispatch; terminal wait on Kevin.
 
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and

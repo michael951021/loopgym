@@ -24,11 +24,12 @@
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
   (paste: kevinruling.md Plan step 1; E2E accept->exit 0 valid, checker
   unchanged since cd681e9).
-  atk18: ruling absent (rulings/ = .gitkeep; no new master commits; no live
-  peer session to ping). Gate exit 1; fresh checker exit 1 (base05 FAIL
-  0.0764 [0.014,0.153] <0.10, others PASS, w1a18-verdict.log). Paste at
-  kevinruling.md still valid (checker unchanged since cd681e9). Terminal
-  wait: Kevin's host paste + hostgate (TODO:137). No agent step (rule 5).
+  atk19: ruling still absent (no new commit on master/any ref/Kevin's
+  host .git = same store, reflog = harness syncs only; no live peer).
+  Gate exit 1; checker exit 1 (base05 FAIL 0.0764 [0.014,0.153] <0.10,
+  others PASS, w1a19-verdict.log). Paste at kevinruling.md Plan step 1
+  valid (checker unchanged since cd681e9). Terminal wait: Kevin's host
+  paste + hostgate wiring (TODO:137). No agent step (rule 5).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
