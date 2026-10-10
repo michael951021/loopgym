@@ -11,8 +11,8 @@ Next-run state; evidence .agent-evidence/*.log.
   values are dicts; loopgym src NotImplemented.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL. BASECHECK blocked
   (rule 5): base05 0.0764 [0.014,0.153] (n=16) < 0.10 floor; 7 causes ruled out incl
-  model identity (494M config, 4/4 probe); base15 0.3056 in range, 1.5B>0.5B, ref 1.0;
-  never widen. Ticket rangerule = range-author ruling.
+  model identity (494M config, 4/4 probe); base15 in range, 1.5B>0.5B, ref 1.0;
+  never widen. Ticket: rangerule.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
@@ -22,19 +22,19 @@ Next-run state; evidence .agent-evidence/*.log.
   reward 1 iff tests>0 no fail/err/skip. `lgbox.py`: RUNNERS["http"] iff LOOPGYM_LGBOX_URL.
   `toy.py`: banana (first 20 tok ci), coinflip. `splits.py`: sha1%100, 137/142 usable, val 9.
 - `loopgym.py`: Task+grade over verified records (diff M/A text + hidden dir; 11 loaded,
-  7 excl); elision diff -U0 ±3, 4500-chr; ```path parse; grade = reply on bad
+  7 excl); ```path parse; grade = reply on bad
   worktree, pristine V._run_once (outside task.files -> 0). Known answer 42
   (ref=1, stub=0, hidden-edit=0).
 
 ## lgbox
-- `lgbox serve` (axum): /run (setpgid, RLIMIT, Q->503), /health, /metrics; FC FakeVmm-only.
-  docker: Dockerfiles (hadolint in check); no python in image -> no in-image grade.
+- `lgbox serve` (axum): /run (setpgid, RLIMIT, Q->503), /health, /metrics;
+  FC FakeVmm-only. docker: Dockerfiles (hadolint in check).
 
 ## Kernel
 - `kernels/token_logprobs(h,w,t,impl,chunk)->[T]: chunked max/LSE bwd softmax
   (no [T,V]); torch,cpp,triton,cuda. cpp JIT (-O3 -fopenmp); triton iff CUDA or
-  TRITON_INTERPRET=1, C<=1024, masked cols -inf; cuda host-only.
-- `tools/bench_logprob.py` -> results/bench_logprob.json; f64 1e-4, fused<1/8 naive.
+  TRITON_INTERPRET=1, C<=1024; cuda host-only.
+- `tools/bench_logprob.py` -> results/bench_logprob.json; f64 1e-4, <1/8 naive.
 
 ## RL
 - `grpo.py` group_advantages/kl_k3/policy_loss; 7/7 known.
@@ -48,12 +48,12 @@ Next-run state; evidence .agent-evidence/*.log.
   <out>^2/ckpt/<name>; --dist+--dry-run; exact resume; exit 1 on orphaned ckpt;
   from_pretrained freezes ALL -> requires_grad lora_.
 - `dist.py` FSDP2: fully_shard, full_state_dict DTensors (.full_tensor()), grads AVG, no 1/W.
-- `ds.py` ZeRO-3 (0.19.7, lazy): ds_zero3.json bf16 stage3; micro=b*group; CPU:
+- `ds.py` ZeRO-3 (0.19.7): ds_zero3.json bf16 stage3; micro=b*group; CPU:
   compatible_ops[deepspeed_shm_comm]=False.
 - Toy gates PASS: toybanana3/toynull3; toy_check exit 0; banana 0.148 -> 1.000
   (<0.2->>0.8); null slope CI contains 0; check_results --only toy 3/3; real GRPO
   may proceed.
-- `tools/fetch_src.sh`: vllm/deepspeed/trl sources -> .tools/src/ (rule 6).
+- `tools/fetch_src.sh`: vllm/deepspeed/trl -> .tools/src/ (rule 6).
 
 ## Data
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files + 3 seeds.
