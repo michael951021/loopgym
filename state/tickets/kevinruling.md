@@ -5,7 +5,7 @@ base05 val pass@1 0.0764 [0.014, 0.153] is below the pre-run 0.10 floor. Rule 5:
 only the range author (Kevin) may accept the number or revise the range — agents
 never write rulings. Until this lands, basecheck stays exit 1 and everything
 gated after it (grpocfg, grpo05) is blocked. The dedicated line was meant to
-stop re-dispatch but did not (37th dispatch: atk37; humandispatch TODO.md:135).
+stop re-dispatch but did not (39th dispatch: atk39; humandispatch TODO.md:135).
 
 ## Question
 Does the range author accept 0.0764 (task-clustered CI straddles the 0.10 floor)
@@ -47,6 +47,12 @@ absent; a committed ruling closes it.
   HEAD 6ca3875 = harness sync, no Kevin commits). Fresh verdicts exit 1,
   same single FAIL base05 (kevinruling3{6,7}-verdict.log). Nothing
   agent-side can change; 37th dispatch on this human-only line.
+- atk38-39 (2026-10-10): absent via full author enumeration — Kevin's only
+  5 commits (2026-10-09 bootstrap 7442a3e, 46fa73f, 0a84071, 80a2e1d,
+  8506b8f) touch no ruling path; `git log --all -- <ruling>` empty; dir =
+  .gitkeep. Fresh verdicts exit 1, same single FAIL base05
+  (kevinruling{38,39}-verdict.log). Root-cause ticket (humandispatch,
+  Kevin-only) stands at TODO.md:135; no new agent-side path exists (rule 5).
 - Raw sidecar recompute exact (11/144 = 0.076389, 0 timeouts): number is real.
 - Ten pipeline causes ruled out atk1-12 (.agent-evidence/basecheck*.log).
 
