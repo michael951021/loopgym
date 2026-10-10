@@ -1,7 +1,9 @@
 # Notes
 
 ## Gotchas
-- .venv/.tools/data/models/ckpt/runs are BIND MOUNTS: never `rm DIR`/find -delete.
+- Bind mounts to Kevin's host (never `rm DIR`/find -delete): /work, .git,
+  /home/agent, .venv, .tools, data, models, ckpt, runs; dispatcher is
+  host-side (task arrives via AGENT_TASK env) — no skip lever in sandbox.
 - ruff I/EXE pinned, whole tree incl tests/hidden; known/ I001/F401. .venv: no pip (uv/ensurepip).
 - RLIMIT_NPROC=64 counts ALL uid-1000 -> transient Cannot fork.
 - torch 2.14 FSDP2: fully_shard auto-inits env://; rank() pre-init 0.
@@ -12,14 +14,13 @@
 - `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (malformed fails closed; rule 5 by access).
-  HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json; verbatim
-  cmd in state/tickets/kevinruling.md (one-shot paste; E2E accept->exit 0
-  verified atk5/19/27; malformed fails closed). atk47: absent (git log --all
-  empty; dir = .gitkeep); checker unchanged since cd681e9; verdict exit 1,
-  single base05 FAIL 0.0764 [0.014,0.153] < 0.10 (kevinruling47-verdict.log);
-  47th dispatch; sandbox /opt/agent = bridge+hooks only, no dispatcher/skip
-  marker -> humandispatch fix (TODO.md:135) is Kevin-side; no agent-side path
-  (rule 5) — terminal wait on Kevin.
+  HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json (one-shot
+  paste in state/tickets/kevinruling.md; E2E accept->exit 0 atk5/19/27).
+  atk53: absent (git log --all = atk commits only; no stash; dir = .gitkeep);
+  fresh verdict exit 1, single base05 FAIL 0.0764 [0.014,0.153] < 0.10
+  (kevinruling53-verdict.log); 53rd dispatch; no agent lever: rule 5 +
+  dispatcher host-side; atk53 also checked MCP resources/live peers/
+  git remote = none; humandispatch (TODO.md:135) Kevin-side.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
