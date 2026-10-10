@@ -11,7 +11,7 @@
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
-- `eval/run.py`: --model/--adapter | --reference; sidecar resume.
+  `eval/run.py`: --model/--adapter | --reference; sidecar resume.
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (malformed fails closed; rule 5 by access).
   HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json (one-shot
@@ -29,9 +29,8 @@
   `lgbox.py`: RUNNERS["http"] iff LOOPGYM_LGBOX_URL.
   `toy.py`: banana (first 20 tok ci), coinflip (seeded). `splits.py`: sha1%100, 101/9/27,
   137/142 usable, val 9. `loopgym.py`: Task(prompt/parse/reference/stub)+grade over verified
-  records (diff M/A text + hidden dir); elided bad-commit files (diff -U0 ±3, 4500-chr/file,
-  <=6k tok); ```path-block parse; grade = reply on bad worktree, pristine V._run_once
-  (outside task.files -> 0); ref=1, stub=0, hidden-test edit=0.
+  records; elided bad files (diff -U0 ±3, 4500-chr, <=6k tok); ```path blocks; grade = reply
+  on bad worktree, pristine V._run_once (outside task.files -> 0); ref=1, stub=0, hidden=0.
 
 ## lgbox
 - `lgbox serve` (axum): /run (setpgid, RLIMIT, Q->503), /health, /metrics;
@@ -61,10 +60,10 @@
 
 ## Data
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
-- vb1/vb2 24/24; vb3 15/16 all verified (bad 0/3, good 3/3); next = draftlab-cf96577-11b1d16.
-- hidden checks: temp root + synthetic fixtures. NOTES.md cands: assert the
-  completion claim; cross-check cited numbers vs results/*.json; when bad is
-  self-consistent-but-stale, anchor on corrected-world facts (Corrections
-  section, heldout split, CI recomputed from results).
-  harness cands: ROOT from PYTHONPATH; fabricate a tmp git repo (agent-loop cands
-  under ROOT/projects), drive tests/fake_claude.py, assert on stream-json events.
+- vb1-3: 40/40 verified (bad 0/3, good 3/3); milestones done.
+- hidden checks: temp root + synthetic fixtures. NOTES.md cands: assert completion
+  claim; cross-check cited numbers vs results/*.json; if bad is stale-but-self-consistent,
+  anchor on corrected-world facts (Corrections, heldout, recomputed CI). GOTCHA: cited
+  results/*.json absent at bad -> worktree discovery lazy inside tests (module level =
+  collection error -> "error"). harness cands: ROOT from PYTHONPATH; fake git repo under
+  ROOT/projects; drive tests/fake_claude.py; assert stream-json events.
