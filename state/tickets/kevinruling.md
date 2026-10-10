@@ -5,7 +5,7 @@ base05 val pass@1 0.0764 [0.014, 0.153] is below the pre-run 0.10 floor. Rule 5:
 only the range author (Kevin) may accept the number or revise the range — agents
 never write rulings. Until this lands, basecheck stays exit 1 and everything
 gated after it (grpocfg, grpo05) is blocked. The dedicated line was meant to
-stop re-dispatch but did not (58th: atk58; humandispatch TODO.md:135).
+stop re-dispatch but did not (w1's 26th: w1 atk26; humandispatch TODO.md:135).
 
 ## Question
 Does the range author accept 0.0764 (task-clustered CI straddles the 0.10 floor)
@@ -220,6 +220,17 @@ absent; a committed ruling closes it.
   -> True, out-of-range/no-rationale/bad-decision -> False. Kevin's paste
   is now copy-safe from either file. Terminal wait on Kevin.
 
+- w1 atk26 (2026-10-10): unchanged — ruling still absent (dir = .gitkeep;
+  `git log --all -- <file>` = cd681e9 mechanism only; no stash/peer;
+  /work/.git = Kevin's host object store, so check is exhaustive).
+  Checker+tests+results/eval unchanged since cd681e9 (fff19b8 added only
+  loopgym_v0.json, not loaded by checker). Fresh verdict exit 1, single
+  base05 FAIL 0.0764 [0.014, 0.153] < 0.10, others PASS
+  (w1a26-verdict.log). Paste bytes re-verified in memory vs real
+  check_ruling: accept True, revise-in True, revise-out/no-rationale/
+  bad-decision False (fail closed). Gate exit 1 (line 133). No agent-side
+  step (rule 5); terminal wait: Kevin's paste (Plan step 1) + hostgate
+  (w2 active).
 ## Done when
 results/rulings/base05_val.ruling.json committed by kevin, and
 `.venv/bin/python tools/check_results.py --only baselines` exits 0.

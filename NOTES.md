@@ -22,12 +22,12 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json.
-  w1a25 (terminal wait): ruling still absent (no refs/stash/peer); gate
-  exit 1; checker unchanged since cd681e9 -> w1a24 verdict holds (exit 1,
-  base05 FAIL 0.0764 [0.014,0.153] <0.10, others PASS). No agent step (rule
-  5). NEW: rangerule.md paste was wrapped (copy would be malformed);
-  TODO:133 + both tickets now byte-identical single-line forms, re-verified
-  vs check_ruling (fail closed). Re-dispatch fix: hostgate (w2 active).
+  w1a26 (terminal wait): ruling still absent (dir=.gitkeep; git log --all =
+  cd681e9 only; no stash/peer); fresh checker exit 1 (base05 FAIL 0.0764
+  [0.014,0.153] <0.10, others PASS, w1a26-verdict.log); paste bytes
+  re-verified vs check_ruling (accept/revise-in True, negatives False);
+  gate exit 1 (line 133); no agent step (rule 5). Re-dispatch fix: hostgate
+  (w2 active).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
