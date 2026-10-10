@@ -60,8 +60,8 @@
 
 ## Data
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
-- vb1/vb2 24/24; vb3 8/16, all verified (bad 0/3, good 3/3); next =
-  draftlab-e6895d1-5bf9b0d.
+- vb1/vb2 24/24; vb3 9/16, all verified (bad 0/3, good 3/3); next =
+  draftlab-fc210e7-f0371d7.
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored).
   spec-chi2: fix in test file -> spy spec_generate, assert rejecting rounds
   (drafted>accepted) > 0 + recompute chi2 p>0.01.
