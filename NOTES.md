@@ -20,7 +20,7 @@ Next-run state; evidence .agent-evidence/*.log.
   reward 1 iff tests>0 no fail/err/skip. `lgbox.py`: RUNNERS["http"] iff LOOPGYM_LGBOX_URL.
   `toy.py`: banana (first 20 tok ci), coinflip (seeded). `splits.py`: sha1%100, 101/9/27, 137/142.
   `loopgym.py`: Task(prompt/parse/reference/stub)+grade over verified records (diff all
-  M/A text + hidden-check dir; 10 loaded, 6 excl D/binary); elided bad-commit files
+  M/A text + hidden-check dir; 11 loaded, 7 excl D/binary); elided bad-commit files
   (diff -U0 ±3, 4500-chr/file, <=6k tok); ```path-block parse; grade = reply on bad
   worktree, pristine V._run_once (file outside task.files -> 0). Known answer 42 @95s
   (ref=1, stub=0, hidden-test edit=0).
@@ -60,9 +60,7 @@ Next-run state; evidence .agent-evidence/*.log.
 - `data/mine.py`: %B x blame keyword fixes -> (bad,good); <=200 lines/4 files + 3 seeds.
 - `data/verify.py`: 3x/side worktrees, pristine -> verified.jsonl; lazy import when file
   absent at one commit (tests=0 -> error); 411f1c8 spec.py present -> top-level fine.
-- vb1: 12/12. vb2: 4/12 (cands 13-16 verified); next 17.
-  absent (tests=0 -> error); 411f1c8 spec.py present.
-- vb1: 12/12. vb2: 3/12 (cands 13-15 verified); next 16.
+- vb1: 12/12. vb2: 5/12 (cands 13-17 verified); next 18.
 - hidden checks: temp root + synthetic fixtures (draftlab data/ gitignored);
   jaxlm: chi2 via stats.chi2.sf (no chisquare); FixedDrafter mid-p token.
   harness: sched.py via runpy (name clash); empty logs/*.jsonl stops grep stdin;
