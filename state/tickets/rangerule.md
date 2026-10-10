@@ -45,7 +45,9 @@ row, note citing the ruling path. Ruling forms (verbatim-verified atk11):
 Agents never write or widen the range. If the ruling is absent at the end
 of the run, stop with RESULT: not done — the one remaining action is
 Kevin's; do not re-run ruled-out cause checks (that is the loop atk1-12
-escaped). Not splittable: the residual action is one human file.
+escaped). atk2 split the TODO line: kevinruling (the human file) + this
+agent residue, now gated (after: kevinruling), so agents stop being
+dispatched to the human-only part.
 
 ## Plan
 1. Verify no ruling arrived (master moved? rulings dir?) — done: none.
