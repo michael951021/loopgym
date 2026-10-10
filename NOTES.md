@@ -16,10 +16,10 @@
   passes only via range-author ruling (malformed fails closed; rule 5 by access).
   HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json (one-shot
   paste in state/tickets/kevinruling.md; E2E accept->exit 0 atk5/19/27).
-  atk54: absent (git log --all = atk commits only; no stash; dir = .gitkeep);
-  fresh verdict exit 1, single base05 FAIL 0.0764 [0.014,0.153] < 0.10
-  (kevinruling54-verdict.log); 54th dispatch; no agent lever: rule 5 +
-  dispatcher host-side; atk53 checked MCP/peers/remote = none;
+  atk55: absent (no commit/stash; dir = .gitkeep; ListAgents = no live peer
+  session to ping Kevin); fresh verdict exit 1, single base05 FAIL
+  0.0764 [0.014,0.153] < 0.10 (kevinruling55-verdict.log); 55th dispatch on
+  human-only line; no agent lever (rule 5; dispatcher host-side);
   humandispatch (TODO.md:135) Kevin-side.
 
 ## Models
