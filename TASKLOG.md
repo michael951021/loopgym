@@ -137,3 +137,7 @@
 - Goal: base05 floor: record ruling verdict
 - Approach: Ran the real checker on committed results with the landed ruling file, captured the log (rangerule-verdict.log), ran the 11 checker tests, updated ticket + NOTES verdict line, committed.
 - Blockers: none
+## Check baselines against ranges
+- Goal: Check baselines against ranges
+- Approach: ran the acceptance check on the committed results, verified the known answer (reference val pass@1 = 1.0), a negative control (tampered base15 → exit 1) and the 11 checker regression tests, then logged the verdict
+- Blockers: none (prior attempts' blocker — the range-author ruling — had already landed)
