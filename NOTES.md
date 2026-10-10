@@ -13,14 +13,13 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   passes only via range-author ruling (malformed fails closed; rule 5 by access).
   HUMAN-ONLY: kevin commits results/rulings/base05_val.ruling.json; verbatim
-  cmd in state/tickets/kevinruling.md (printf bytes re-verified vs real
-  check_ruling -> (True); malformed fails closed; one-shot paste).
-  atk46: absent (git log --all -- <file> empty; dir = .gitkeep). Checker
-  unchanged since cd681e9; ticket printf:73 re-verified vs current
-  check_ruling -> accept (True), malformed/revise-out fail closed.
-  Verdict exit 1, single base05 FAIL 0.0764 [0.014,0.153] < 0.10
-  (kevinruling46-verdict.log); 46th dispatch; humandispatch TODO.md:135
-  stands; no agent-side path (rule 5) — terminal wait on Kevin.
+  cmd in state/tickets/kevinruling.md (one-shot paste; E2E accept->exit 0
+  verified atk5/19/27; malformed fails closed). atk47: absent (git log --all
+  empty; dir = .gitkeep); checker unchanged since cd681e9; verdict exit 1,
+  single base05 FAIL 0.0764 [0.014,0.153] < 0.10 (kevinruling47-verdict.log);
+  47th dispatch; sandbox /opt/agent = bridge+hooks only, no dispatcher/skip
+  marker -> humandispatch fix (TODO.md:135) is Kevin-side; no agent-side path
+  (rule 5) — terminal wait on Kevin.
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
