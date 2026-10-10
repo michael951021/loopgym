@@ -23,11 +23,11 @@
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   HUMAN-ONLY (rule 5): kevin commits results/rulings/base05_val.ruling.json
-  (paste: kevinruling.md Plan step 1). attempt17 terminal wait: ruling
-  absent (fresh disk + log --all); guard --line kevinruling exit 1
-  (--line = id, not lineno); paste OK vs check_ruling:61 + fresh E2E exit
-  0 (temp results copy); checker+guard unchanged since b710661; verdict:
-  base05 0.0764 [0.014,0.153] <0.10. Kevin: paste + hostgate apply (w2).
+  (paste: kevinruling.md Plan step 1). attempt18 terminal wait (=atk17):
+  ruling absent (disk .gitkeep only, log --all empty); guard --line
+  kevinruling exit 1 (--line = id, not lineno); checker+guard unchanged
+  since b710661; verdict re-run fresh: base05 0.0764 [0.014,0.153] <0.10,
+  exit 1. Kevin: paste (Plan step 1) + hostgate apply (w2 atk6 ready).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.

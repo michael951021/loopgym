@@ -14,7 +14,7 @@ or revise the pre-run range? Open iff results/rulings/base05_val.ruling.json is
 absent; a committed ruling closes it.
 
 ## Evidence (all observed, no guesses)
-- Ruling absent everywhere (re-verified every attempt; latest w1 atk17,
+- Ruling absent everywhere (re-verified every attempt; latest w1 atk18,
   2026-10-10: fresh disk check — .gitkeep only — + git log --all empty, guard
   `--line kevinruling` exit 1; atk17 re-verified the Plan-1 paste against the
   current check_ruling source (tools/check_results.py:61: accept form passes)
