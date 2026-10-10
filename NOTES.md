@@ -4,7 +4,7 @@
 - Bind mounts to Kevin's host (never `rm DIR`/find -delete): /work, .git,
   /home/agent, .venv, .tools, data, models, ckpt, runs; dispatcher is
   host-side (task arrives via AGENT_TASK env) — no skip lever in sandbox.
-- ruff I/EXE pinned; known/ I001/F401. .venv: no pip (uv/ensurepip).
+- ruff I/EXE pinned, whole tree incl tests/hidden; known/ I001/F401. .venv: no pip (uv/ensurepip).
 - RLIMIT_NPROC=64 counts ALL uid-1000 -> transient Cannot fork.
 - torch 2.14 FSDP2: fully_shard auto-inits env://; rank() pre-init 0.
 - env.grade default timeout=30 < slowest loopgym check: pass cfg.timeout=120.
@@ -62,10 +62,8 @@
 
 ## Data
 - `data/verify.py`: 3x/side pristine worktrees -> verified.jsonl; tests=0 -> error.
-- vb1/vb2 24/24; vb3 13/16, all verified (bad 0/3, good 3/3); next =
-  draftlab-7953937-d5fd1c1.
-- hidden checks: temp root + synthetic fixtures.
-  NOTES.md cands: assert the completion claim, not bare numbers.
-  harness cands: ROOT from PYTHONPATH; fabricate a tmp git repo (agent-loop
-  cands: under ROOT/projects), drive tests/fake_claude.py, assert on its
-  stream-json events.
+- vb1/vb2 24/24; vb3 14/16 all verified (bad 0/3, good 3/3); next = draftlab-44cfa02-2c2ba6b.
+- hidden checks: temp root + synthetic fixtures. NOTES.md cands: assert the
+  completion claim; cross-check cited numbers vs results/*.json (same at bad/good).
+  harness cands: ROOT from PYTHONPATH; fabricate a tmp git repo (agent-loop cands
+  under ROOT/projects), drive tests/fake_claude.py, assert on stream-json events.

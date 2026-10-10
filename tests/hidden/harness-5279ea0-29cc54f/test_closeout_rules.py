@@ -1,7 +1,11 @@
 """harness 5279ea0..29cc54f: loop.md gains acceptance-check-first + known-answer rules;
 the agent reports via a RESULT block and no longer self-checks the box or writes TASKLOG.md
 (the harness close-out does), and a [fail] run re-asked answers "not done"."""
-import json, os, re, subprocess, sys
+import json
+import os
+import re
+import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(os.environ["PYTHONPATH"])
@@ -21,7 +25,7 @@ def fake(d, prompt, *extra):
                           capture_output=True, text=True, timeout=60)
 
 def result_event(r):
-    evs = [json.loads(l) for l in r.stdout.splitlines() if l.strip().startswith("{")]
+    evs = [json.loads(ln) for ln in r.stdout.splitlines() if ln.strip().startswith("{")]
     return next(e for e in reversed(evs) if e.get("type") == "result")
 
 def test_agent_reports_result_block_and_lets_harness_close_out(tmp_path):
