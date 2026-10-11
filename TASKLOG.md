@@ -141,3 +141,7 @@
 - Goal: Check baselines against ranges
 - Approach: ran the acceptance check on the committed results, verified the known answer (reference val pass@1 = 1.0), a negative control (tampered base15 → exit 1) and the 11 checker regression tests, then logged the verdict
 - Blockers: none (prior attempts' blocker — the range-author ruling — had already landed)
+## CPU GRPO config
+- Goal: CPU GRPO config
+- Approach: acceptance probe first, minimal config + trainer extension with regression tests, then the real 0.5B probe and a seq-mean control on identical completions (loss 0.0 exact) proving the out-of-range step-1 token-mean loss (0.0957) is a length-weighting artifact, not a trainer bug.
+- Blockers: none
