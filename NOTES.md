@@ -24,10 +24,9 @@
   uncommitted (baselg2 supersedes).
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
-  base05 ruling LANDED (64ecd1b, kevin 2026-10-10, verbatim accept +
-  trailing \n). VERDICT (rangerule): checker `--only baselines` exit 0,
-  5/5 PASS, ruling cited verbatim (rangerule-verdict.log); checker tests
-  11/11. basecheck UNBLOCKED.
+  base05 ruling LANDED (64ecd1b, kevin, verbatim accept). basecheck DONE
+  (atk13): `--only baselines` exit 0, 5/5 PASS, ruling cited verbatim;
+  negative control exit 1; tests 11/11 (basecheck13-*.log).
 
 ## Models
 - `tiny_config` (2L/d64/V512); `tiny_tokenizer()` byte-BPE. GOTCHA: cfg vocab 151936 vs tok 151643.
@@ -56,6 +55,12 @@
 - `train.py`: toml+--k v; sample->gen->grade->grpo_step->jsonl->ckpt
   <out>^2/ckpt/<name>; --dist+--dry-run; exact resume; exit 1 on orphan ckpt;
   from_pretrained freezes ALL -> requires_grad lora_.
+- `train.py`: max_difficulty caps train sampler (scale 1-9; 67 of 101 train <=3);
+  eval_n>0 = that many val tasks/eval, stateless draw seed+off+s, row has tasks[].
+  configs/grpo05_exercism.toml (0.5B r16, diff<=3, B4 G8, 384tok, lr2e-5, b0.02,
+  40 steps, eval 20/n2, save 5). Probe: 1 step 524s, reward 0.25, tok-mean loss
+  0.0957 vs seq-mean 0.0 (same completions) = length artifact, not a bug.
+  tiny ctx 512 < exercism prompts -> tiny+exercism gen untestable.
 - `dist.py` FSDP2: fully_shard, full_state_dict DTensors, grads AVG, no 1/W.
 - `ds.py` ZeRO-3: ds_zero3.json bf16 stage3; micro=b*group; CPU compatible_ops[deepspeed_shm_comm]=False.
 - Toy gates PASS: toybanana3/toynull3; banana 0.148 -> 1.000; null slope CI contains 0.

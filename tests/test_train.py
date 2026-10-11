@@ -178,6 +178,52 @@ def test_complete_run_resume_if_any_noops(tmp_path):
     assert "nothing to do" in p.stdout, p.stdout
 
 
+def test_max_difficulty_filters_train_sampler(tmp_path):
+    from loopgym.rl.train import ROOT, Run, TrainCfg
+    splits = json.loads((ROOT / "results" / "splits.json").read_text())
+    base = dict(model="tiny", task="exercism", split="train", batch=1, group=1,
+                max_new_tokens=4, out=str(tmp_path / "runs" / "x"))
+    r = Run(TrainCfg(max_difficulty=1, **base))
+    want = {n for n, d in splits["train"].items() if d == 1}
+    assert want and set(r.sampler.names) == want
+    for cap in (0, 9):  # 0 = no cap; 9 = above every difficulty in the data
+        full = Run(TrainCfg(max_difficulty=cap, **base))
+        assert set(full.sampler.names) == set(splits["train"])
+
+
+def test_eval_tasks_deterministic_and_from_val(tmp_path):
+    from loopgym.rl.train import ROOT, Run, TrainCfg
+    splits = json.loads((ROOT / "results" / "splits.json").read_text())
+    r = Run(TrainCfg(model="tiny", task="exercism", split="train", max_difficulty=1,
+                     batch=1, group=1, max_new_tokens=4, eval_n=2, seed=42,
+                     out=str(tmp_path / "runs" / "y")))
+    a = [t.name for t in r.eval_tasks(20)]
+    b = [t.name for t in r.eval_tasks(20)]  # stateless per step: no drift on resume
+    assert a == b and len(a) == 2
+    assert set(a) <= set(splits["val"])
+
+
+def test_exercism_eval_step_uses_val_tasks(tmp_path):
+    """tiny model's 512-token context cannot take real exercism prompts, so the
+    generator is stubbed; the val draw and the local grading are the real code."""
+    from loopgym.rl.train import ROOT, Run, TrainCfg
+    splits = json.loads((ROOT / "results" / "splits.json").read_text())
+    r = Run(TrainCfg(model="tiny", task="exercism", split="train", max_difficulty=1,
+                     batch=1, group=1, max_new_tokens=4, eval_n=2, seed=42,
+                     out=str(tmp_path / "runs" / "z")))
+
+    class _C:
+        text = "```python\nx = 1\n```"
+
+    r.backend.generate = (lambda prompts, g, mnt, temp, top_p, seed:
+                          [[_C()] for _ in prompts])
+    ev = r.eval_step(20, None)
+    assert ev["kind"] == "eval" and ev["step"] == 20
+    assert set(ev["tasks"]) <= set(splits["val"]), ev
+    assert len(ev["tasks"]) == 2
+    assert ev["reward_mean"] == 0.0  # junk solution, real local grading
+
+
 def test_task_sampler_continuity_after_state_roundtrip():
     from loopgym.rl.train import TaskSampler
     names = ["a", "b", "c", "d", "e", "f"]

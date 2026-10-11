@@ -1,0 +1,29 @@
+# Gated 0.5B CPU GRPO run: validates the pipeline end to end; the real
+# experiment is the 1.5B GPU run. Train: exercism practice, difficulty <= 3.
+# Eval: 2 val tasks (x group completions) every 20 steps. Job: --resume-if-any.
+model = "0.5b"
+lora_r = 16
+lora_alpha = 32
+lora_targets = ["q_proj", "k_proj", "v_proj", "o_proj"]
+task = "exercism"
+split = "train"
+max_difficulty = 3
+batch = 4
+group = 8
+max_new_tokens = 384
+temperature = 1.0
+top_p = 1.0
+lr = 2e-5
+beta = 0.02
+clip = 0.2
+agg = "token-mean"
+scale = "std"
+max_grad_norm = 1.0
+runner = "local"
+seed = 1337
+steps = 40
+eval_every = 20
+eval_n = 2
+save_every = 5
+timeout = 30
+out = "runs/grpo05_exercism"
