@@ -30,6 +30,10 @@ CONTEXT = 3
 SYSTEM = "You are an expert software engineer. Find and fix the defect described below."
 INSTRUCTION = ("Find and fix the defect. Reply with the full new content of each file "
                "you change in ```path\\n...``` blocks.")
+DIFF_INSTRUCTION = ("Find and fix the defect. Reply with a single unified diff in one "
+                    "```diff code block and nothing else; the diff is against the files "
+                    "shown (git format, a/ and b/ paths) and must apply with git apply.")
+V0_CHECKS = V.ROOT / "data" / "loopgym" / "v0" / "checks"
 
 
 def _git(repo, *args):
@@ -89,11 +93,37 @@ class Task:
         return _parse_files(reply, set(self.files))
 
 
-def _budgeted(head, blocks):
+class DiffTask(Task):
+    """A v0 task answered as a unified diff (one ```diff block), for the eval's
+    512-token budget: whole-file rewrites of the ~815-line median fix cannot fit,
+    but the changed hunks do. parse() -> the patch text ('' = no fix);
+    reference() -> `git diff bad..good`, which grades 1.0 by construction."""
+
+    def prompt(self):
+        ticket = self.ticket.strip()
+        head = (ticket + "\n\n" if ticket else "")
+        head += "Changed files (content at this commit; unchanged stretches elided):\n"
+        blocks = []
+        for p in self.priority:
+            body = "[new file: does not exist at this commit; create it if the fix needs it]" \
+                if p in self.added else _elide(self, p)
+            blocks.append((p, body))
+        shown, note = _budgeted(head, blocks, DIFF_INSTRUCTION)
+        user = head + "\n" + "\n".join(shown) + note + "\n\n" + DIFF_INSTRUCTION
+        return [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]
+
+    def parse(self, reply):
+        return _extract_patch(reply)
+
+    def reference(self):
+        return _git(V.REPOS[self.repo], "diff", "--no-color", self.bad, self.good)
+
+
+def _budgeted(head, blocks, instruction=INSTRUCTION):
     """Order blocks to fit BUDGET_TOKENS; return (shown_block_strings, omitted_note).
     The omitted note is budgeted too: a wide diff lists many long paths there."""
     target = (BUDGET_TOKENS - 200) * CHARS_PER_TOKEN  # slack for instruction + separators
-    rem = target - len(head) - len(INSTRUCTION)
+    rem = target - len(head) - len(instruction)
     shown, others = [], []
     for path, body in blocks:
         body = body[:PER_FILE_CAP] + ("\n...[truncated]" if len(body) > PER_FILE_CAP else "")
@@ -104,13 +134,14 @@ def _budgeted(head, blocks):
             body = body[:rem] + "\n...[truncated]"
         shown.append(f"```{path}\n{body}\n```")
         rem -= len(body) + 2
-    while len(head) + sum(len(s) for s in shown) + len(INSTRUCTION) > target and shown:
+    while len(head) + sum(len(s) for s in shown) + len(instruction) > target and shown:
         others.append(blocks[len(shown)][0])
         shown.pop()
     note = ""
     if others:
         # +25 reserves room for the "(and N more)" suffix; base overcounts separators
-        base = len(head) + 1 + sum(len(s) for s in shown) + len(shown) + 2 + len(INSTRUCTION)
+        base = (len(head) + 1 + sum(len(s) for s in shown) + len(shown) + 2
+                + len(instruction))
         pre = "\n\nOther changed files (not shown for length): "
         kept, line = [others[0]], others[0]
         for p in others[1:]:
@@ -205,6 +236,43 @@ def _parse_files(reply, known):
     return files
 
 
+def _extract_patch(reply):
+    """The reply's unified diff: the content of the LAST ```diff/```patch block; if
+    there is no such block, the whole reply when it already looks like a diff; else
+    '' (no fix: the check then runs at the bad commit and fails). A block ends at a
+    fence line that is exactly ``` , so diff content lines ("+```md", " ```") cannot
+    close it early."""
+    lines = reply.splitlines()
+    opens = [i for i, line in enumerate(lines)
+             if line.strip().startswith("```diff") or line.strip().startswith("```patch")]
+    if opens:
+        start = opens[-1] + 1
+        for j in range(start, len(lines)):
+            if lines[j].rstrip() == "```":
+                return "\n".join(lines[start:j]) + "\n"
+        return "\n".join(lines[start:]) + "\n"
+    if "diff --git" in reply:
+        return reply
+    return ""
+
+
+def _patch_paths(patch):
+    """The paths a unified diff touches. Prefer git's `diff --git` headers; a patch
+    with none (hand-written) falls back to consecutive ---/+++ header pairs."""
+    lines = patch.splitlines()
+    hdr = re.compile(r"^diff --git a/(\S+) b/(\S+)")
+    paths = {m.group(2) for line in lines if (m := hdr.match(line))}
+    if paths:
+        return paths
+    m3 = re.compile(r"^--- (?:a/)?(\S+)")
+    m2 = re.compile(r"^\+\+\+ (?:b/)?(\S+)")
+    for i in range(len(lines) - 1):
+        if m3.match(lines[i]) and (m := m2.match(lines[i + 1])):
+            if m.group(1) != "/dev/null":
+                paths.add(m.group(1))
+    return paths
+
+
 def _diff_spec(repo, bad, good):
     """(files, added, content_bad, content_good) or None if the fix is not representable
     (any diff file that is not M/A, or not utf-8 where it exists)."""
@@ -284,13 +352,87 @@ def load_tasks():
     return tasks
 
 
+def load_v0(split, limit=None):
+    """The frozen v0 tasks (data/loopgym/v0/tasks.jsonl) for one split, as DiffTasks,
+    sorted by id. The ticket text comes from the mining record (candidates.jsonl);
+    fix_msg describes the fix and is never part of the prompt."""
+    v0 = V.ROOT / "data" / "loopgym" / "v0" / "tasks.jsonl"
+    recs = [json.loads(line) for line in v0.read_text().splitlines() if line.strip()]
+    recs = sorted((r for r in recs if r["split"] == split), key=lambda r: r["id"])
+    if limit is not None:
+        recs = recs[:limit]
+    cands = _candidates()
+    tasks = []
+    for r in recs:
+        spec = _diff_spec(V.REPOS[r["repo"]], r["bad"], r["good"])
+        if spec is None:
+            raise SystemExit(f"v0 task {r['id']} is no longer representable; "
+                             "run python -m loopgym.data.freeze --check")
+        files, added, content_bad, content_good = spec
+        cand = cands.get(r["id"], {})
+        prio = [p for p in cand.get("files", []) if p in files]
+        prio += [p for p in files if p not in prio]
+        tasks.append(DiffTask(name=r["id"], repo=r["repo"], bad=r["bad"], good=r["good"],
+                              ticket=cand.get("ticket", ""), files=files, added=added,
+                              content_bad=content_bad, content_good=content_good,
+                              priority=prio))
+    return tasks
+
+
+def _apply_patch(wt, patch):
+    """git apply -p1, then -p0 (a/ b/ paths vs bare paths): True iff it applied."""
+    for p in ("1", "0"):
+        r = subprocess.run(["git", "apply", f"-p{p}", "--whitespace=nowarn"],
+                           cwd=wt, input=patch, capture_output=True, text=True)
+        if r.returncode == 0:
+            return True
+    return False
+
+
+def _grade_diff(task, patch, timeout=V.TIMEOUT):
+    """Apply the reply's diff to a pristine worktree of the bad commit; run the
+    task's frozen v0 check (data/loopgym/v0/checks/<id>/). Empty patch = the check
+    at the bad commit (fails); a patch that touches any file outside task.files or
+    does not apply scores 0 without running."""
+    info = {"runner": "local", "timed_out": False, "returncode": None,
+            "tests": 0, "failures": 0, "errors": 0, "skipped": 0}
+    extra = sorted(_patch_paths(patch) - set(task.files))
+    if extra:
+        info["reward"] = 0.0
+        info["reason"] = "patch modifies files outside the task: " + ", ".join(extra)
+        return 0.0, info
+    checks = V.check_files(V0_CHECKS / task.name)
+    if not checks:
+        info["reward"] = 0.0
+        info["reason"] = "no frozen check for " + task.name
+        return 0.0, info
+    repo = V.REPOS[task.repo]
+    with tempfile.TemporaryDirectory(prefix="loopgym-grade-") as base:
+        base = Path(base)
+        wt = base / "wt"
+        V._add_worktree(repo, task.bad, wt)
+        try:
+            if patch.strip() and not _apply_patch(wt, patch):
+                info["reward"] = 0.0
+                info["reason"] = "patch does not apply to the bad commit"
+            else:
+                scratch = base / "scratch"
+                scratch.mkdir()
+                info = V._run_once(wt, checks, scratch, timeout=timeout)
+        finally:
+            V._remove_worktree(repo, wt)
+    return info["reward"], info
+
+
 def grade(task, files, runner="local", timeout=V.TIMEOUT):
-    """Apply the reply's files to a worktree of the bad commit; run the hidden check.
+    """Apply the reply to a worktree of the bad commit; run the hidden check.
 
     A reply that names any file outside task.files scores 0 without running (anti-hack:
     the model could otherwise rewrite the hidden test)."""
     if runner != "local":
         raise ValueError(f"loopgym tasks grade locally; got runner {runner!r}")
+    if isinstance(task, DiffTask):
+        return _grade_diff(task, files, timeout=timeout)
     info = {"runner": "local", "timed_out": False, "returncode": None,
             "tests": 0, "failures": 0, "errors": 0, "skipped": 0}
     extra = sorted(set(files) - set(task.files))

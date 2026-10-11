@@ -16,7 +16,12 @@
 
 ## Eval
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.
-  `eval/run.py`: --model/--adapter | --reference; sidecar resume.
+  `eval/run.py`: --model/--adapter | --reference; sidecar resume. loopgym source
+  (lgsource): reply = one ```diff unified-diff block (815-line median fix can't fit
+  512 tokens as whole-file rewrite); ref = git diff bad..good -> 1.0 by construction,
+  empty patch = bad state -> 0.0; frozen v0/checks, timeout 120. e2e 0.5B/2 tasks
+  pass@1 0.0 (base range 0.0-0.25): .agent-evidence/lgsource-e2e2.log; smoke results/
+  uncommitted (baselg2 supersedes).
 - `tools/check_results.py`: baselines/benches/toy; PENDING != FAIL; out-of-range
   only via range-author ruling (malformed fails closed; rule 5).
   base05 ruling LANDED (64ecd1b, kevin 2026-10-10, verbatim accept +
@@ -34,6 +39,7 @@
   137/142 usable, val 9. `loopgym.py`: Task(prompt/parse/reference/stub)+grade over verified
   records; elided bad files (diff -U0 ±3, 4500-chr, <=6k tok); ```path blocks; grade = reply
   on bad worktree, pristine V._run_once (outside task.files -> 0); ref=1, stub=0, hidden=0.
+  DiffTask (eval): ```diff reply, ref = git diff bad..good, frozen v0/checks.
 
 ## Kernel
 - `kernels/token_logprobs(h,w,t,impl,chunk)->[T]: chunked max/LSE bwd softmax (no

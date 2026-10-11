@@ -4,8 +4,9 @@ Samples completions with the HF backend, parses and grades them locally, and
 summarizes with pass@k over a task-clustered bootstrap CI. Samples are appended
 to a sidecar JSONL next to --out, so an interrupted run resumes per task: each
 sample is seeded by (task index, sample index) and re-runs skip finished tasks.
-`--reference` scores the exercise reference solutions as the "model" (known
-answer: pass@1 = 1.0 on a split of usable exercises).
+`--reference` scores the reference solutions as the "model" (known answer:
+pass@1 = 1.0; the loopgym v0 reference is the good commit's unified diff, which
+grades 1.0 by construction).
 """
 from __future__ import annotations
 
@@ -19,7 +20,8 @@ import torch
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from ..env.exercism import grade, load_exercise
+from ..env import grade
+from ..env.exercism import load_exercise
 from ..env.splits import ROOT
 from ..rl.rollout import HFBackend
 from .passk import summarize
@@ -46,6 +48,9 @@ def load_model(model: str, adapter: str | None):
 
 
 def load_tasks(source: str, split: str, limit: int | None) -> list:
+    if source == "loopgym":
+        from ..env import loopgym as _lg
+        return _lg.load_v0(split, limit)
     if source != "exercism":
         raise NotImplementedError(f"task source {source!r} is not mined yet "
                                   "(see loopgym/data/verify.py)")
@@ -76,13 +81,13 @@ def load_done(side: Path) -> dict:
     return done
 
 
-def eval_reference(tasks, n: int, side: Path, done: dict) -> None:
+def eval_reference(tasks, n: int, side: Path, done: dict, timeout: int = 30) -> None:
     with side.open("a") as f:
         for t in tasks:
             have = len(done.get(t.name, []))
             if have >= n:
                 continue
-            reward, info = grade(t, t.reference(), "local")
+            reward, info = grade(t, t.reference(), "local", timeout=timeout)
             for i in range(n - have):
                 r = {"task": t.name, "sample": have + i, "seed": None,
                      "reward": reward, "timed_out": info["timed_out"]}
@@ -91,7 +96,7 @@ def eval_reference(tasks, n: int, side: Path, done: dict) -> None:
 
 
 def eval_model(backend: HFBackend, tasks, n: int, args, side: Path,
-               done: dict) -> None:
+               done: dict, timeout: int = 30) -> None:
     with side.open("a") as f:
         for idx, t in enumerate(tasks):
             have = len(done.get(t.name, []))
@@ -104,7 +109,7 @@ def eval_model(backend: HFBackend, tasks, n: int, args, side: Path,
                                         args.temperature, args.top_p,
                                         args.seed + idx * 100 + i)[0][0]
                 files = t.parse(comp.text)
-                reward, info = grade(t, files, "local")
+                reward, info = grade(t, files, "local", timeout=timeout)
                 r = {"task": t.name, "sample": i, "seed": args.seed + idx * 100 + i,
                      "reward": reward, "timed_out": info["timed_out"]}
                 f.write(json.dumps(r) + "\n")
@@ -142,11 +147,13 @@ def main(argv=None) -> int:
     side = sidecar_path(out)
     done = load_done(side)
 
+    timeout = 120 if args.source == "loopgym" else 30  # verify.py's check budget
     if args.reference:
-        eval_reference(tasks, args.n, side, done)
+        eval_reference(tasks, args.n, side, done, timeout)
     else:
         model, tokenizer = load_model(args.model, args.adapter)
-        eval_model(HFBackend(model, tokenizer), tasks, args.n, args, side, done)
+        eval_model(HFBackend(model, tokenizer), tasks, args.n, args, side, done,
+                   timeout)
 
     records, per_task = [], {}
     for t in tasks:
