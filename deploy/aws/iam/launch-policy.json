@@ -1,0 +1,40 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "RunG4dnSpotWithLoopgymTagOnly",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:InstanceType": "g4dn.xlarge",
+          "aws:RequestTag/Project": "loopgym",
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "TerraformGuardrailsOnly",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateTags",
+        "ec2:DescribeImages",
+        "ec2:DescribeInstances",
+        "ec2:DescribeSpotInstanceRequests",
+        "ec2:TerminateInstances",
+        "iam:CreateRole",
+        "iam:GetRole",
+        "iam:PutRolePolicy",
+        "iam:CreatePolicy",
+        "iam:PassRole",
+        "budgets:CreateBudget",
+        "budgets:CreateBudgetAction",
+        "budgets:ViewBudget",
+        "cloudwatch:PutMetricAlarm",
+        "scheduler:CreateSchedule"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

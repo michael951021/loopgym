@@ -116,6 +116,28 @@
 - Toy gates PASS: banana 0.148 -> 1.000; null slope CI contains 0.
 - `tools/fetch_src.sh`: vllm/deepspeed/trl -> .tools/src/ (rule 6).
 
+## AWS
+- awsguard: deploy/aws/{terraform,iam,README} + scripts/aws_{sweep,launch}.sh;
+  tests/test_aws_guard.py (15) stubs aws on PATH; sandbox never applies (rule 4).
+- sweep: tag-based (Project=loopgym), state-independent: ec2 describe-* +
+  cloudwatch/scheduler --tag-filters + resourcegroupstaggingapi catch-all;
+  --kill = cancel spot -> terminate -> del alarm/schedule -> wait terminated
+  (bounded 20x10s) -> del volumes/SGs -> re-check, fail loudly on leftovers.
+- launch preflight (also under --dry-run): sweep clean (no double launch),
+  caller Arn has role/loopgym-launch (short-lived creds only), G+VT spot quota
+  <= 8 vCPU (paginated), estimate nodes*(max_hours+0.25)*(max_price+50*0.08/730
+  +0.005) <= budget_usd <= $10. 2x3h@$0.30 -> $2.02; @$5 -> $32.57 refused.
+  EXIT/INT/TERM trap: destroy (if state) -> sweep --check -> exit 1 + print
+  `aws_sweep.sh --kill` if anything left. GOTCHA: terraform needs `-chdir=DIR`
+  (equals form); tf state gitignored (*.tfstate). Makefile check gate ->
+  deploy/aws/terraform (old deploy/aws/*.tf test would silently skip).
+- .tf: nodes in {1,2}, max_hours 1..3 integer, instance_type g4dn.xlarge only,
+  max_price <= 0.60, budget <= 10 (variable validation); shutdown-first
+  user_data; one-time spot terminate-on-interruption; IMDSv2; gp3 delete_on_
+  termination; scheduler at(+15m) terminate (own role); idle CPU<5% 6x300s ->
+  arn:aws:automate terminate; budgets 50/80 actual + 100 forecast e-mail, 100
+  actual -> deny-RunInstances on launch role (LAGGING backstop).
+
 ## Data
 - `freeze.py`: v0 = 26 verified (draftlab 22/harness 4), train 13/test 13; `--check`
   exit 1 on drift; public draftlab/harness only. `data/verify.py`: 3x/side pristine

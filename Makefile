@@ -22,11 +22,11 @@ check:
 	if [ -n "$$docks" ]; then \
 	  echo "hadolint"; $(CURDIR)/.tools/bin/hadolint $$docks; \
 	else echo "skip hadolint: no Dockerfiles under deploy/ yet"; fi
-	@if [ -d deploy/aws ] && ls deploy/aws/*.tf >/dev/null 2>&1; then \
-	  echo "terraform validate (deploy/aws, -backend=false only)"; \
-	  $(CURDIR)/.tools/bin/terraform -chdir=deploy/aws init -backend=false -input=false; \
-	  $(CURDIR)/.tools/bin/terraform -chdir=deploy/aws validate; \
-	else echo "skip terraform: deploy/aws not present yet"; fi
+	@if ls deploy/aws/terraform/*.tf >/dev/null 2>&1; then \
+	  echo "terraform validate (deploy/aws/terraform, -backend=false only)"; \
+	  $(CURDIR)/.tools/bin/terraform -chdir=deploy/aws/terraform init -backend=false -input=false; \
+	  $(CURDIR)/.tools/bin/terraform -chdir=deploy/aws/terraform validate; \
+	else echo "skip terraform: deploy/aws/terraform not present yet"; fi
 
 known:
 	bash tools/check_known.sh
