@@ -62,14 +62,18 @@ def build_batch(groups, rewards, tokenizer, scale="std"):
     return Batch(input_ids, attention_mask, target_mask, adv.reshape(-1))
 
 
-def logp_of(model, batch, cfg):
-    """Per-column log-prob of the next token under `model`, [N, T-1], via the chunked kernel."""
+def _forward_hidden(model, batch):
+    """(hidden[: , :-1], targets[:, 1:]) from one forward under `model`."""
     dev = next(model.parameters()).device
     input_ids = batch.input_ids.to(dev)
     attention_mask = batch.attention_mask.to(dev)
     out = model(input_ids=input_ids, attention_mask=attention_mask, output_hidden_states=True)
-    hidden = out.hidden_states[-1][:, :-1]
-    targets = input_ids[:, 1:]
+    return out.hidden_states[-1][:, :-1], input_ids[:, 1:]
+
+
+def logp_of(model, batch, cfg):
+    """Per-column log-prob of the next token under `model`, [N, T-1], via the chunked kernel."""
+    hidden, targets = _forward_hidden(model, batch)
     n, t = targets.shape
     w = model.get_output_embeddings().weight
     # The kernel indexes weight rows by global vocab id; FSDP2 shards the weight along
@@ -87,12 +91,25 @@ def logp_of(model, batch, cfg):
 
 
 def _gathered_logp(engine, batch, cfg):
-    """logp_of on a ZeRO-3 engine: materialize the partitioned lm_head weight for the kernel
-    (the engine's forward hooks release it again after the forward)."""
-    from deepspeed.zero import GatheredParameters
+    """logp_of on a ZeRO-3 engine. The forward's post-hook releases the partitioned lm_head
+    weight back to its (0,) shard, so re-gather it AFTER the forward and run the kernel
+    while it is full. lm_head is not a LoRA target (frozen) and hidden_states[-1] does not
+    depend on it, so the kernel needs no grad through the gathered weight."""
+    import deepspeed  # the pinned source exposes `zero` as an attribute alias (from .runtime import zero),
+    # not a registered submodule, so `from deepspeed.zero import ...` fails
 
-    with GatheredParameters([engine.get_output_embeddings().weight]):
-        return logp_of(engine, batch, cfg)
+    hidden, targets = _forward_hidden(engine, batch)
+    n, t = targets.shape
+    with deepspeed.zero.GatheredParameters([engine.get_output_embeddings().weight]):
+        w = engine.get_output_embeddings().weight
+        logp = kernels.token_logprobs(
+            hidden.reshape(-1, hidden.size(-1)),
+            w,
+            targets.reshape(-1),
+            impl=cfg.logprob_impl,
+            chunk=cfg.chunk,
+        )
+    return logp.reshape(n, t)
 
 
 def grpo_step(policy, ref_fn, batch, optimizer, cfg, loss_factor=1.0, engine=None):

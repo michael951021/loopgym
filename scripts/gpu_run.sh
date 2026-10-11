@@ -2,8 +2,9 @@
 # Kevin's GPU window in one command (CLAUDE.md "GPU and AWS", scale-out).
 # Host only: rule 2 (no GPU in the sandbox) - written and dry-run here.
 #
-#   scripts/gpu_run.sh --stop-agents   full run (stop model-server agents first)
-#   scripts/gpu_run.sh --dry-run       plan + required-file checks, nothing runs
+#   scripts/gpu_run.sh --stop-agents          full run (stop model-server agents first)
+#   scripts/gpu_run.sh --two-node-local       0.5B toy multi-node rehearsal on this host
+#   scripts/gpu_run.sh --dry-run              plan + required-file checks, nothing runs
 #
 # Full run: 2-GPU preflight -> .venv-gpu (CUDA torch, pinned vllm/deepspeed) ->
 # kernel preflight (cuda+triton in IMPLS) -> tests/known -> vLLM-vs-HF logprob
@@ -22,20 +23,25 @@ CKPT=ckpt/grpo15_gpu
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/gpu_run.sh [--dry-run] [--stop-agents]
-  --dry-run       print the plan, check required files and pins, exit
-                  (nothing is executed; safe in the sandbox)
-  --stop-agents   full run only: ./agent stop all --now before the run
-                  (the model server holds ~21 GB of each 3090)
+Usage: scripts/gpu_run.sh [--dry-run] [--stop-agents] [--two-node-local]
+  --dry-run         print the plan, check required files and pins, exit
+                    (nothing is executed; safe in the sandbox)
+  --stop-agents     full run only: ./agent stop all --now before the run
+                    (the model server holds ~21 GB of each 3090)
+  --two-node-local  0.5B toy multi-node rehearsal on THIS host: two torchrun
+                    "nodes" (GPU 0 + GPU 1), 20 steps each for fsdp and deepspeed,
+                    reports -> results/gpu/scale_{fsdp,deepspeed}.json
 USAGE
 }
 
 DRY=0
 STOP=0
+TWO_LOCAL=0
 for a in "$@"; do
   case "$a" in
     --dry-run) DRY=1 ;;
     --stop-agents) STOP=1 ;;
+    --two-node-local) TWO_LOCAL=1 ;;
     -h|--help) usage; exit 0 ;;
     *) usage >&2; echo "unknown flag: $a" >&2; exit 2 ;;
   esac
@@ -64,6 +70,21 @@ REQUIRED_FILES=(
   "data/loopgym/candidates.jsonl"
   "data/raw/repos/draftlab.git"
   "data/raw/repos/harness.git"
+)
+
+# The two-node rehearsal is 0.5B toy (in-process grading, torch kernel, no eval),
+# so it needs far less than the 1.5B exercism/loopgym window.
+REQUIRED_FILES_TWOLOCAL=(
+  "tools/versions.txt"
+  ".tools/bin/uv"
+  "configs/scale05.toml"
+  "loopgym/rl/train.py"
+  "loopgym/rl/launch.py"
+  "loopgym/rl/batch.py"
+  "loopgym/rl/dist.py"
+  "loopgym/rl/ds.py"
+  "loopgym/models.py"
+  "$MODEL_05"
 )
 
 plan() {
@@ -95,26 +116,128 @@ $stopline
 PLAN
 }
 
-if [ "$DRY" -eq 1 ]; then
-  plan
-  echo "--- required files ---"
-  bad=0
-  for f in "${REQUIRED_FILES[@]}"; do
+plan_twolocal() {
+  cat <<PLAN
+=== gpu_run.sh --two-node-local plan (0.5B toy multi-node rehearsal) ===
+ config  : configs/scale05.toml (0.5B, toy=banana, B2 G8, 256 tok, 20 steps, no eval)
+ topology: 2 torchrun "nodes" on THIS host, 1 rank each; c10d master 127.0.0.1:29500
+           node0 -> GPU 0, node1 -> GPU 1 (each node exports exactly one GPU)
+ dist    : fsdp then deepspeed (one 20-step rehearsal each)
+  1. preflight  : nvidia-smi -L (need 2 GPUs)
+  2. .venv-gpu  : uv venv -p 3.12 + pinned install (torch, vllm, deepspeed, triton, ...)
+  3. fsdp       : 2 concurrent torchrun -> runs/gpu/scale_fsdp
+                  report      -> results/gpu/scale_fsdp.json
+  4. deepspeed  : 2 concurrent torchrun -> runs/gpu/scale_deepspeed
+                  report      -> results/gpu/scale_deepspeed.json
+ (toy rewards grade in-process; this measures rendezvous/sharding/step time, not
+  learning)
+PLAN
+}
+
+ensure_venv_gpu() {
+  local vllm_pin ds_pin want
+  vllm_pin=$(pin vllm)
+  ds_pin=$(pin deepspeed)
+  if [ -z "$vllm_pin" ] || [ -z "$ds_pin" ]; then
+    echo "tools/versions.txt must pin vllm= and deepspeed=" >&2
+    exit 1
+  fi
+  want="vllm=$vllm_pin deepspeed=$ds_pin"
+  if [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$want" ] && [ -x .venv-gpu/bin/python ]; then
+    echo ".venv-gpu up to date ($want)"
+  else
+    if [ ! -x .venv-gpu/bin/python ]; then
+      .tools/bin/uv venv -p 3.12 .venv-gpu
+    fi
+    .tools/bin/uv pip install -q --python .venv-gpu/bin/python \
+      "torch" "vllm==$vllm_pin" "deepspeed==$ds_pin" "triton" "ninja" \
+      "transformers" "peft" "accelerate" "safetensors" "numpy" \
+      "pydantic" "httpx" "tomli-w" "pytest"
+    printf '%s\n' "$want" > "$STAMP"
+  fi
+  CUDA_VISIBLE_DEVICES=0 .venv-gpu/bin/python -c \
+    "import torch; assert torch.cuda.is_available(), 'torch has no CUDA'; print('torch', torch.__version__, 'GPUs', torch.cuda.device_count())"
+}
+
+# Run both two-local rehearsals. For each dist backend, launch the node-0 and
+# node-1 torchrun commands (from loopgym.rl.launch) concurrently on this host,
+# each pinned to one GPU, then fold the metrics + PEAKMEM logs into one report.
+twolocal_run() {
+  local dist cmds c0 c1 log0 log1 p0 p1 rc0 rc1
+  for dist in fsdp deepspeed; do
+    step "two-node-local: $dist (2 torchrun nodes, GPU0 + GPU1)"
+    mapfile -t cmds < <(.venv-gpu/bin/python -m loopgym.rl.launch cmds --topology two-local --dist "$dist")
+    if [ "${#cmds[@]}" -ne 2 ]; then
+      echo "expected 2 node commands for $dist, got ${#cmds[@]}" >&2
+      exit 1
+    fi
+    c0="${cmds[0]}"
+    c1="${cmds[1]}"
+    log0="$LOGDIR/twolocal_${dist}_node0.log"
+    log1="$LOGDIR/twolocal_${dist}_node1.log"
+    echo "  node0: $c0"
+    echo "  node1: $c1"
+    eval "$c0" > "$log0" 2>&1 &
+    p0=$!
+    eval "$c1" > "$log1" 2>&1 &
+    p1=$!
+    rc0=0; wait "$p0" || rc0=$?
+    rc1=0; wait "$p1" || rc1=$?
+    if [ "$rc0" -ne 0 ] || [ "$rc1" -ne 0 ]; then
+      echo "two-node-local $dist FAILED (node0 rc=$rc0, node1 rc=$rc1); tail of logs:" >&2
+      tail -n 40 "$log0" >&2 || true
+      tail -n 40 "$log1" >&2 || true
+      exit 1
+    fi
+    step "two-node-local: $dist report -> results/gpu/scale_${dist}.json"
+    .venv-gpu/bin/python -m loopgym.rl.launch report \
+      --metrics "runs/gpu/scale_${dist}/metrics.jsonl" \
+      --logs "$log0" "$log1" \
+      --topology two-local --dist "$dist" \
+      --out "results/gpu/scale_${dist}.json"
+  done
+}
+
+check_required() {
+  local f rc=0
+  for f in "$@"; do
     if [ -e "$f" ]; then
       echo "OK      $f"
     else
       echo "MISSING $f"
-      bad=1
+      rc=1
     fi
   done
-  for k in vllm deepspeed; do
+  return $rc
+}
+
+check_pins() {
+  local k rc=0
+  for k in "$@"; do
     if [ -n "$(pin "$k")" ]; then
       echo "OK      tools/versions.txt: $k=$(pin "$k")"
     else
       echo "MISSING tools/versions.txt: $k="
-      bad=1
+      rc=1
     fi
   done
+  return $rc
+}
+
+if [ "$DRY" -eq 1 ]; then
+  bad=0
+  if [ "$TWO_LOCAL" -eq 1 ]; then
+    plan_twolocal
+  else
+    plan
+  fi
+  echo "--- required files ---"
+  if [ "$TWO_LOCAL" -eq 1 ]; then
+    check_required "${REQUIRED_FILES_TWOLOCAL[@]}" || bad=1
+  else
+    check_required "${REQUIRED_FILES[@]}" || bad=1
+  fi
+  check_pins vllm deepspeed || bad=1
   if [ "$bad" -ne 0 ]; then
     echo "dry-run FAILED: missing files or pins (above)" >&2
     exit 1
@@ -128,6 +251,29 @@ mkdir -p "$LOGDIR" results/gpu
 
 step() { echo; echo "### $*"; }
 
+if [ "$TWO_LOCAL" -eq 1 ]; then
+  step "two-node-local 1/4 preflight: GPUs"
+  nvidia-smi -L
+  if [ "$(nvidia-smi -L | wc -l)" -lt 2 ]; then
+    echo "two-node-local needs 2 GPUs; see nvidia-smi -L above" >&2
+    exit 1
+  fi
+  if [ "$STOP" -eq 1 ]; then
+    step "two-node-local 2/4 stop agents"
+    ./agent stop all --now
+  else
+    step "two-node-local 2/4 agents left running (no --stop-agents)"
+  fi
+  step "two-node-local 3/4 .venv-gpu"
+  ensure_venv_gpu
+  step "two-node-local 4/4 rehearsals: fsdp, deepspeed"
+  twolocal_run
+  step "done"
+  echo "results/gpu/:"
+  ls -l results/gpu/
+  exit 0
+fi
+
 step "1/8 preflight: GPUs"
 nvidia-smi -L
 
@@ -139,27 +285,7 @@ else
 fi
 
 step "3/8 .venv-gpu"
-vllm_pin=$(pin vllm)
-ds_pin=$(pin deepspeed)
-if [ -z "$vllm_pin" ] || [ -z "$ds_pin" ]; then
-  echo "tools/versions.txt must pin vllm= and deepspeed=" >&2
-  exit 1
-fi
-want="vllm=$vllm_pin deepspeed=$ds_pin"
-if [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$want" ] && [ -x .venv-gpu/bin/python ]; then
-  echo ".venv-gpu up to date ($want)"
-else
-  if [ ! -x .venv-gpu/bin/python ]; then
-    .tools/bin/uv venv -p 3.12 .venv-gpu
-  fi
-  .tools/bin/uv pip install -q --python .venv-gpu/bin/python \
-    "torch" "vllm==$vllm_pin" "deepspeed==$ds_pin" "triton" "ninja" \
-    "transformers" "peft" "accelerate" "safetensors" "numpy" \
-    "pydantic" "httpx" "tomli-w" "pytest"
-  printf '%s\n' "$want" > "$STAMP"
-fi
-CUDA_VISIBLE_DEVICES=0 .venv-gpu/bin/python -c \
-  "import torch; assert torch.cuda.is_available(), 'torch has no CUDA'; print('torch', torch.__version__, 'GPUs', torch.cuda.device_count())"
+ensure_venv_gpu
 
 step "4/8 kernel preflight (cuda + triton in IMPLS)"
 CUDA_VISIBLE_DEVICES=0 .venv-gpu/bin/python - <<'PY'

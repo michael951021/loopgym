@@ -103,7 +103,7 @@ def test_report(tmp_path):
         {"step": 1, "reward_mean": 0.25, "loss": 0.01, "grad_norm": 0.5, "step_s": 12.0},
         {"step": 2, "reward_mean": 0.5, "loss": -0.01, "grad_norm": 0.4, "step_s": 13.0},
     ]
-    mp.write_text("".join(json.dumps(l) + "\n" for l in lines))
+    mp.write_text("".join(json.dumps(rec) + "\n" for rec in lines))
     logs = []
     for i, gb in ((0, 2.5), (1, 3.5)):
         lg = tmp_path / f"node{i}.log"

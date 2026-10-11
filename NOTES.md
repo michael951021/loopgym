@@ -64,6 +64,12 @@
   (configs/grpo15_gpu.toml: backend=vllm, trainer_device=cuda:1, impl=triton,
   B4 G8 384tok lr2e-5 beta0.02 100 steps), 3 evals w/ final adapter -> results/gpu/.
   --dry-run: plan + 19-file check, exit 0/1; unknown flag exit 2; shellcheck clean.
+  --two-node-local (twonode): 0.5B toy rehearsal, 2 torchrun "nodes" on this host
+  (GPU0+GPU1, 1 rank each, c10d master 127.0.0.1:29500), fsdp+deepspeed x20 steps;
+  per-node cmds from loopgym.rl.launch cmds (run concurrently, tee per-node logs),
+  report folds rank-0 metrics.jsonl + PEAKMEM -> results/gpu/scale_{fsdp,deepspeed}.json.
+  Smaller REQUIRED_FILES_TWOLOCAL (toy: no exercism/loopgym/1.5B/cuda-kernels);
+  ensure_venv_gpu factored so full run + two-node share the pinned .venv-gpu build.
 - train.py backend=hf|vllm (in RESUME_CHECK, w/ trainer_device): vllm ->
   engine_args + rv.build_llm; sync_vllm(s, dir) saves adapter + sync_lora(f"step_{s}");
   restore re-syncs so the live engine uses the ckpt adapter; first generation is
@@ -80,7 +86,19 @@
   0.0957 vs seq-mean 0.0 (same completions) = length artifact, not a bug.
   tiny ctx 512 < exercism prompts -> tiny+exercism gen untestable.
 - `dist.py` FSDP2: fully_shard, full_state_dict DTensors, grads AVG, no 1/W.
+  wrap_fsdp shards Qwen2ForCausalLM as the ROOT (children embed/layers/norm/lm_head first)
+  so generate + train fwd + save() gather all reach a coordinating root.
 - `ds.py` ZeRO-3: ds_zero3.json bf16 stage3; micro=b*group; CPU compatible_ops[deepspeed_shm_comm]=False.
+  Pinned 0.19.7 aliases `zero` as an attribute (`from .runtime import zero`), NOT a
+  registered submodule -> `from deepspeed.zero import X` fails; use `import deepspeed` +
+  `deepspeed.zero.X` (rule 6 caught it; the test's DS_SKIP masked it as a sandbox gap).
+  _gathered_logp: in GRAD mode the forward post-hook releases lm_head to its (0,) shard
+  even inside the outer GatheredParameters, so re-gather AFTER the forward and run the
+  kernel while it's full (no_grad hides it). lm_head is frozen/non-LoRA, hidden_states[-1]
+  needs no grad through w. save(): optimizer gather is a collective -> every rank joins,
+  only rank0 persists; _dist_adapter_tensors names keys via get_peft_model_state_dict so
+  the ckpt == single-process save_pretrained (drops the `default` adapter level).
+  test_train_dist.py: 2 ranks x b == single 2b (LoRA 1e-5, metrics 1e-6) fsdp+deepspeed.
 - Toy gates PASS: toybanana3/toynull3; banana 0.148 -> 1.000; null slope CI contains 0.
 - `tools/fetch_src.sh`: vllm/deepspeed/trl -> .tools/src/ (rule 6).
 

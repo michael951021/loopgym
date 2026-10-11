@@ -46,7 +46,7 @@ def commands(topology: str, dist: str, master_ip: str = MASTER_IP_AWS) -> list[s
 
 
 def report(metrics: str, logs: list[str], topology: str, dist: str, out: str) -> dict:
-    lines = [json.loads(l) for l in Path(metrics).read_text().splitlines() if l.strip()]
+    lines = [json.loads(ln) for ln in Path(metrics).read_text().splitlines() if ln.strip()]
     peak: dict[str, float] = {}
     for lg in logs:
         for m in re.finditer(r"PEAKMEM rank=(\d+) gb=([\d.]+)", Path(lg).read_text()):
@@ -59,7 +59,7 @@ def report(metrics: str, logs: list[str], topology: str, dist: str, out: str) ->
         "reward_mean_last": last["reward_mean"],
         "loss_last": last["loss"],
         "grad_norm_last": last["grad_norm"],
-        "wall_s": round(sum(l["step_s"] for l in lines), 6),
+        "wall_s": round(sum(ln["step_s"] for ln in lines), 6),
         "peak_mem_gb": peak,
         "topology": topology,
         "dist": dist,
