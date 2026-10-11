@@ -145,3 +145,11 @@
 - Goal: CPU GRPO config
 - Approach: acceptance probe first, minimal config + trainer extension with regression tests, then the real 0.5B probe and a seq-mean control on identical completions (loss 0.0 exact) proving the out-of-range step-1 token-mean loss (0.0957) is a length-weighting artifact, not a trainer bug.
 - Blockers: none
+## Baselines on loopgym v0 (after loader)
+- Goal: Baselines on loopgym v0 (after loader)
+- Approach: compute job baselg2 ran OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-0.5b-instruct --source loopgym --split test --n 4 --out results/eval/base05_loopgym.json && .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-1.5b-instruct --source loopgym --split test --n 4 --out results/eval/base15_loopgym.json (exit 0)
+- Blockers: none
+## GRPO step memory fix
+- Goal: GRPO step memory fix
+- Approach: This run continued an interrupted one whose code fix was already committed (dba1534). I verified the fix against the ticket contract (state/tickets/grpomem.md), re-ran tests/test_grpomem.py (3/3) and the full suite, confirmed the 2-step measurement log, applied the mem bump per the ticket's x1.3 rule, recorded the peak and condensed NOTES.md (4030 bytes < 4 KB), added the plan_lint why: lines under the open TODO tasks, committed (75022cd), and merged master (already up to date).
+- Blockers: none.

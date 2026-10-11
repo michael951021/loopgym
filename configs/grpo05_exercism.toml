@@ -19,6 +19,7 @@ clip = 0.2
 agg = "token-mean"
 scale = "std"
 max_grad_norm = 1.0
+micro_batch = 8  # rows per rollout/logp chunk (fits the 24 GB job cap)
 runner = "local"
 seed = 1337
 steps = 40

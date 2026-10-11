@@ -39,7 +39,7 @@ EVAL_SEED_OFFSET = 1_000_000_003
 RESUME_CHECK = ("model", "lora_r", "lora_alpha", "lora_targets", "task", "toy_task",
                 "split", "max_difficulty", "batch", "group", "max_new_tokens",
                 "temperature", "top_p", "seed", "runner", "eval_n",
-                "backend", "trainer_device")
+                "backend", "trainer_device", "micro_batch")
 
 
 @dataclass
@@ -64,6 +64,7 @@ class TrainCfg:
     scale: str = "std"  # "std" | "none" (Dr. GRPO)
     max_grad_norm: float = 1.0
     chunk: int = 8192
+    micro_batch: int = 8  # rows per rollout/logp chunk; sized to fit the 24 GB job cap
     logprob_impl: str = "torch"
     runner: str = "local"  # local | http (lgbox)
     backend: str = "hf"  # hf | vllm (rollout backend; vllm is host-only)
@@ -201,12 +202,13 @@ class Run:
         self.backend = self._make_backend()
         self.step_cfg = B.StepCfg(logprob_impl=cfg.logprob_impl, clip_eps=cfg.clip,
                                   kl_coef=cfg.beta, agg=cfg.agg,
-                                  max_grad_norm=cfg.max_grad_norm, chunk=cfg.chunk)
+                                  max_grad_norm=cfg.max_grad_norm, chunk=cfg.chunk,
+                                  micro_batch=cfg.micro_batch)
         self.step = 0  # completed steps
 
     def _make_backend(self):
         if self.cfg.backend == "hf":
-            return HFBackend(self.policy, self.tokenizer)
+            return HFBackend(self.policy, self.tokenizer, micro_batch=self.cfg.micro_batch)
         from loopgym.rl import rollout_vllm as rv
         model_path = "tiny" if self.cfg.model == "tiny" else str(model_dir(self.cfg))
         args = rv.engine_args(model_path, lora_rank=self.cfg.lora_r)
@@ -449,7 +451,8 @@ class Run:
         if self.cfg.backend == "vllm":
             self.sync_vllm(self.step, d)  # re-point the live engine at the ckpt adapter
         else:
-            self.backend = HFBackend(self.policy, self.tokenizer)
+            self.backend = HFBackend(self.policy, self.tokenizer,
+                                     micro_batch=self.cfg.micro_batch)
 
 
 def metrics_path(cfg: TrainCfg) -> Path:
