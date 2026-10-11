@@ -135,6 +135,18 @@ def register_impl(name, fn):
     IMPLS = tuple(_REGISTRY)
 
 
+def _host_shim(fn):
+    """tests/known pass CPU tensors; the triton/cuda kernels only run on the GPU host
+    (rule 2: no GPU in the sandbox). Transparent CPU->CUDA->CPU; the .to() copies are
+    differentiable, so f64 gradcheck on CPU inputs still reaches the kernel."""
+    def wrapped(h, w, t, chunk):
+        if h.device.type == "cpu" and torch.cuda.is_available():
+            out = fn(h.to("cuda"), w.to("cuda"), t.to("cuda"), chunk)
+            return out.to(h.device)
+        return fn(h, w, t, chunk)
+    return wrapped
+
+
 # Register "cpp" at import once the JIT build succeeds; no compiler -> torch-only.
 try:
     _load_cpp()
@@ -143,16 +155,17 @@ except Exception as _e:
     print(f"loopgym.kernels: cpp kernel not built ({_e}); torch-only", file=sys.stderr)
 
 # Triton is usable on a GPU host or in the interpreter (sandbox, CLAUDE.md rule 2).
+# On the host the shim moves CPU tensors to CUDA (no GPU in the sandbox).
 if os.environ.get("TRITON_INTERPRET") == "1" or torch.cuda.is_available():
     from . import triton_logprob
-    register_impl("triton", triton_logprob.triton_impl)
+    register_impl("triton", _host_shim(triton_logprob.triton_impl))
 
 # "cuda" only where torch has CUDA (host, not this sandbox): JIT build, same API as cpp.
 if torch.cuda.is_available():
     try:
         from . import cuda_ext
         cuda_ext._load_cuda()
-        register_impl("cuda", cuda_ext._cuda_impl)
+        register_impl("cuda", _host_shim(cuda_ext._cuda_impl))
     except Exception as _e:
         print(f"loopgym.kernels: cuda kernel not built ({_e})", file=sys.stderr)
 

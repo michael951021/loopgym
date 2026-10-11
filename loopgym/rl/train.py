@@ -35,7 +35,8 @@ EVAL_SEED_OFFSET = 1_000_000_003
 # fields that must match a checkpoint's config for --resume to be safe
 RESUME_CHECK = ("model", "lora_r", "lora_alpha", "lora_targets", "task", "toy_task",
                 "split", "max_difficulty", "batch", "group", "max_new_tokens",
-                "temperature", "top_p", "seed", "runner", "eval_n")
+                "temperature", "top_p", "seed", "runner", "eval_n",
+                "backend", "trainer_device")
 
 
 @dataclass
@@ -62,6 +63,8 @@ class TrainCfg:
     chunk: int = 8192
     logprob_impl: str = "torch"
     runner: str = "local"  # local | http (lgbox)
+    backend: str = "hf"  # hf | vllm (rollout backend; vllm is host-only)
+    trainer_device: str = ""  # "" = CPU; "cuda:1" on the GPU host
     seed: int = 1337
     steps: int = 100
     eval_every: int = 0  # 0 disables eval rollouts
@@ -149,6 +152,8 @@ class Run:
         self.val_names = None
         if cfg.eval_n > 0 and cfg.task != "exercism":
             raise SystemExit("eval_n requires task = \"exercism\"")
+        if cfg.backend not in ("hf", "vllm"):
+            raise SystemExit(f"unknown backend {cfg.backend!r} (hf | vllm)")
         if cfg.task == "toy":
             self.toy_task = toy.load_toy(cfg.toy_task)
             self.sampler = None
@@ -173,13 +178,29 @@ class Run:
             build_base(cfg),
             LoraConfig(r=cfg.lora_r, lora_alpha=cfg.lora_alpha,
                        target_modules=list(cfg.lora_targets)))
+        if cfg.trainer_device:
+            self.policy = self.policy.to(cfg.trainer_device)
         self.optimizer = torch.optim.AdamW(
             [p for p in self.policy.parameters() if p.requires_grad], lr=cfg.lr)
-        self.backend = HFBackend(self.policy, self.tokenizer)
+        self.backend = self._make_backend()
         self.step_cfg = B.StepCfg(logprob_impl=cfg.logprob_impl, clip_eps=cfg.clip,
                                   kl_coef=cfg.beta, agg=cfg.agg,
                                   max_grad_norm=cfg.max_grad_norm, chunk=cfg.chunk)
         self.step = 0  # completed steps
+
+    def _make_backend(self):
+        if self.cfg.backend == "hf":
+            return HFBackend(self.policy, self.tokenizer)
+        from loopgym.rl import rollout_vllm as rv
+        model_path = "tiny" if self.cfg.model == "tiny" else str(model_dir(self.cfg))
+        args = rv.engine_args(model_path, lora_rank=self.cfg.lora_r)
+        return rv.VLLMBackend(rv.build_llm(args), self.tokenizer)
+
+    def sync_vllm(self, s: int, adapter_dir: Path) -> None:
+        """Save the current LoRA adapter and point the vLLM engine at it."""
+        adapter_dir.mkdir(parents=True, exist_ok=True)
+        self.policy.save_pretrained(str(adapter_dir))
+        self.backend.sync_lora(adapter_dir, f"step_{s}")
 
     # -- data -------------------------------------------------------------
     def tasks(self) -> list:
@@ -220,6 +241,8 @@ class Run:
         rewards = self.grade_all(tasks, groups, s)
         batch_ = B.build_batch(groups, rewards, self.tokenizer, scale=cfg.scale)
         stats = B.grpo_step(self.policy, None, batch_, self.optimizer, self.step_cfg)
+        if self.cfg.backend == "vllm":
+            self.sync_vllm(s, Path(cfg.out) / "vllm_adapter")
         r = torch.tensor(rewards, dtype=torch.float32).reshape(-1)
         same = sum(1 for b in range(len(tasks)) if len({x for x in rewards[b]}) == 1)
         rec = {
@@ -302,7 +325,10 @@ class Run:
         if self.sampler is not None:
             self.sampler.load_state(state["task_rng"])
         self.step = state["step"]
-        self.backend = HFBackend(self.policy, self.tokenizer)
+        if self.cfg.backend == "vllm":
+            self.sync_vllm(self.step, d)  # re-point the live engine at the ckpt adapter
+        else:
+            self.backend = HFBackend(self.policy, self.tokenizer)
 
 
 def metrics_path(cfg: TrainCfg) -> Path:

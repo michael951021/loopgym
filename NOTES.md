@@ -44,6 +44,10 @@
 - `kernels/token_logprobs(h,w,t,impl,chunk)->[T]: chunked max/LSE bwd softmax (no
   [T,V]); torch,cpp,triton,cuda; cpp JIT (-O3 -fopenmp); triton iff CUDA or
   TRITON_INTERPRET=1, C<=1024; cuda host-only. bench_logprob.py -> bench_logprob.json, f64 1e-4.
+  `_host_shim` wraps triton/cuda: known tests pass CPU tensors -> on a CUDA host they
+  are moved .to("cuda") (differentiable, so f64 gradcheck still reaches the kernel);
+  no-op in the sandbox. Host-only risk: triton/cuda on a real GPU untested here
+  (gpu_run.sh step 5 surfaces it).
 
 ## RL
 - `grpo.py` group_advantages/kl_k3/policy_loss; 7/7 known.
@@ -51,7 +55,21 @@
   step-0 β=0 ~0; no last_hidden_state in 5.x; kernel unbatched -> flatten.
 - `rollout.py` HFBackend (left pad, output_scores fp32; T<=0 greedy); top_k=0, rep=1.0.
 - `rollout_vllm.py` (host): bf16 enable_lora r16; sync_lora id+1/step;
-  logprobs=0 -> sampler_logp; max_tokens explicit; 0.02-nat.
+  logprobs=0 -> sampler_logp; max_tokens explicit; 0.02-nat; build_llm() lazy
+  (tests monkeypatch it; vLLM never imported in sandbox).
+- gpurun: scripts/gpu_run.sh = Kevin's one-command GPU window: preflight nvidia-smi
+  (2 GPU), stop agents only w/ --stop-agents, .venv-gpu via .tools/bin/uv pinned to
+  tools/versions.txt (+.gpu-stamp), assert IMPLS superset {cuda,triton},
+  pytest tests/known on CUDA, check_vllm_hf gate, GRPO 1.5B
+  (configs/grpo15_gpu.toml: backend=vllm, trainer_device=cuda:1, impl=triton,
+  B4 G8 384tok lr2e-5 beta0.02 100 steps), 3 evals w/ final adapter -> results/gpu/.
+  --dry-run: plan + 19-file check, exit 0/1; unknown flag exit 2; shellcheck clean.
+- train.py backend=hf|vllm (in RESUME_CHECK, w/ trainer_device): vllm ->
+  engine_args + rv.build_llm; sync_vllm(s, dir) saves adapter + sync_lora(f"step_{s}");
+  restore re-syncs so the live engine uses the ckpt adapter; first generation is
+  unlora (train before sync). check_vllm_hf.py: greedy n=1 both backends, common
+  prefix, fp32 mean|Δ|<0.02 nats GATED (full-prefix too), bf16 reported; teardown =
+  engine_core.shutdown + gc + empty_cache (0.35 mem util, 2048 ctx).
 - `train.py`: toml+--k v; sample->gen->grade->grpo_step->jsonl->ckpt
   <out>^2/ckpt/<name>; --dist+--dry-run; exact resume; exit 1 on orphan ckpt;
   from_pretrained freezes ALL -> requires_grad lora_.

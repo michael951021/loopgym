@@ -1,0 +1,35 @@
+# 1.5B GRPO in Kevin's GPU window (CLAUDE.md: Scale-out). Run via
+# scripts/gpu_run.sh --stop-agents, never by hand.
+# Rollouts: vLLM on GPU0 (bf16, max_model_len 8192), LoRA synced every step.
+# Trainer: GPU1, fp32 base + LoRA r16. Memory: 1.5B fp32 ~6.2 GB +
+# output_hidden_states ~29 layers x B4 x G8 x ~1.9k ctx x d1536 x 4B ~= 9 GB.
+model = "1.5b"
+lora_r = 16
+lora_alpha = 32
+lora_targets = ["q_proj", "k_proj", "v_proj", "o_proj"]
+task = "exercism"
+split = "train"
+max_difficulty = 0
+batch = 4
+group = 8
+max_new_tokens = 384
+temperature = 1.0
+top_p = 1.0
+lr = 2e-5
+beta = 0.02
+clip = 0.2
+agg = "token-mean"
+scale = "std"
+max_grad_norm = 1.0
+chunk = 1024
+logprob_impl = "triton"
+runner = "local"
+backend = "vllm"
+trainer_device = "cuda:1"
+seed = 1337
+steps = 100
+eval_every = 20
+eval_n = 8
+save_every = 10
+timeout = 30
+out = "runs/grpo15_gpu"

@@ -32,7 +32,14 @@ except ModuleNotFoundError:  # sandbox: tests monkeypatch fakes onto these names
     SamplingParams = None
     LoRARequest = None
 
-__all__ = ["VLLMBackend", "engine_args", "main"]
+__all__ = ["VLLMBackend", "build_llm", "engine_args", "main"]
+
+
+def build_llm(engine_args: dict):
+    """Build vllm.LLM(**engine_args). Lazy import: host-only (rule 2); tests
+    monkeypatch this function instead of installing vLLM."""
+    from vllm import LLM
+    return LLM(**engine_args)
 
 
 def engine_args(model: str, *, lora_rank: int = 16, dtype: str = "bfloat16",
@@ -134,8 +141,7 @@ def main(argv: list[str] | None = None) -> int:
     print(json.dumps(payload, indent=1))
     if args.dry_run:
         return 0
-    from vllm import LLM
-    LLM(**payload["engine_args"])
+    build_llm(payload["engine_args"])
     print("engine built; wire VLLMBackend(llm, tokenizer) into the host training loop",
           file=sys.stderr)
     return 0
