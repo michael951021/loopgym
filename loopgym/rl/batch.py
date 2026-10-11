@@ -71,9 +71,14 @@ def logp_of(model, batch, cfg):
     hidden = out.hidden_states[-1][:, :-1]
     targets = input_ids[:, 1:]
     n, t = targets.shape
+    w = model.get_output_embeddings().weight
+    # The kernel indexes weight rows by global vocab id; FSDP2 shards the weight along
+    # dim 0, so materialize the full tensor before it reaches the kernel.
+    if isinstance(w, torch.distributed.tensor.DTensor):
+        w = w.full_tensor()
     logp = kernels.token_logprobs(
         hidden.reshape(-1, hidden.size(-1)),
-        model.get_output_embeddings().weight,
+        w,
         targets.reshape(-1),
         impl=cfg.logprob_impl,
         chunk=cfg.chunk,
@@ -81,28 +86,52 @@ def logp_of(model, batch, cfg):
     return logp.reshape(n, t)
 
 
-def grpo_step(policy, ref_fn, batch, optimizer, cfg):
+def _gathered_logp(engine, batch, cfg):
+    """logp_of on a ZeRO-3 engine: materialize the partitioned lm_head weight for the kernel
+    (the engine's forward hooks release it again after the forward)."""
+    from deepspeed.zero import GatheredParameters
+
+    with GatheredParameters([engine.get_output_embeddings().weight]):
+        return logp_of(engine, batch, cfg)
+
+
+def grpo_step(policy, ref_fn, batch, optimizer, cfg, loss_factor=1.0, engine=None):
     """One GRPO optimizer step. `policy` is a PeftModel; `ref_fn` (policy, batch) -> [N, T-1]
     log-probs under the reference, or None to use the base model via policy.disable_adapter().
     old_logp = logp.detach() (on-policy, first epoch). Returns stats: loss, kl, clip_frac,
-    ratio_mean, grad_norm (pre-clip), tokens."""
-    policy.train()
-    logp = logp_of(policy, batch, cfg)
+    ratio_mean, grad_norm (pre-clip), tokens (the loss is the per-rank local mean).
+
+    `loss_factor` scales only the backward (world * N_local / N_global turns the AVG
+    reduce-scatter of per-rank token-mean losses into one global token-mean step).
+    `engine` (a DeepSpeed ZeRO-3 engine around policy): forward and the weight gather go
+    through the engine, clip at cfg.max_grad_norm comes from the engine's gradient_clipping,
+    and the reference forward is skipped when kl_coef == 0."""
+    fwd = engine if engine is not None else policy
+    fwd.train()
+    logp = _gathered_logp(fwd, batch, cfg) if engine is not None else logp_of(fwd, batch, cfg)
     old_logp = logp.detach()
     if ref_fn is not None:
         ref_logp = ref_fn(policy, batch)
+    elif engine is not None and cfg.kl_coef == 0.0:
+        ref_logp = logp
     else:
         with policy.disable_adapter(), torch.no_grad():
-            ref_logp = logp_of(policy, batch, cfg)
+            ref_logp = _gathered_logp(fwd, batch, cfg) if engine is not None else logp_of(policy, batch, cfg)
     dev = logp.device
     loss, stats = grpo.policy_loss(
         logp, old_logp, ref_logp, batch.advantages.to(dev), batch.target_mask.to(dev),
         clip_eps=cfg.clip_eps, kl_coef=cfg.kl_coef, agg=cfg.agg,
     )
-    loss.backward()
-    grad_norm = clip_grad_norm_([p for p in policy.parameters() if p.requires_grad], cfg.max_grad_norm)
-    optimizer.step()
-    optimizer.zero_grad(set_to_none=True)
+    if engine is not None:
+        engine.backward(loss * loss_factor)
+        engine.step()
+        gn = engine.get_global_grad_norm()
+        grad_norm = 0.0 if gn is None else float(gn)
+    else:
+        (loss * loss_factor).backward()
+        grad_norm = clip_grad_norm_([p for p in fwd.parameters() if p.requires_grad], cfg.max_grad_norm)
+        optimizer.step()
+        optimizer.zero_grad(set_to_none=True)
     return {
         "loss": float(loss.detach()),
         "kl": float(stats["kl"].detach()),

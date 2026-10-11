@@ -31,10 +31,18 @@ def init_dist(backend: str | None = None) -> None:
     dist.init_process_group(backend=backend, **kwargs)
 
 
-def wrap_fsdp(model, cfg=None):
-    """fully_shard each decoder layer bottom-up, then the root; returns model."""
+def wrap_fsdp(model, cfg=None, layers=None):
+    """fully_shard each decoder layer bottom-up, then the root; returns model.
+
+    `layers` defaults to the first .layers list found walking down .model (a plain
+    Qwen2ForCausalLM has model.model.layers; a PeftModel one more level down)."""
     init_dist(getattr(cfg, "backend", None))
-    for layer in model.model.layers:
+    if layers is None:
+        base = model
+        while not hasattr(base, "layers"):
+            base = base.model
+        layers = base.layers
+    for layer in layers:
         fully_shard(layer)
     fully_shard(model)
     return model
