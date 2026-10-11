@@ -2,7 +2,7 @@
 
 One torchrun template for every topology (single / two-local / two-aws); the
 generated commands differ only in CUDA_VISIBLE_DEVICES, --nnodes, --node_rank,
---nproc_per_node and --master_addr (pinned by tests/test_launch_cmds.py).
+--nproc_per_node and --rdzv-endpoint (pinned by tests/test_launch_cmds.py).
 `report` folds the rank-0 metrics.jsonl and the per-node logs (PEAKMEM lines)
 into one result JSON.
 """
@@ -20,11 +20,11 @@ CONFIG = "configs/scale05.toml"
 TEMPLATE = (
     "CUDA_VISIBLE_DEVICES={gpu} .venv-gpu/bin/python -m torch.distributed.run "
     "--nnodes={nnodes} --node_rank={rank} --nproc_per_node={nproc} "
-    "--master_addr={addr} --master_port={port} -m loopgym.rl.train "
+    "--rdzv-backend c10d --rdzv-endpoint={addr}:{port} -m loopgym.rl.train "
     "--config {config} --dist {dist} --out runs/gpu/scale_{dist} --resume-if-any"
 )
 
-# topology -> (nnodes, nproc_per_node, master_addr, [(node_rank, gpus), ...])
+# topology -> (nnodes, nproc_per_node, rdzv-endpoint addr, [(node_rank, gpus), ...])
 def _topology(name: str, master_ip: str):
     if name == "single":
         return 1, 2, "127.0.0.1", [(0, "0,1")]

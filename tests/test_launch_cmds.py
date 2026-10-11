@@ -2,7 +2,7 @@
 
 The 1-node, 2-local-node and 2-AWS-node commands must share one template and differ
 only in CUDA_VISIBLE_DEVICES / --nnodes / --node_rank / --nproc_per_node /
---master_addr. Plus a hand-written command pinning the exact output and the
+--rdzv-endpoint. Plus a hand-written command pinning the exact output and the
 report aggregator.
 """
 import json
@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PY = ROOT / ".venv" / "bin" / "python"
 
-VARYING = {"--nnodes", "--node_rank", "--nproc_per_node", "--master_addr"}
+VARYING = {"--nnodes", "--node_rank", "--nproc_per_node", "--rdzv-endpoint"}
 
 
 def launch(*args: str) -> subprocess.CompletedProcess:
@@ -48,8 +48,8 @@ def masked(cmd: str) -> list[str]:
 
 HAND = (
     "CUDA_VISIBLE_DEVICES={gpu} .venv-gpu/bin/python -m torch.distributed.run "
-    "--nnodes=2 --node_rank={rank} --nproc_per_node=1 --master_addr=127.0.0.1 "
-    "--master_port=29500 -m loopgym.rl.train --config configs/scale05.toml "
+    "--nnodes=2 --node_rank={rank} --nproc_per_node=1 --rdzv-backend c10d "
+    "--rdzv-endpoint=127.0.0.1:29500 -m loopgym.rl.train --config configs/scale05.toml "
     "--dist {dist} --out runs/gpu/scale_{dist} --resume-if-any"
 )
 
@@ -68,13 +68,15 @@ def test_template_invariance():
         ref = masked(all_c[0])
         for c in all_c:
             assert masked(c) == ref, (c, ref)
-            assert "--master_port=29500" in c.split()
+            assert "--rdzv-backend" in c.split() and "c10d" in c.split()
+            assert any(t.startswith("--rdzv-endpoint=") and t.endswith(":29500")
+                       for t in c.split())
 
 
 def test_single_node_shape():
     t = cmds("single", "fsdp")[0].split()
     assert "--nnodes=1" in t and "--node_rank=0" in t and "--nproc_per_node=2" in t
-    assert "--master_addr=127.0.0.1" in t
+    assert "--rdzv-endpoint=127.0.0.1:29500" in t
     assert t[0] == "CUDA_VISIBLE_DEVICES=0,1"
 
 
@@ -83,11 +85,12 @@ def test_two_local_shape():
     assert [x.split()[0] for x in c] == ["CUDA_VISIBLE_DEVICES=0", "CUDA_VISIBLE_DEVICES=1"]
     assert "--node_rank=0" in c[0].split() and "--node_rank=1" in c[1].split()
     assert all("--nproc_per_node=1" in x.split() and "--nnodes=2" in x.split() for x in c)
+    assert all("--rdzv-endpoint=127.0.0.1:29500" in x.split() for x in c)
 
 
 def test_two_aws_shape():
     c = cmds("two-aws", "fsdp", "--master-ip", "10.0.1.7")
-    assert all("--master_addr=10.0.1.7" in x.split() for x in c)
+    assert all("--rdzv-endpoint=10.0.1.7:29500" in x.split() for x in c)
     assert all(x.split()[0] == "CUDA_VISIBLE_DEVICES=0" for x in c)  # each node's own GPU 0
     assert "--node_rank=0" in c[0].split() and "--node_rank=1" in c[1].split()
 

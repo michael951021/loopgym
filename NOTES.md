@@ -65,9 +65,14 @@
   B4 G8 384tok lr2e-5 beta0.02 100 steps), 3 evals w/ final adapter -> results/gpu/.
   --dry-run: plan + 19-file check, exit 0/1; unknown flag exit 2; shellcheck clean.
   --two-node-local (twonode): 0.5B toy rehearsal, 2 torchrun "nodes" on this host
-  (GPU0+GPU1, 1 rank each, c10d master 127.0.0.1:29500), fsdp+deepspeed x20 steps;
-  per-node cmds from loopgym.rl.launch cmds (run concurrently, tee per-node logs),
-  report folds rank-0 metrics.jsonl + PEAKMEM -> results/gpu/scale_{fsdp,deepspeed}.json.
+  (GPU0+GPU1, 1 rank each); cmds from loopgym.rl.launch cmds, one template for
+  single/two-local/two-aws differing only in gpu/nnodes/node_rank/nproc/
+  --rdzv-endpoint (c10d 127.0.0.1:29500 local), fsdp+deepspeed x20 steps;
+  report -> results/gpu/scale_local_{dist}.json (per-step gen_tok_s/step_s + PEAKMEM).
+  GOTCHA: c10d rdzv HANGS in sandbox (C getaddrinfo on unresolvable hostname
+  "sandbox"; Python shim no-op) -> preflight requires getent hosts $(hostname).
+  test_train_dist: 2 ranks x b == single 2b (LoRA 1e-5, metrics 1e-6) PASS for BOTH
+  fsdp+deepspeed in sandbox (23s) - no host-only skip needed.
   Smaller REQUIRED_FILES_TWOLOCAL (toy: no exercism/loopgym/1.5B/cuda-kernels);
   ensure_venv_gpu factored so full run + two-node share the pinned .venv-gpu build.
 - train.py backend=hf|vllm (in RESUME_CHECK, w/ trainer_device): vllm ->

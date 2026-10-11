@@ -123,12 +123,13 @@ plan_twolocal() {
  topology: 2 torchrun "nodes" on THIS host, 1 rank each; c10d master 127.0.0.1:29500
            node0 -> GPU 0, node1 -> GPU 1 (each node exports exactly one GPU)
  dist    : fsdp then deepspeed (one 20-step rehearsal each)
-  1. preflight  : nvidia-smi -L (need 2 GPUs)
+  1. preflight  : nvidia-smi -L (need 2 GPUs) + this host's hostname resolves
+                  (c10d rendezvous would hang otherwise, torch C getaddrinfo)
   2. .venv-gpu  : uv venv -p 3.12 + pinned install (torch, vllm, deepspeed, triton, ...)
   3. fsdp       : 2 concurrent torchrun -> runs/gpu/scale_fsdp
-                  report      -> results/gpu/scale_fsdp.json
+                  report      -> results/gpu/scale_local_fsdp.json
   4. deepspeed  : 2 concurrent torchrun -> runs/gpu/scale_deepspeed
-                  report      -> results/gpu/scale_deepspeed.json
+                  report      -> results/gpu/scale_local_deepspeed.json
  (toy rewards grade in-process; this measures rendezvous/sharding/step time, not
   learning)
 PLAN
@@ -189,12 +190,12 @@ twolocal_run() {
       tail -n 40 "$log1" >&2 || true
       exit 1
     fi
-    step "two-node-local: $dist report -> results/gpu/scale_${dist}.json"
+    step "two-node-local: $dist report -> results/gpu/scale_local_${dist}.json"
     .venv-gpu/bin/python -m loopgym.rl.launch report \
       --metrics "runs/gpu/scale_${dist}/metrics.jsonl" \
       --logs "$log0" "$log1" \
       --topology two-local --dist "$dist" \
-      --out "results/gpu/scale_${dist}.json"
+      --out "results/gpu/scale_local_${dist}.json"
   done
 }
 
@@ -256,6 +257,15 @@ if [ "$TWO_LOCAL" -eq 1 ]; then
   nvidia-smi -L
   if [ "$(nvidia-smi -L | wc -l)" -lt 2 ]; then
     echo "two-node-local needs 2 GPUs; see nvidia-smi -L above" >&2
+    exit 1
+  fi
+  # c10d rendezvous resolves this host's own hostname via the C library
+  # (torch socket.cpp getaddrinfo); if it cannot, torchrun hangs before any
+  # rank starts. Observed in the sandbox (hostname absent from /etc/hosts,
+  # no DNS); the Python-level name is invisible to that call.
+  if ! getent hosts "$(hostname)" >/dev/null 2>&1; then
+    echo "hostname '$(hostname)' does not resolve; c10d rendezvous would hang." >&2
+    echo "add it to /etc/hosts (e.g. '127.0.1.1 $(hostname)') and re-run." >&2
     exit 1
   fi
   if [ "$STOP" -eq 1 ]; then
