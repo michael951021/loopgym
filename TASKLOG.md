@@ -145,3 +145,7 @@
 - Goal: CPU GRPO config
 - Approach: acceptance probe first, minimal config + trainer extension with regression tests, then the real 0.5B probe and a seq-mean control on identical completions (loss 0.0 exact) proving the out-of-range step-1 token-mean loss (0.0957) is a length-weighting artifact, not a trainer bug.
 - Blockers: none
+## Baselines on loopgym v0 (after loader)
+- Goal: Baselines on loopgym v0 (after loader)
+- Approach: compute job baselg2 ran OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-0.5b-instruct --source loopgym --split test --n 4 --out results/eval/base05_loopgym.json && .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-1.5b-instruct --source loopgym --split test --n 4 --out results/eval/base15_loopgym.json (exit 0)
+- Blockers: none
