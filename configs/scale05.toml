@@ -1,0 +1,19 @@
+# 0.5B multi-node scale rehearsal (twonode ticket): 20 steps, 2 ranks x batch 2,
+# group 8, 256 new tokens, no eval. GPU host only (scripts/gpu_run.sh
+# --two-node-local / two-aws). trainer_device=cuda:0 = the rank's own single
+# visible GPU (each node exports exactly one GPU in two-local/two-aws).
+# Toy tasks: zero data dependencies and in-process grading, so the rehearsal
+# measures the multi-node machinery (rendezvous, sharding, step time), not learning.
+model = "0.5b"
+task = "toy"
+toy_task = "banana"
+batch = 2
+group = 8
+max_new_tokens = 256
+lr = 2e-5
+steps = 20
+eval_every = 0
+save_every = 20
+trainer_device = "cuda:0"
+logprob_impl = "torch"
+out = "runs/gpu/scale"
