@@ -38,12 +38,16 @@ class HFBackend:
     """Batched HuggingFace `generate` with the tokenizer chat template and left padding.
 
     temperature <= 0 means do_sample=False (greedy); then the n copies of a prompt are
-    identical. Sampling consumes the global torch RNG (seeded with `seed` before the
-    batch), so each row in the batch gets an independent sample."""
+    identical. Rows are generated in chunks of `micro_batch` so the per-step scores
+    ([steps, chunk, vocab] fp32) stay small; each chunk seeds the global torch RNG
+    (seed + 7919 * chunk) so every row still gets an independent, reproducible sample.
+    Position ids are per-row (left padding is masked), so chunking never changes a
+    row's logits."""
 
-    def __init__(self, model, tokenizer):
+    def __init__(self, model, tokenizer, micro_batch: int = 8):
         self.model = model
         self.tokenizer = tokenizer
+        self.micro_batch = max(1, int(micro_batch))
 
     def generate(
         self,
@@ -61,47 +65,52 @@ class HFBackend:
         if pad_id is None:
             raise ValueError("tokenizer has no pad token")
         rows = [ids for ids in prompt_ids for _ in range(n)]
-        width = max(len(r) for r in rows)
-        input_ids = torch.tensor([[pad_id] * (width - len(r)) + r for r in rows], dtype=torch.long)
-        attention_mask = torch.tensor([[0] * (width - len(r)) + [1] * len(r) for r in rows], dtype=torch.long)
         dev = next(self.model.parameters()).device
-        input_ids = input_ids.to(dev)
-        attention_mask = attention_mask.to(dev)
-
         do_sample = temperature > 0
-        torch.manual_seed(seed)
-        with torch.no_grad():
-            out = self.model.generate(
-                input_ids,
-                attention_mask=attention_mask,
-                max_new_tokens=max_new_tokens,
-                do_sample=do_sample,
-                temperature=temperature if do_sample else 1.0,
-                top_p=top_p if do_sample else 1.0,
-                # the instruct model's generation_config.json ships top_k=20 and
-                # repetition_penalty=1.05; rollouts must be exactly temperature + top_p
-                top_k=0,
-                repetition_penalty=1.0,
-                return_dict_in_generate=True,
-                output_scores=True,
-            )
-        scores = [s.float() for s in out.scores]  # [steps, B, V], fp32, temperature-scaled
-        seqs = out.sequences
         eos_id = self.tokenizer.eos_token_id
         results: list[list[Completion]] = [[] for _ in prompts]
-        for i, r in enumerate(rows):
-            prompt = prompt_ids[i // n]
-            comp = seqs[i, width:].tolist()
-            # rows that hit EOS are frozen; HF fills the rest of the sequence with pad, so trim there
-            if eos_id is not None and eos_id in comp:
-                comp = comp[: comp.index(eos_id) + 1]
-            logp = [float(torch.log_softmax(scores[s], dim=-1)[i, token]) for s, token in enumerate(comp)]
-            results[i // n].append(
-                Completion(
-                    prompt_ids=list(prompt),
-                    completion_ids=comp,
-                    text=self.tokenizer.decode(comp),
-                    sampler_logp=logp,
+        for c0 in range(0, len(rows), self.micro_batch):
+            sub = rows[c0:c0 + self.micro_batch]
+            width = max(len(r) for r in sub)
+            input_ids = torch.tensor(
+                [[pad_id] * (width - len(r)) + r for r in sub], dtype=torch.long).to(dev)
+            attention_mask = torch.tensor(
+                [[0] * (width - len(r)) + [1] * len(r) for r in sub], dtype=torch.long).to(dev)
+            torch.manual_seed(seed + 7919 * (c0 // self.micro_batch))
+            with torch.no_grad():
+                out = self.model.generate(
+                    input_ids,
+                    attention_mask=attention_mask,
+                    max_new_tokens=max_new_tokens,
+                    do_sample=do_sample,
+                    temperature=temperature if do_sample else 1.0,
+                    top_p=top_p if do_sample else 1.0,
+                    # the instruct model's generation_config.json ships top_k=20 and
+                    # repetition_penalty=1.05; rollouts must be exactly temperature + top_p
+                    top_k=0,
+                    repetition_penalty=1.0,
+                    return_dict_in_generate=True,
+                    output_scores=True,
                 )
-            )
+            scores = [s.float() for s in out.scores]  # [steps, chunk, V], fp32, temperature-scaled
+            seqs = out.sequences
+            for j, r in enumerate(sub):
+                i = c0 + j
+                prompt = prompt_ids[i // n]
+                comp = seqs[j, width:].tolist()
+                # rows that hit EOS are frozen; HF fills the rest of the sequence with pad, so trim there
+                if eos_id is not None and eos_id in comp:
+                    comp = comp[: comp.index(eos_id) + 1]
+                logp = [
+                    float(torch.log_softmax(scores[s], dim=-1)[j, token]) for s, token in enumerate(comp)
+                ]
+                results[i // n].append(
+                    Completion(
+                        prompt_ids=list(prompt),
+                        completion_ids=comp,
+                        text=self.tokenizer.decode(comp),
+                        sampler_logp=logp,
+                    )
+                )
+            del scores, out
         return results

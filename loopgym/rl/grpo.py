@@ -18,11 +18,14 @@ def kl_k3(logp, ref_logp):
     return torch.exp(d) - d - 1
 
 
-def policy_loss(logp, old_logp, ref_logp, adv, mask, clip_eps=0.2, kl_coef=0.0, agg="token-mean"):
+def policy_loss(logp, old_logp, ref_logp, adv, mask, clip_eps=0.2, kl_coef=0.0, agg="token-mean",
+                denom=None):
     """GRPO/PPO objective.
 
     logp/old_logp/ref_logp [B, T] (old/ref from the trainer's forward, never the sampler);
     adv [B] (per prompt); mask [B, T]. Returns (loss, {"clip_frac", "kl", "ratio_mean"}).
+    denom: global token count for token-mean micro-batch chunks (chunk losses then sum
+    to the full-batch loss); default None = this call's own mask sum.
     """
     if adv.dim() == 1:
         adv = adv.unsqueeze(-1)
@@ -31,7 +34,8 @@ def policy_loss(logp, old_logp, ref_logp, adv, mask, clip_eps=0.2, kl_coef=0.0, 
     a = adv.float()
     obj = torch.min(ratio * a, clipped * a) - kl_coef * kl_k3(logp, ref_logp)
     if agg == "token-mean":
-        loss = -(obj * mask).sum() / mask.sum()
+        d = mask.sum() if denom is None else denom
+        loss = -(obj * mask).sum() / d
     elif agg == "seq-mean":
         denom = mask.sum(dim=-1).clamp_min(1)
         loss = -((obj * mask).sum(dim=-1) / denom).mean()
