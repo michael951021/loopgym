@@ -64,6 +64,9 @@ class HFBackend:
         width = max(len(r) for r in rows)
         input_ids = torch.tensor([[pad_id] * (width - len(r)) + r for r in rows], dtype=torch.long)
         attention_mask = torch.tensor([[0] * (width - len(r)) + [1] * len(r) for r in rows], dtype=torch.long)
+        dev = next(self.model.parameters()).device
+        input_ids = input_ids.to(dev)
+        attention_mask = attention_mask.to(dev)
 
         do_sample = temperature > 0
         torch.manual_seed(seed)

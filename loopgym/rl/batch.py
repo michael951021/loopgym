@@ -64,9 +64,12 @@ def build_batch(groups, rewards, tokenizer, scale="std"):
 
 def logp_of(model, batch, cfg):
     """Per-column log-prob of the next token under `model`, [N, T-1], via the chunked kernel."""
-    out = model(input_ids=batch.input_ids, attention_mask=batch.attention_mask, output_hidden_states=True)
+    dev = next(model.parameters()).device
+    input_ids = batch.input_ids.to(dev)
+    attention_mask = batch.attention_mask.to(dev)
+    out = model(input_ids=input_ids, attention_mask=attention_mask, output_hidden_states=True)
     hidden = out.hidden_states[-1][:, :-1]
-    targets = batch.input_ids[:, 1:]
+    targets = input_ids[:, 1:]
     n, t = targets.shape
     logp = kernels.token_logprobs(
         hidden.reshape(-1, hidden.size(-1)),
@@ -91,8 +94,9 @@ def grpo_step(policy, ref_fn, batch, optimizer, cfg):
     else:
         with policy.disable_adapter(), torch.no_grad():
             ref_logp = logp_of(policy, batch, cfg)
+    dev = logp.device
     loss, stats = grpo.policy_loss(
-        logp, old_logp, ref_logp, batch.advantages, batch.target_mask,
+        logp, old_logp, ref_logp, batch.advantages.to(dev), batch.target_mask.to(dev),
         clip_eps=cfg.clip_eps, kl_coef=cfg.kl_coef, agg=cfg.agg,
     )
     loss.backward()
