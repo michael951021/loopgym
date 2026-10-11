@@ -34,8 +34,8 @@ EVAL_SEED_OFFSET = 1_000_000_003
 
 # fields that must match a checkpoint's config for --resume to be safe
 RESUME_CHECK = ("model", "lora_r", "lora_alpha", "lora_targets", "task", "toy_task",
-                "split", "batch", "group", "max_new_tokens", "temperature", "top_p",
-                "seed", "runner")
+                "split", "max_difficulty", "batch", "group", "max_new_tokens",
+                "temperature", "top_p", "seed", "runner", "eval_n")
 
 
 @dataclass
@@ -47,6 +47,7 @@ class TrainCfg:
     task: str = "toy"  # exercism | toy | loopgym
     toy_task: str = "banana"  # banana | coinflip
     split: str = "train"
+    max_difficulty: int = 0  # exercism only; 0 = no cap (data runs 1-9)
     batch: int = 4  # tasks per step
     group: int = 8  # completions per task
     max_new_tokens: int = 256
@@ -64,9 +65,14 @@ class TrainCfg:
     seed: int = 1337
     steps: int = 100
     eval_every: int = 0  # 0 disables eval rollouts
+    eval_n: int = 0  # 0 = eval the step's tasks; >0 = draw that many val tasks
     save_every: int = 10
     timeout: int = 30  # per-grade timeout, seconds
     out: str = "runs/unnamed"
+
+
+_FIELD_DEFAULTS = {f.name: f.default for f in dataclasses.fields(TrainCfg)
+                   if f.default is not dataclasses.MISSING}
 
 
 def load_cfg(path: str, overrides: dict) -> TrainCfg:
@@ -140,6 +146,9 @@ class Run:
     def __init__(self, cfg: TrainCfg):
         self.cfg = cfg
         self.tokenizer = load_tokenizer(cfg)
+        self.val_names = None
+        if cfg.eval_n > 0 and cfg.task != "exercism":
+            raise SystemExit("eval_n requires task = \"exercism\"")
         if cfg.task == "toy":
             self.toy_task = toy.load_toy(cfg.toy_task)
             self.sampler = None
@@ -150,7 +159,12 @@ class Run:
                 "LOOPGYM_EXERCISES",
                 ROOT / "data" / "raw" / "exercism-python" / "exercises" / "practice"))
             splits_doc = json.loads((ROOT / "results" / "splits.json").read_text())
-            self.sampler = TaskSampler(splits_doc[cfg.split], cfg.seed)
+            by_diff = splits_doc[cfg.split]
+            names = list(by_diff)
+            if cfg.max_difficulty > 0:
+                names = [n for n in names if by_diff[n] <= cfg.max_difficulty]
+            self.val_names = list(splits_doc.get("val", []))
+            self.sampler = TaskSampler(names, cfg.seed)
         elif cfg.task == "loopgym":
             raise NotImplementedError("loopgym task source is not mined yet")
         else:
@@ -222,8 +236,16 @@ class Run:
         }
         return rec
 
-    def eval_step(self, s: int, tasks, prompts) -> dict:
+    def eval_tasks(self, s: int):
+        """Draw this step's val eval tasks. Stateless per step (fresh sampler) so a
+        resumed run re-derives the same tasks without checkpointed RNG state."""
+        sampler = TaskSampler(self.val_names, self.cfg.seed + EVAL_SEED_OFFSET + s)
+        return [exercism.load_exercise(self.exdir / n) for n in sampler.draw(self.cfg.eval_n)]
+
+    def eval_step(self, s: int, fallback_tasks) -> dict:
         cfg = self.cfg
+        tasks = self.eval_tasks(s) if cfg.eval_n > 0 else fallback_tasks
+        prompts = [t.prompt() for t in tasks]
         groups = self.backend.generate(
             prompts, cfg.group, cfg.max_new_tokens, cfg.temperature, cfg.top_p,
             seed=cfg.seed + EVAL_SEED_OFFSET + s)
@@ -239,10 +261,11 @@ class Run:
                                       runner=cfg.runner, timeout=cfg.timeout)
             return r
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=min(8, cfg.batch * cfg.group)) as pool:
-            rewards = list(pool.map(one, range(cfg.batch * cfg.group)))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=min(8, len(tasks) * cfg.group)) as pool:
+            rewards = list(pool.map(one, range(len(tasks) * cfg.group)))
         r = torch.tensor(rewards, dtype=torch.float32)
         return {"step": s, "kind": "eval",
+                "tasks": [t.name for t in tasks],
                 "reward_mean": float(r.mean()),
                 "reward_std": float(r.std(unbiased=True)) if len(r) > 1 else 0.0}
 
@@ -262,7 +285,7 @@ class Run:
         saved = state["config"]
         cur = dataclasses.asdict(self.cfg)
         for k in RESUME_CHECK:
-            a, b = saved.get(k), cur[k]
+            a, b = saved.get(k, _FIELD_DEFAULTS.get(k)), cur[k]
             if isinstance(a, (list, tuple)) or isinstance(b, (list, tuple)):
                 a, b = list(a), list(b)  # lora_targets: tuple in-memory, list in JSON
             if a != b:
@@ -345,7 +368,7 @@ def run(cfg: TrainCfg, resume: bool | str) -> None:
         print(f"[{out.name}] step {s}/{cfg.steps} reward={rec['reward_mean']:.3f} "
               f"loss={rec['loss']:.4f} kl={rec['kl']:.5f} step_s={rec['step_s']:.1f}")
         if cfg.eval_every > 0 and s % cfg.eval_every == 0:
-            erec = run_.eval_step(s, tasks, prompts)
+            erec = run_.eval_step(s, tasks)
             with mpath.open("a") as f:
                 f.write(json.dumps(erec) + "\n")
             print(f"[{out.name}] eval step {s} reward={erec['reward_mean']:.3f}")
