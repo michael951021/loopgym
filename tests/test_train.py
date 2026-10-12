@@ -224,6 +224,30 @@ def test_exercism_eval_step_uses_val_tasks(tmp_path):
     assert ev["reward_mean"] == 0.0  # junk solution, real local grading
 
 
+def test_resume_roundtrips_exercism_sampler(tmp_path):
+    """The multi-hour exercism run resumes through state.json with a LIVE TaskSampler
+    (task='exercism'), but test_resume_matches_uninterrupted uses task='toy' where
+    sampler is None, so it never covers restore()'s load_state branch — which is where
+    grpo05 crashed. Drive the real save()/restore() on an exercism Run and check the
+    sampler position survives the JSON round-trip (tiny model, no grading, no steps)."""
+    from loopgym.rl.train import ROOT, Run, TrainCfg, ckpt_dir
+    json.loads((ROOT / "results" / "splits.json").read_text())  # splits.json must exist
+    base = dict(model="tiny", task="exercism", split="train", max_difficulty=1,
+                batch=1, group=1, max_new_tokens=4, seed=42,
+                out=str(tmp_path / "runs" / "resume_ex"))
+    r = Run(TrainCfg(**base))
+    assert r.sampler is not None, "exercism run must have a live sampler"
+    r.sampler.draw(3)          # advance past the fresh position
+    r.step = 2
+    r.save(ckpt_dir(TrainCfg(**base)))   # writes state.json with the sampler's position
+    nxt = r.sampler.draw(3)    # what the uninterrupted run would draw next
+
+    r2 = Run(TrainCfg(**base))           # fresh sampler at position 0
+    r2.restore(ckpt_dir(TrainCfg(**base)))   # the line that crashed grpo05
+    assert r2.step == 2
+    assert r2.sampler.draw(3) == nxt, "restored sampler did not continue from the checkpoint"
+
+
 def test_task_sampler_continuity_after_state_roundtrip():
     from loopgym.rl.train import TaskSampler
     names = ["a", "b", "c", "d", "e", "f"]

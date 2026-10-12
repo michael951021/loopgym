@@ -560,13 +560,17 @@ def main(argv: list[str] | None = None) -> int:
                     help="resume if a checkpoint exists, else start fresh (for retried jobs)")
     ap.add_argument("--dist", choices=("fsdp", "deepspeed"), default="fsdp")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--check-resume", action="store_true",
+                    help="build the model and restore the checkpoint, then exit — a seconds-long "
+                         "re-trigger of the resume path (sampler/optimizer/RNG restore) with no "
+                         "training, so a resume bug is caught without a multi-hour run")
     args, extra = ap.parse_known_args(argv)
     if len(extra) % 2:
         ap.error("overrides must be --key value pairs")
     overrides = {}
     for i in range(0, len(extra), 2):
         key = extra[i].lstrip("-").replace("-", "_")
-        if not key or key in ("config", "resume", "resume_if_any", "dist", "dry_run"):
+        if not key or key in ("config", "resume", "resume_if_any", "dist", "dry_run", "check_resume"):
             ap.error(f"unexpected argument {extra[i]!r}")
         overrides[key] = extra[i + 1]
     if args.dry_run:
@@ -578,6 +582,14 @@ def main(argv: list[str] | None = None) -> int:
     cfg = load_cfg(args.config, overrides)
     if args.resume and args.resume_if_any:
         ap.error("--resume and --resume-if-any are exclusive")
+    if args.check_resume:
+        ck = ckpt_dir(cfg)
+        if not (ck / "state.json").is_file():
+            raise SystemExit(f"nothing to resume: no checkpoint at {ck}")
+        run_ = Run(cfg, args.dist)
+        run_.restore(ck)
+        print(f"resume OK at step {run_.step} ({ck})")
+        return 0
     run(cfg, resume="auto" if args.resume_if_any else args.resume, dist=args.dist)
     return 0
 
