@@ -173,4 +173,3 @@
   why: the CPU GRPO run must survive its job memory cap; this unblocks grpo05 and keeps its (mem:) tag honest.
 - [ ] **GPU run: GRPO 1.5B on both 3090s** — (id: gpurun1) (after: twonode, grpomem) the host GPU window as a GPU job: scripts/gpu_run.sh without --stop-agents (the job runner already paused the agents and stopped the model server): builds .venv-gpu, CUDA/Triton known tests, vLLM-vs-HF log-prob gate, GRPO 1.5B (configs/grpo15_gpu.toml), evals into results/gpu/. (run: `bash scripts/gpu_run.sh`) (gpu) (mem: 48) (cpus: 16) (timeout: 12h)
   why: the real 1.5B training run: the experiment the whole stack exists to produce, on the host GPUs for $0.
-- [ ] **Fix grpo05 crash: Loading weights in train.py** — auto-filed from the job traceback (id: fix-grpo05-c07bdaac) (after: -)
