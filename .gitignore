@@ -7,5 +7,7 @@ runs/
 .agent-evidence/
 target/
 .terraform/
+*.tfstate
+*.tfstate.*
 __pycache__/
 *.egg-info/

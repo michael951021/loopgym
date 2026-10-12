@@ -29,8 +29,13 @@ class RolloutBackend(Protocol):
         temperature: float,
         top_p: float,
         seed: int,
+        seeds: list[int] | None = None,
     ) -> list[list[Completion]]:
-        """n completions per prompt (chat messages). Rows are independent samples."""
+        """n completions per prompt (chat messages). Rows are independent samples.
+
+        `seeds` (one per prompt, len == len(prompts)) seeds each prompt's rows
+        separately, so prompt i's completions are identical no matter which other
+        prompts are in the batch (what multi-rank equivalence needs)."""
         ...
 
 
@@ -57,7 +62,15 @@ class HFBackend:
         temperature: float,
         top_p: float,
         seed: int,
+        seeds: list[int] | None = None,
     ) -> list[list[Completion]]:
+        if seeds is not None:
+            if len(seeds) != len(prompts):
+                raise ValueError(f"{len(seeds)} seeds for {len(prompts)} prompts")
+            # one generate per prompt: the sampling RNG stream of prompt i then depends
+            # only on seeds[i] and its own (shared) trajectory, not on batch neighbors
+            return [self.generate([p], n, max_new_tokens, temperature, top_p, seed=sd)[0]
+                    for p, sd in zip(prompts, seeds)]
         prompt_ids = [
             self.tokenizer.apply_chat_template(p, tokenize=True, add_generation_prompt=True).input_ids for p in prompts
         ]

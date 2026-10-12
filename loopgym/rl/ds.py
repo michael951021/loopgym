@@ -58,11 +58,14 @@ def make_optimizer(model: torch.nn.Module, doc: dict) -> torch.optim.AdamW:
     return torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=float(d["lr"]))
 
 
-def build_engine(model: torch.nn.Module, doc: dict):
-    """(engine, optimizer, config) via deepspeed.initialize; torch dist must be up."""
+def build_engine(model: torch.nn.Module, doc: dict, base: dict | None = None):
+    """(engine, optimizer, config) via deepspeed.initialize; torch dist must be up.
+
+    `base` replaces configs/ds_zero3.json as the engine-config base (train.py passes
+    the parsed cfg.ds_config when set, e.g. the fp32 variant in the CPU test)."""
     import deepspeed  # lazy: pinned source on sys.path, not installed in .venv
 
-    cfg = engine_cfg(doc)
+    cfg = engine_cfg(doc, base=base)
     optimizer = make_optimizer(model, doc)
     engine, opt, _, _ = deepspeed.initialize(model=model, optimizer=optimizer, config=cfg)
     return engine, opt, cfg

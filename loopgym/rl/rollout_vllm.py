@@ -85,7 +85,15 @@ class VLLMBackend:
         temperature: float,
         top_p: float,
         seed: int,
+        seeds: list[int] | None = None,
     ) -> list[list[Completion]]:
+        if seeds is not None:
+            if len(seeds) != len(prompts):
+                raise ValueError(f"{len(seeds)} seeds for {len(prompts)} prompts")
+            # vLLM's SamplingParams seed is per request: one request per prompt keeps
+            # prompt i's completions independent of batch neighbors (multi-rank parity)
+            return [self.generate([p], n, max_new_tokens, temperature, top_p, seed=sd)[0]
+                    for p, sd in zip(prompts, seeds)]
         texts = [
             self.tokenizer.apply_chat_template(p, tokenize=False, add_generation_prompt=True)
             for p in prompts

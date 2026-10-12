@@ -31,12 +31,34 @@ def init_dist(backend: str | None = None) -> None:
     dist.init_process_group(backend=backend, **kwargs)
 
 
-def wrap_fsdp(model, cfg=None):
-    """fully_shard each decoder layer bottom-up, then the root; returns model."""
+def wrap_fsdp(model, cfg=None, layers=None):
+    """fully_shard the Qwen2 backbone bottom-up under a Qwen2ForCausalLM root; returns model.
+
+    The drill from `model` (a PeftModel) reaches the Qwen2Model (`base`, owns embed_tokens,
+    layers, norm); its parent Qwen2ForCausalLM (`for_causal`, owns lm_head) is the FSDP root.
+    Each decoder layer plus embed_tokens / norm / lm_head are leaf units, and the root is
+    sharded last (children before parent). The root forward must be reachable by BOTH
+    `generate()` (HF runs Qwen2ForCausalLM.forward per step) and the training forward, so
+    its params unshard on either path; the root is what lets save() gather the sharded
+    state (`full_tensor` / `get_model_state_dict` require a coordinating root)."""
     init_dist(getattr(cfg, "backend", None))
-    for layer in model.model.layers:
+    base = model
+    while not hasattr(base, "layers"):
+        base = base.model
+    if layers is None:
+        layers = base.layers
+    # parent of `base` that owns lm_head = the Qwen2ForCausalLM root
+    for_causal = next(m for m in model.modules()
+                      if getattr(m, "lm_head", None) is not None
+                      and getattr(m, "model", None) is base)
+    if hasattr(base, "embed_tokens"):
+        fully_shard(base.embed_tokens)
+    for layer in layers:
         fully_shard(layer)
-    fully_shard(model)
+    if hasattr(base, "norm"):
+        fully_shard(base.norm)
+    fully_shard(for_causal.lm_head)
+    fully_shard(for_causal)  # root last
     return model
 
 
@@ -68,3 +90,12 @@ def global_mean_loss(local_sum: torch.Tensor, local_count: float) -> torch.Tenso
     t = torch.stack([local_sum.detach().to(torch.float32), torch.tensor(float(local_count))])
     dist.all_reduce(t)
     return t[0] / t[1]
+
+
+def global_token_count(local: float) -> float:
+    """All-reduce the local token count; 1.0 when not distributed."""
+    if not dist.is_initialized():
+        return float(local)
+    t = torch.tensor(float(local))
+    dist.all_reduce(t)
+    return float(t.item())
