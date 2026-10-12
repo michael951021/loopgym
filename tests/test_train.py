@@ -234,3 +234,19 @@ def test_task_sampler_continuity_after_state_roundtrip():
     s2 = TaskSampler(names, 999)  # different seed; restored state must override it
     s2.load_state(st)
     assert s2.draw(3) == second, "state did not restore the sampler's position"
+
+
+def test_task_sampler_continuity_after_json_roundtrip():
+    # Checkpoints store the state in state.json, which turns getstate()'s
+    # tuples into lists; load_state must restore from that just as well.
+    import json
+    from loopgym.rl.train import TaskSampler
+    names = ["a", "b", "c", "d", "e", "f"]
+    s1 = TaskSampler(names, 7)
+    s1.draw(2)
+    st = json.loads(json.dumps(s1.state()))
+    assert not isinstance(st, tuple), "JSON must have degraded the tuple to a list"
+    second = s1.draw(3)
+    s2 = TaskSampler(names, 999)
+    s2.load_state(st)
+    assert s2.draw(3) == second, "state did not restore after a JSON round-trip"

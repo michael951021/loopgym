@@ -143,6 +143,12 @@ class TaskSampler:
         return self.rng.getstate()
 
     def load_state(self, st):
+        # getstate() is a tuple (version, internalstate, gauss_next); a JSON
+        # checkpoint round-trip turns both the outer and inner tuples into
+        # lists, and random.setstate requires the state vector to be a tuple.
+        if st is not None and not isinstance(st, tuple):
+            version, internalstate, gauss_next = st
+            st = (version, tuple(internalstate), gauss_next)
         self.rng.setstate(st)
 
 
