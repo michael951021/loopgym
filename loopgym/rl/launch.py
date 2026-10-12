@@ -21,7 +21,7 @@ TEMPLATE = (
     "CUDA_VISIBLE_DEVICES={gpu} .venv-gpu/bin/python -m torch.distributed.run "
     "--nnodes={nnodes} --node_rank={rank} --nproc_per_node={nproc} "
     "--rdzv-backend c10d --rdzv-endpoint={addr}:{port} -m loopgym.rl.train "
-    "--config {config} --dist {dist} --out runs/gpu/scale_{dist} --resume-if-any"
+    "--config {config} --dist {dist} --out {out} --resume-if-any"
 )
 
 # topology -> (nnodes, nproc_per_node, rdzv-endpoint addr, [(node_rank, gpus), ...])
@@ -33,14 +33,20 @@ def _topology(name: str, master_ip: str):
     if name == "two-aws":
         # each AWS node sees its own GPU 0; node 0 is the c10d master
         return 2, 1, master_ip, [(0, "0"), (1, "0")]
-    raise SystemExit(f"unknown topology {name!r} (single | two-local | two-aws)")
+    if name == "one-aws":
+        # one g4dn.xlarge = one T4: single node, single local rank
+        return 1, 1, "127.0.0.1", [(0, "0")]
+    raise SystemExit(f"unknown topology {name!r} (single | two-local | two-aws | one-aws)")
 
 
-def commands(topology: str, dist: str, master_ip: str = MASTER_IP_AWS) -> list[str]:
+def commands(topology: str, dist: str, master_ip: str = MASTER_IP_AWS,
+             steps: int | None = None, out: str | None = None) -> list[str]:
     nnodes, nproc, addr, rows = _topology(topology, master_ip)
+    out = out or f"runs/gpu/scale_{dist}"
+    suffix = f" --steps {steps}" if steps else ""
     return [
         TEMPLATE.format(gpu=gpu, nnodes=nnodes, rank=rank, nproc=nproc, addr=addr,
-                        port=PORT, config=CONFIG, dist=dist)
+                        port=PORT, config=CONFIG, dist=dist, out=out) + suffix
         for rank, gpu in rows
     ]
 
@@ -72,21 +78,28 @@ def main(argv: list[str] | None = None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     c = sub.add_parser("cmds", help="print one torchrun command per node")
-    c.add_argument("--topology", required=True, choices=("single", "two-local", "two-aws"))
+    c.add_argument("--topology", required=True,
+                   choices=("single", "two-local", "two-aws", "one-aws"))
     c.add_argument("--dist", required=True, choices=("fsdp", "deepspeed"))
     c.add_argument("--master-ip", default=MASTER_IP_AWS,
                    help="c10d master address for two-aws (node 0's private IP)")
+    c.add_argument("--steps", type=int, default=None,
+                   help="append `--steps N` (train.py cfg override)")
+    c.add_argument("--out", default=None,
+                   help="override --out (default runs/gpu/scale_<dist>)")
 
     r = sub.add_parser("report", help="aggregate metrics.jsonl + node logs into one JSON")
     r.add_argument("--metrics", required=True)
     r.add_argument("--logs", required=True, nargs="+")
-    r.add_argument("--topology", required=True, choices=("single", "two-local", "two-aws"))
+    r.add_argument("--topology", required=True,
+                   choices=("single", "two-local", "two-aws", "one-aws"))
     r.add_argument("--dist", required=True, choices=("fsdp", "deepspeed"))
     r.add_argument("--out", required=True)
 
     args = ap.parse_args(argv)
     if args.cmd == "cmds":
-        print("\n".join(commands(args.topology, args.dist, args.master_ip)))
+        print("\n".join(commands(args.topology, args.dist, args.master_ip,
+                                 steps=args.steps, out=args.out)))
     else:
         doc = report(args.metrics, args.logs, args.topology, args.dist, args.out)
         out = Path(args.out)

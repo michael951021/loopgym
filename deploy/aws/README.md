@@ -1,9 +1,8 @@
 # AWS guardrails (ticket: awsguard)
 
-Spend protection for the AWS scaling study (ticket `aws`). The study itself
-(VPC/SG, 3 configs x 50 steps) is not here; this is the cap that makes the
-study impossible to overspend, and each leak path has its own cap that acts
-within minutes:
+Spend protection for the AWS scaling study (ticket `aws`), which this README
+also documents ("AWS run" below). The caps below make the study impossible to
+overspend; each leak path has its own cap that acts within minutes:
 
 | Leak path | Cap | Acts in |
 |---|---|---|
@@ -38,25 +37,62 @@ within minutes:
    automate.ec2.amazonaws.com` (verify the exact service name in the CloudWatch
    docs when running this on the host).
 
-## Running (host only)
+## AWS run: the scaling study (host only)
+
+Two spot g4dn.xlarge (1x T4 each) in a throwaway VPC, one placement group,
+run **3 configs back to back, 50 steps each** from `configs/scale05.toml`:
+`single` (1 node, FSDP), `fsdp` (2 nodes, FSDP), `deepspeed` (2 nodes,
+DeepSpeed). After each config the launcher `scp`s `runs/gpu/scale_<name>/`
+(`metrics.jsonl` + per-node stdout) home and writes
+`results/gpu/scale_aws_<name>.json`, so a failed config is still debuggable
+after the destroy.
 
 ```
-scripts/aws_launch.sh --run-id <id> --max-hours 3 --max-price 0.30 --nodes 2 \
-    --budget-email you@example.com -- <training command>
+scripts/aws_launch.sh --run-id <id> --budget-email you@example.com \
+    --admin-cidr <your host IP>/32 [--repo-url URL] [--ssh-key PATH] \
+    [--max-hours 3] [--max-price 0.30] [--nodes 2]
+scripts/aws_launch.sh --dry-run        # plan + commands + estimate, changes nothing
 ```
 
-Preflight (also run by `--dry-run`, testable with a stub `aws` on PATH):
-sweep clean, caller is `loopgym-launch`, G-spot quota <= 8 vCPU, and worst-case
-estimate `nodes x (max_hours + 0.25) x (max_price + EBS $/h + public IPv4
-$0.005/h)` <= `budget_usd` ($10). On EXIT/INT/TERM it runs `terraform destroy`
-then `aws_sweep.sh --check` and exits 1 loudly (printing
-`scripts/aws_sweep.sh --kill`) if anything tagged `Project=loopgym` is left.
+Before running:
+- **Merge to the default branch** — the workers `git clone <repo-url>` it.
+- **SSH key**: default `~/.ssh/loopgym` (+ `.pub`); the public half becomes
+  the run's `aws_key_pair`. `--admin-cidr` is the ONLY source of SSH.
+- **Spot price**: check current g4dn.xlarge prices in the region,
+  `aws ec2 describe-spot-price-history --instance-type g4dn.xlarge \
+  --product-desc 'Linux/UNIX' --region <region> --max-items 10`; pick
+  `--max-price` at/above the recent price (default 0.30; on-demand is ~0.52).
 
-Cleanup / emergency:
+Spend: worst-case estimate `nodes x (max_hours + 0.25) x (max_price +
+50 GB gp3 + public IPv4)` = **$2.02 <= $10** at the defaults (the launcher
+prints it and refuses above budget); expected actual is **< $2** — the study
+finishes well inside max_hours. Preflight before apply: sweep clean, caller
+is the `loopgym-launch` role, G-spot quota <= 8 vCPU, estimate within budget.
+
+Kill switches (all in the table above) and what each does:
+- **user-data `shutdown -h +max_hours`** (line 1, re-armed across the
+  driver-install reboot): the box stops itself at the hard cap even if every
+  other system is down.
+- **one-time spot, terminate-on-interruption**: AWS reclaims the instance the
+  second the price beats `max_price`.
+- **idle alarm** (CPU < 5% for 6x5 min): a node that booted but never trained
+  is terminated by `arn:aws:automate` within ~35 min.
+- **one-time scheduler** `at(launch + max_hours + 15 min)`: terminates both
+  instances from outside, even if their user-data never ran, then deletes
+  itself.
+- **destroy + sweep trap**: on ANY exit (success, config failure, Ctrl-C) the
+  launcher runs `terraform destroy` then `aws_sweep.sh --check`; on leftovers
+  it exits 1 and prints the emergency command.
+- **budgets**: 50/80% e-mail, 100% actual -> IAM deny on `ec2:RunInstances`
+  (lagging backstop only, Budgets data can be ~24 h stale).
+
+Recovery if a sweep reports leftovers (e.g. the host died mid-run and a
+`--check` still lists `Project=loopgym` resources):
 
 ```
 scripts/aws_sweep.sh --check   # list everything tagged Project=loopgym
-scripts/aws_sweep.sh --kill    # terminate/delete all of it
+scripts/aws_sweep.sh --kill    # cancel spot, terminate, delete alarms/schedule,
+                               # wait for terminated, delete volumes/SGs, re-check
 ```
 
 Sweep is tag-based (`resourcegroupstaggingapi` + `ec2 describe-*`),

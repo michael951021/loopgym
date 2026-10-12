@@ -19,7 +19,9 @@ SWEEP = REPO / "scripts/aws_sweep.sh"
 IAM = REPO / "deploy/aws/iam"
 README = REPO / "deploy/aws/README.md"
 
-BASE_VARS = ["-var=run_id=test-run", "-var=budget_email=t@example.com"]
+BASE_VARS = ["-var=run_id=test-run", "-var=budget_email=t@example.com",
+             "-var=admin_cidr=203.0.113.7/32",
+             "-var=repo_url=git@example.com:kevin/loopgym.git"]
 
 # Stub aws CLI: leftover/kill state via env vars; state dir gets a `killed`
 # marker on the first kill-type call, after which describes return empty.
@@ -176,9 +178,11 @@ def test_shutdown_is_first_user_data_action():
     assert lines[0] == "#!/bin/bash"
     act = [line for line in lines[1:] if line and not line.startswith("#")]
     assert re.match(r'shutdown -h \+\$\(\(.*max_hours.*60.*\)\)', act[0]), act[0]
-    # nothing that can fail (network, install) before the shutdown line
-    for line in act[1:]:
-        assert not re.search(r'apt|curl|wget|git clone|pip |uv |terraform', line)
+    # ticket aws: the study bootstrap (clone the repo, build .venv-gpu) is allowed,
+    # but only AFTER the shutdown line — a hung bootstrap cannot stop the hard stop.
+    boot = "\n".join(act[1:])
+    assert "git clone" in boot, "user_data must clone the repo (after the shutdown line)"
+    assert ".venv-gpu" in boot, "user_data must build .venv-gpu (after the shutdown line)"
 
 
 def test_launch_policy_json():
@@ -257,6 +261,45 @@ def test_sweep_check_and_kill(aws_stub, tmp_path):
     assert r2.returncode == 0, out(r2)
     r3 = run([str(SWEEP), "--check"], env)
     assert r3.returncode == 0, out(r3)
+
+
+# ---- (d) the study itself (ticket aws): plan, network, bootstrap -------------
+
+
+def test_tf_network_guardrails():
+    t = _tf_text()
+    for res in ("aws_vpc", "aws_internet_gateway", "aws_subnet", "aws_route_table",
+                "aws_security_group", "aws_placement_group", "aws_key_pair"):
+        assert re.search(rf'resource\s+"{res}"\s+"', t), f"missing resource {res}"
+    assert re.search(r'strategy\s*=\s*"cluster"', t), "placement group must be cluster"
+    assert re.search(r'from_port\s*=\s*22', t) and "var.admin_cidr" in t, \
+        "SSH must come from var.admin_cidr only"
+    assert re.search(r'self\s*=\s*true', t), "run-internal traffic allowed via self-ingress"
+    assert "10.0.0.10" in t, "node 0's private IP must pin the c10d master (MASTER_IP_AWS)"
+    for banned in ("aws_nat_gateway", "aws_lb", "aws_alb", "aws_elb", "aws_eip", "aws_s3"):
+        assert banned not in t, f"{banned} costs money while idle; not allowed"
+
+
+def _gen(topo, dist, name):
+    g = run([str(REPO / ".venv" / "bin" / "python"), "-m", "loopgym.rl.launch", "cmds",
+             "--topology", topo, "--dist", dist, "--steps", "50",
+             "--out", f"runs/gpu/scale_{name}"], None)
+    assert g.returncode == 0, g.stderr
+    return [ln for ln in g.stdout.splitlines() if ln.strip()]
+
+
+def test_dry_run_prints_plan_commands_estimate(aws_stub):
+    r = run([str(LAUNCH), *DRY], stub_env(aws_stub))
+    assert r.returncode == 0, out(r)
+    o = out(r)
+    for needle in ("one-aws", "two-aws", "fsdp", "deepspeed", "50"):
+        assert needle in o, f"plan missing {needle!r}\n{o}"
+    for topo, dist, name in (("one-aws", "fsdp", "single"), ("two-aws", "fsdp", "fsdp"),
+                             ("two-aws", "deepspeed", "deepspeed")):
+        for cmd in _gen(topo, dist, name):
+            assert cmd in o, f"generated command not printed by --dry-run:\n{cmd}\n{o}"
+    # worst-case estimate, hand math: 2 * 3.25 * (0.30 + 50*0.08/730 + 0.005) = 2.02
+    assert re.search(r"estimate \$2\.02 <= budget \$10", o), o
 
 
 if __name__ == "__main__":

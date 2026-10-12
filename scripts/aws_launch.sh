@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
-# Launcher for the AWS scaling study (ticket `aws`). Every spend guardrail from
-# deploy/aws/README.md that lives at launch time: preflight refuses unless the
-# tag sweep is clean (no double launch), the caller is the loopgym-launch role
-# (no long-lived root keys), the account G-spot quota is <= 8 vCPU, and the
-# worst-case estimate is within budget. On EXIT/INT/TERM it destroys, re-sweeps,
-# and fails loudly if anything tagged Project=loopgym survived.
-# No AWS creds in the sandbox: only --dry-run (stub aws on PATH) runs here.
+# Launcher for the AWS scaling study (ticket `aws`): 3 configs back to back
+# (1 node fsdp, 2 nodes fsdp, 2 nodes deepspeed, 50 steps each) on
+# var.nodes x spot g4dn.xlarge. Every spend guardrail from
+# deploy/aws/README.md that lives at launch time: preflight refuses unless
+# the tag sweep is clean (no double launch), the caller is the launch role
+# (no long-lived keys), the account G-spot quota is <= 8 vCPU, and the
+# worst-case estimate is within budget. On EXIT/INT/TERM it destroys,
+# re-sweeps, and fails loudly if anything tagged Project=loopgym survived.
+# Metrics + node logs are scp'd home after EACH config, so a failed config
+# is debuggable after the destroy. No AWS creds in the sandbox: only
+# --dry-run (stub aws on PATH) runs here.
 set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd -- "$SCRIPT_DIR/.." && pwd)
 TF_BIN="$REPO_ROOT/.tools/bin/terraform"
 TF_DIR="$REPO_ROOT/deploy/aws/terraform"
+PY="$REPO_ROOT/.venv/bin/python"
 
 NODES=2
 MAX_HOURS=3
@@ -24,14 +29,21 @@ LAUNCH_ROLE="loopgym-launch"
 MAX_QUOTA_VCPUS=8
 ACCOUNT_BUDGET_USD=10
 DRY_RUN=0
-TRAIN_CMD=()
+STEPS=50
+ADMIN_CIDR=""
+REPO_URL=""
+SSH_KEY="${HOME}/.ssh/loopgym"
+STUDY_RC=0
 
 usage() {
   cat >&2 <<EOF
 usage: $(basename "$0") [--dry-run] [--nodes N] [--max-hours H] [--max-price P]
     [--budget-usd B] [--run-id ID] [--budget-email E] [--region R]
-    [--launch-role NAME] -- <training command>
---dry-run: run the full preflight, change nothing, exit 0/1.
+    [--launch-role NAME] [--admin-cidr CIDR] [--repo-url URL] [--ssh-key PATH]
+--dry-run: print the 3-config plan + torchrun commands, run the full
+  preflight, change nothing, exit 0/1. Real mode (host only, launch role):
+  apply, wait for the node bootstrap, run the 3 configs back to back,
+  scp metrics/logs home after each, destroy + sweep on every exit path.
 EOF
   exit 2
 }
@@ -47,13 +59,31 @@ while [ $# -gt 0 ]; do
     --budget-email) BUDGET_EMAIL="${2:?--budget-email needs a value}"; shift 2 ;;
     --region) REGION="${2:?--region needs a value}"; shift 2 ;;
     --launch-role) LAUNCH_ROLE="${2:?--launch-role needs a value}"; shift 2 ;;
-    --) shift; TRAIN_CMD=("$@"); break ;;
+    --admin-cidr) ADMIN_CIDR="${2:?--admin-cidr needs a value}"; shift 2 ;;
+    --repo-url) REPO_URL="${2:?--repo-url needs a value}"; shift 2 ;;
+    --ssh-key) SSH_KEY="${2:?--ssh-key needs a value}"; shift 2 ;;
     -h|--help) usage ;;
     *) echo "unknown option: $1" >&2; usage ;;
   esac
 done
 
 refuse() { echo "aws_launch: REFUSED — $*" >&2; exit 1; }
+
+# The study: (name, topology, dist) — one g4dn.xlarge = one T4, so the
+# 1-node config is one-aws (single local rank) and runs on node 0.
+PLAN_NAMES=(single fsdp deepspeed)
+PLAN_TOPOS=(one-aws two-aws two-aws)
+PLAN_DISTS=(fsdp fsdp deepspeed)
+
+print_plan() {
+  echo "aws_launch: 3-config study plan (config configs/scale05.toml, ${STEPS} steps each):"
+  local i
+  for i in 0 1 2; do
+    echo "  ${PLAN_NAMES[$i]}: topology=${PLAN_TOPOS[$i]} dist=${PLAN_DISTS[$i]} out=runs/gpu/scale_${PLAN_NAMES[$i]}"
+    "$PY" -m loopgym.rl.launch cmds --topology "${PLAN_TOPOS[$i]}" --dist "${PLAN_DISTS[$i]}" \
+      --steps "$STEPS" --out "runs/gpu/scale_${PLAN_NAMES[$i]}"
+  done
+}
 
 preflight_sweep() {
   if ! AWS_REGION="$REGION" "$SCRIPT_DIR/aws_sweep.sh" --check --region "$REGION"; then
@@ -142,6 +172,7 @@ run_preflight() {
 }
 
 if [ "$DRY_RUN" -eq 1 ]; then
+  print_plan
   run_preflight
   echo "aws_launch: --dry-run passed; nothing was created or changed."
   exit 0
@@ -149,22 +180,38 @@ fi
 
 [ -n "$RUN_ID" ] || refuse "--run-id is required (tag + budget name)."
 [ -n "$BUDGET_EMAIL" ] || refuse "--budget-email is required."
+[ "$NODES" = "2" ] || refuse "the 3-config study needs --nodes 2 (the 1-node config runs on node 0)."
+[ -n "$ADMIN_CIDR" ] || refuse "--admin-cidr is required (your host IP /32; SSH comes from here only)."
 [ -x "$TF_BIN" ] || refuse "$TF_BIN not found."
+[ -x "$PY" ] || refuse "$PY not found."
 command -v aws >/dev/null 2>&1 || refuse "aws CLI not found."
+command -v ssh >/dev/null 2>&1 || refuse "ssh not found."
+[ -f "$SSH_KEY" ] || refuse "ssh private key $SSH_KEY not found (pass --ssh-key PATH)."
+[ -f "$SSH_KEY.pub" ] || refuse "ssh public key $SSH_KEY.pub not found."
+if [ -z "$REPO_URL" ]; then
+  REPO_URL=$(git -C "$REPO_ROOT" remote get-url origin 2>/dev/null || true)
+fi
+[ -n "$REPO_URL" ] || refuse "--repo-url is required (no git origin remote found)."
+# The nodes clone the default branch: the study code must be on it.
+git -C "$REPO_ROOT" rev-parse --verify -q origin/HEAD >/dev/null \
+  || refuse "cannot resolve origin/HEAD; push the branch and set the default before the run."
 
 tf() { "$TF_BIN" -chdir "$TF_DIR" "$@"; }
 TF_VARS=(
   -var=run_id="$RUN_ID" -var=region="$REGION" -var=nodes="$NODES"
   -var=max_hours="$MAX_HOURS" -var=max_price="$MAX_PRICE"
   -var=budget_usd="$BUDGET_USD" -var=budget_email="$BUDGET_EMAIL"
+  -var=admin_cidr="$ADMIN_CIDR" -var=repo_url="$REPO_URL"
+  -var=ssh_public_key_path="$SSH_KEY.pub"
 )
 
 STATE_FILE="$TF_DIR/terraform.tfstate"
 CLEANED_UP=0
+# shellcheck disable=SC2329  # invoked via trap cleanup EXIT (this shellcheck version misses that ref)
 cleanup() {
+  local rc=$?   # capture before anything else assigns
   if [ "$CLEANED_UP" -eq 1 ]; then return; fi
   CLEANED_UP=1
-  local rc=$?
   set +e
   if [ "$DRY_RUN" -eq 0 ] && [ -s "$STATE_FILE" ]; then
     echo "aws_launch: terraform destroy (exit/signal path)."
@@ -183,15 +230,113 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
+SSH_OPTS=(-o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30
+          -o ServerAliveInterval=15 -o ServerAliveCountMax=4)
+NODE_PRIV=()
+NODE_PUB=()
+
 run_preflight
+print_plan
 
 tf init -input=false
 tf apply -input=false -auto-approve "${TF_VARS[@]}"
 
-if [ "${#TRAIN_CMD[@]}" -gt 0 ]; then
-  echo "aws_launch: running: ${TRAIN_CMD[*]}"
-  "${TRAIN_CMD[@]}"
+discover_nodes() {
+  local out parsed
+  out=$(aws ec2 describe-instances --region "$REGION" \
+    --filters "Name=tag:Run,Values=$RUN_ID" --output json 2>&1) \
+    || refuse "ec2 describe-instances failed: $out"
+  parsed=$(printf '%s' "$out" | python3 - "$NODES" 2>&1 <<'PY'
+import json, sys
+n = int(sys.argv[1])
+d = json.load(sys.stdin)
+insts = []
+for r in d.get("Reservations", []):
+    for i in r.get("Instances", []):
+        tags = {t["Key"]: t["Value"] for t in i.get("Tags", [])}
+        role = tags.get("Role", "")
+        if role.startswith("worker-"):
+            insts.append((int(role.split("-")[1]), i.get("PrivateIpAddress", ""),
+                          i.get("PublicIpAddress", "")))
+insts.sort()
+assert len(insts) == n, f"expected {n} workers, found {len(insts)}"
+print(" ".join(p for _, p, _ in insts))
+print(" ".join(p for _, _, p in insts))
+PY
+) || refuse "node discovery failed: $parsed"
+  mapfile -t parsed <<< "$parsed"
+  [ "${#parsed[@]}" -eq 2 ] || refuse "node discovery failed: ${parsed[*]}"
+  read -r -a NODE_PRIV <<< "${parsed[0]}"
+  read -r -a NODE_PUB <<< "${parsed[1]}"
+  [ -n "${NODE_PRIV[0]}" ] || refuse "node 0 has no private IP yet; re-run after instances boot."
+  [ -n "${NODE_PUB[0]}" ] || refuse "node 0 has no public IP; cannot SSH in."
+  [ "${NODE_PRIV[0]}" = "10.0.0.10" ] \
+    || refuse "node 0 private IP is ${NODE_PRIV[0]}, expected 10.0.0.10 (c10d master)."
+  echo "aws_launch: nodes up — priv ${NODE_PRIV[*]}, pub ${NODE_PUB[*]}."
+}
+
+wait_bootstrap() {
+  local ip="${NODE_PUB[0]}" deadline=$(( (MAX_HOURS * 60 - 15) * 60 )) waited=0
+  echo "aws_launch: waiting for node 0 bootstrap (driver + .venv-gpu + model)..."
+  while [ "$waited" -lt "$deadline" ]; do
+    if ssh "${SSH_OPTS[@]}" -i "$SSH_KEY" "ubuntu@${ip}" "test -f /work/.aws-ready" 2>/dev/null; then
+      echo "aws_launch: node 0 ready after $((waited / 60)) min."
+      return 0
+    fi
+    sleep 30
+    waited=$((waited + 30))
+  done
+  return 1
+}
+
+run_config() {
+  local name="$1" topo="$2" dist="$3" outdir="runs/gpu/scale_$1" rc=0
+  local cmds=() pids=() rcs=() i
+  mkdir -p "$outdir"
+  mapfile -t cmds < <("$PY" -m loopgym.rl.launch cmds --topology "$topo" --dist "$dist" \
+    --steps "$STEPS" --out "$outdir")
+  for i in "${!cmds[@]}"; do
+    echo "aws_launch: [$name] node $i (pub ${NODE_PUB[$i]}): ${cmds[$i]}"
+    ssh "${SSH_OPTS[@]}" -i "$SSH_KEY" "ubuntu@${NODE_PUB[$i]}" \
+      "cd /work && ${cmds[$i]}" > "$outdir/node$i.log" 2>&1 &
+    pids+=("$!")
+  done
+  for i in "${!pids[@]}"; do
+    if wait "${pids[$i]}"; then rcs+=(0); else rcs+=(1); fi
+  done
+  rc=${rcs[0]}   # rank 0 decides the config's fate
+  # Metrics home before the destroy: a failed config must stay debuggable.
+  if scp "${SSH_OPTS[@]}" -i "$SSH_KEY" -q "ubuntu@${NODE_PUB[0]}:${outdir}/metrics.jsonl" \
+      "$outdir/metrics.jsonl" 2>/dev/null; then
+    "$PY" -m loopgym.rl.launch report --metrics "$outdir/metrics.jsonl" \
+      --logs "$outdir"/node*.log --topology "$topo" --dist "$dist" \
+      --out "results/gpu/scale_aws_${name}.json" \
+      || echo "aws_launch: [$name] report failed (metrics present; see log)."
+  else
+    echo "aws_launch: [$name] no metrics.jsonl on node 0 (config failed at/before step 1?)."
+  fi
+  return "$rc"
+}
+
+discover_nodes
+
+if ! wait_bootstrap; then
+  echo "aws_launch: ERROR — node 0 did not finish bootstrapping before the max_hours hard stop." >&2
+  echo "aws_launch: the instances are being destroyed; bootstrap log was /var/log/loopgym-bootstrap.log." >&2
+  STUDY_RC=1
 else
-  echo "aws_launch: instances are up; no training command given."
-  echo "aws_launch: hard stops: user-data shutdown at max_hours, scheduler at +15 min, idle alarm, one-time spot."
+  for i in 0 1 2; do
+    name="${PLAN_NAMES[$i]}"
+    if run_config "$name" "${PLAN_TOPOS[$i]}" "${PLAN_DISTS[$i]}"; then
+      echo "aws_launch: config $name finished (rc=0)."
+    else
+      echo "aws_launch: config $name FAILED (rc!=0); continuing with the next config." >&2
+      STUDY_RC=1
+    fi
+  done
 fi
+
+if [ "$STUDY_RC" -eq 0 ]; then
+  echo "aws_launch: study complete; results in results/gpu/scale_aws_{single,fsdp,deepspeed}.json."
+fi
+exit "$STUDY_RC"

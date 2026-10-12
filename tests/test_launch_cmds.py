@@ -63,8 +63,9 @@ def test_hand_written_two_local():
 
 def test_template_invariance():
     for d in ("fsdp", "deepspeed"):
-        all_c = cmds("single", d) + cmds("two-local", d) + cmds("two-aws", d)
-        assert len(all_c) == 5, all_c
+        all_c = (cmds("single", d) + cmds("two-local", d) + cmds("two-aws", d)
+                 + cmds("one-aws", d))
+        assert len(all_c) == 6, all_c
         ref = masked(all_c[0])
         for c in all_c:
             assert masked(c) == ref, (c, ref)
@@ -93,6 +94,24 @@ def test_two_aws_shape():
     assert all("--rdzv-endpoint=10.0.1.7:29500" in x.split() for x in c)
     assert all(x.split()[0] == "CUDA_VISIBLE_DEVICES=0" for x in c)  # each node's own GPU 0
     assert "--node_rank=0" in c[0].split() and "--node_rank=1" in c[1].split()
+
+
+def test_one_aws_shape():
+    # ticket aws: one g4dn.xlarge = one T4, so one node with a single local rank.
+    c = cmds("one-aws", "fsdp")
+    assert len(c) == 1
+    t = c[0].split()
+    assert "--nnodes=1" in t and "--node_rank=0" in t and "--nproc_per_node=1" in t
+    assert "--rdzv-endpoint=127.0.0.1:29500" in t
+    assert t[0] == "CUDA_VISIBLE_DEVICES=0"
+    assert "--out runs/gpu/scale_fsdp" in c[0]
+
+
+def test_steps_and_out_overrides():
+    base = cmds("one-aws", "fsdp")[0]
+    ov = cmds("one-aws", "fsdp", "--steps", "50", "--out", "runs/gpu/scale_single")[0]
+    assert ov == base.replace("--out runs/gpu/scale_fsdp",
+                              "--out runs/gpu/scale_single") + " --steps 50", (base, ov)
 
 
 def test_rejects_bad_topology():

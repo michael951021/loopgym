@@ -64,6 +64,27 @@ variable "budget_email" {
   type = string
 }
 
+variable "admin_cidr" {
+  type        = string
+  description = "CIDR allowed to SSH into the workers (your host IP, e.g. 203.0.113.7/32)."
+
+  validation {
+    condition     = can(cidrhost(var.admin_cidr, 0))
+    error_message = "admin_cidr must be a valid CIDR block, e.g. 203.0.113.7/32."
+  }
+}
+
+variable "repo_url" {
+  type        = string
+  description = "Git URL the workers clone (this repo, merged to main before the run)."
+}
+
+variable "ssh_public_key_path" {
+  type        = string
+  default     = "~/.ssh/loopgym.pub"
+  description = "Local path to the public key for the worker key pair."
+}
+
 variable "launch_role_name" {
   type        = string
   default     = "loopgym-launch"

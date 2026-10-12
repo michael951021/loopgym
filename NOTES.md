@@ -58,6 +58,23 @@
   fsdp+deepspeed in sandbox (23s) - no host-only skip needed.
   Smaller REQUIRED_FILES_TWOLOCAL (toy: no exercism/loopgym/1.5B/cuda-kernels);
   ensure_venv_gpu factored so full run + two-node share the pinned .venv-gpu build.
+  aws (study): network.tf VPC/IGW/subnet/route/SG (SSH 22 from var.admin_cidr
+  ONLY + self all-protocol)/cluster PG/keypair; no NAT/LB/EIP/S3. Worker pinned
+  10.0.0.10/11 (node0 = c10d master); user_data = shutdown FIRST (re-armed
+  around the driver reboot), then idempotent clone + .venv-gpu (uv, pins from
+  tools/versions.txt) + 0.5B model -> /work/.aws-ready. aws_launch.sh
+  --dry-run = 3-config plan (single one-aws+fsdp, fsdp/deepspeed two-aws, 50
+  steps, out runs/gpu/scale_<name>) + full preflight + estimate $2.02 <= $10
+  (known answer: 2*3.25*(0.30+50*0.08/730+0.005)); real = apply -> wait
+  .aws-ready -> 3 configs back to back (rank-0 rc decides; continue on fail)
+  -> scp metrics.jsonl + `launch report` results/gpu/scale_aws_<name>.json per
+  config (debuggable post-destroy) -> destroy+sweep trap on ANY exit.
+  launch.py: +one-aws topology, --steps/--out overrides (train.py load_cfg
+  coerces both). GOTCHA: sandbox has no aws CLI - stub via `import
+  test_aws_guard; STUB_AWS` (regex on the source corrupts \n escapes); this
+  shellcheck SC2329 false-positives a trap-invoked fn when a top-level exit
+  follows the traps (disabled, reason inline). Evidence: .agent-evidence/aws-
+  dryrun-clean.log, aws-makecheck.log.
 - train.py backend=hf|vllm (in RESUME_CHECK, w/ trainer_device): vllm ->
   engine_args + rv.build_llm; sync_vllm(s, dir) saves adapter + sync_lora(f"step_{s}");
   restore re-syncs so the live engine uses the ckpt adapter; first generation is
