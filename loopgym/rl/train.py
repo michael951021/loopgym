@@ -493,6 +493,16 @@ def peak_mem_gb() -> float:
     return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6
 
 
+def cgroup_peak_gb() -> float | None:
+    """cgroup v2 memory.peak in GB: the high-water mark over ALL processes in this
+    cgroup (parent + grader children), i.e. what a job MemoryMax actually counts.
+    None where unavailable (no cgroup v2, or the root cgroup has no peak file)."""
+    try:
+        return int(Path("/sys/fs/cgroup/memory.peak").read_text()) / 2**30
+    except (OSError, ValueError):
+        return None
+
+
 def run(cfg: TrainCfg, resume: bool | str, dist: str = "") -> None:
     """resume: False = fresh run, True = must continue a checkpoint, "auto" = continue
     one if it exists, else start fresh (what a retried compute job needs).
@@ -547,7 +557,9 @@ def run(cfg: TrainCfg, resume: bool | str, dist: str = "") -> None:
                 print(f"[{out.name}] eval step {s} reward={erec['reward_mean']:.3f}")
         if s % cfg.save_every == 0 or s == cfg.steps:
             run_.save(ck)
-    print(f"PEAKMEM rank={run_.rank} gb={peak_mem_gb():.3f}", flush=True)
+    cg = cgroup_peak_gb()
+    print(f"PEAKMEM rank={run_.rank} gb={peak_mem_gb():.3f}"
+          + (f" cg_gb={cg:.3f}" if cg is not None else ""), flush=True)
     if rank0:
         print(f"[{out.name}] done at step {run_.step}")
 
