@@ -161,3 +161,7 @@
 - Goal: AWS scaling study under $10
 - Approach: extended the one-template launch.py generator with a one-aws topology and --steps/--out overrides; aws_launch.sh reuses awsguard's preflight verbatim, pins node0 to 10.0.0.10 (c10d master), and tests everything through a stubbed aws CLI extracted from test_aws_guard.py so no real AWS call is possible in the sandbox.
 - Blockers: shellcheck false positive — this pinned version drops the trap's reference to cleanup() when a top-level exit follows the traps (SC2329), so the disable is inline with the reason documented.
+## Fix grpo05: OOM (ran out of memory)
+- Goal: Fix grpo05: OOM (ran out of memory)
+- Approach: Prior attempt's fix was committed but unverified (session killed at step 2, no ckpt). Relaunched the resume-safe scratch acceptance run in the background with a tree-Pss monitor, polled it to completion, confirmed the fails-first evidence (mb=8 repro PEAKMEM 54.9 GB), raised the (mem:) tag, ran make check (exit 0: ruff, 274 passed/1 skipped, cargo, tf validate), updated NOTES.md and the ticket, committed (3bff2af), merged master (already up to date).
+- Blockers: Session teardown killed the first acceptance attempt mid-run (recovered: --resume-if-any restarted fresh, deterministic seeds made steps 1-2 bit-identical); also pytest tests/ without make check's ignores fails collection on 21 worktree-scoped tests/hidden/ checks (pre-existing on master, noted in NOTES.md).
