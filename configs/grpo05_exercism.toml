@@ -19,8 +19,10 @@ clip = 0.2
 agg = "token-mean"
 scale = "std"
 max_grad_norm = 1.0
-micro_batch = 4  # rows per rollout/logp chunk: mb=8 peaked 54.9 GB parent on
-                 # wide steps (24 layers of [8,14,T,T] fp32 in backward); 4 halves it
+micro_batch = 2  # rows per rollout/logp chunk. mb=8 peaked 54.9 GB (fresh 10-step
+                 # repro); mb=4 peaked 41.3 GB on the job's step 32 (beer-song,
+                 # T=3859, the widest row of the 40) > 39 GB cap; mb=2 halves the
+                 # per-chunk [mb,T,151936] logits+grad terms again
 runner = "local"
 seed = 1337
 steps = 40

@@ -116,6 +116,13 @@
   Peak > 20 G -> grpo05 (mem: 33)->39 = 29.3 x1.3 rounded up (cap 48). Stale
   mb=8 step-5 ckpt kept at ckpt/grpo05_exercism.pre-mb4; the job's
   --resume-if-any therefore restarts fresh (metrics auto-discarded, no ckpt).
+- fix-grpo05 attempt 2 (10-13): the mb=4 job ran to step 31 and OOM'd at 32 =
+  beer-song (T<=3859, widest row of the 40). mb=4 tail (31-40, OMP 8) tree
+  peak 41.268 GiB > 39 cap; 41.3x1.3 > 48 -> micro_batch=2 in the toml.
+  mb=2 beer 1-step: parent 26.74 GiB, tree 27.071 GiB -> x1.3 = 36 <= 39, so
+  (mem: 39) stays; ~11 h est for 40 steps < 24 h timeout. Stale step-30
+  mb=4 ckpt -> ckpt/grpo05_exercism.pre-mb2 (kept; job restarts from 1).
+  Evidence: .agent-evidence/grpo05fix-tail{,-mon}.log, grpo05fix-beer{,-mon}.log.
 - gpurun: scripts/gpu_run.sh = Kevin's GPU window: 2 GPU preflight, --stop-agents,
   .venv-gpu, known tests on CUDA, check_vllm_hf <0.02-nats, 1.5B GRPO, 3 evals -> results/gpu/.
 - `dist.py` FSDP2: fully_shard, full_state_dict DTensors, grads AVG, no 1/W.
