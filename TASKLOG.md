@@ -165,3 +165,7 @@
 - Goal: Fix grpo05: OOM (ran out of memory)
 - Approach: Prior attempt's fix was committed but unverified (session killed at step 2, no ckpt). Relaunched the resume-safe scratch acceptance run in the background with a tree-Pss monitor, polled it to completion, confirmed the fails-first evidence (mb=8 repro PEAKMEM 54.9 GB), raised the (mem:) tag, ran make check (exit 0: ruff, 274 passed/1 skipped, cargo, tf validate), updated NOTES.md and the ticket, committed (3bff2af), merged master (already up to date).
 - Blockers: Session teardown killed the first acceptance attempt mid-run (recovered: --resume-if-any restarted fresh, deterministic seeds made steps 1-2 bit-identical); also pytest tests/ without make check's ignores fails collection on 21 worktree-scoped tests/hidden/ checks (pre-existing on master, noted in NOTES.md).
+## Fix grpo05: OOM (ran out of memory)
+- Goal: Fix grpo05: OOM (ran out of memory)
+- Approach: reproduced the task sampler (Random(1337)) to bound every step's row length without running the job, cross-checked against the known beer-song prompt length, then verified the resume/discard mechanics in train.py against the existing test suite.
+- Blockers: none — the prior session was killed mid floor-run; that run turned out to be unnecessary once the width probe closed the step-40 gap.

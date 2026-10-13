@@ -175,3 +175,4 @@
   why: the real 1.5B training run: the experiment the whole stack exists to produce, on the host GPUs for $0.
 - [x] **Fix grpo05: OOM (ran out of memory)** — auto-filed from the job log (id: fix-grpo05-093648a6) (after: -)
   why: the CPU GRPO run must survive its job memory cap; this unblocks grpo05 and keeps its (mem:) tag honest.
+- [x] **Fix grpo05: OOM (ran out of memory)** — auto-filed from the job log (previous fix did not resolve it) (id: fix-grpo05-093648a6) (after: -)

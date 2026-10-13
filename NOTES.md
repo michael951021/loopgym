@@ -108,14 +108,16 @@
   + rollout scores). micro_batch=8 key (TrainCfg, RESUME_CHECK, toml). 2-step run exit 0,
   peak RSS 25.1 GiB: .agent-evidence/grpomem-2step.log. grpo05 (mem: 24)->33 = peak GiB
   x1.3 rounded up. tests/test_grpomem.py 3/3: mb=1 grads == big batch 1e-5.
-- fix-grpo05 DONE: mb=8 peaked 54.9 GB parent on a fresh 10-step repro
-  (grpo05fix-repro.log) > 33 G job cap -> micro_batch 8->4 in
-  grpo05_exercism.toml. Acceptance: fresh 10-step mb=4 run (OMP 8) exit 0 at
-  step 10, PEAKMEM 29.304 GB < 33; wide steps 6-7 (876/978 s) passed; tree
-  monitor peak 29.302 (kids=0): .agent-evidence/grpo05fix-mb4{,-mon}.log.
-  Peak > 20 G -> grpo05 (mem: 33)->39 = 29.3 x1.3 rounded up (cap 48). Stale
-  mb=8 step-5 ckpt kept at ckpt/grpo05_exercism.pre-mb4; the job's
-  --resume-if-any therefore restarts fresh (metrics auto-discarded, no ckpt).
+- fix-grpo05 DONE (attempt 3, 10-13): mb=8 54.9 GB, mb=4 41.3 GB at step 32
+  (beer-song, T<=3859) > 39 cap -> micro_batch=2 in grpo05_exercism.toml.
+  Width probe (deterministic sampler seed 1337, all 40 steps;
+  grpo05fix_width_probe.py): max T = 3859 @ step 32, next 2465; beer prompt
+  3475 reproduced = known answer. mb=2 beer probe (that row, OMP 8): parent
+  28.71 GB < 39 -> (mem: 39) stays; ~11 h < 24 h timeout. Floor run (1-13)
+  superseded: monotone in T + worst row measured. Retry: no ckpt (pre-mb2
+  aside) -> --resume-if-any discards metrics, fresh from 1 (train.py:517-521,
+  tested); dispatcher merges master (mb=2) into job branch (precedent 12f92b7).
+  Evidence: grpo05fix-{repro,mb4,tail,beer}{,-mon}.log.
 - gpurun: scripts/gpu_run.sh = Kevin's GPU window: 2 GPU preflight, --stop-agents,
   .venv-gpu, known tests on CUDA, check_vllm_hf <0.02-nats, 1.5B GRPO, 3 evals -> results/gpu/.
 - `dist.py` FSDP2: fully_shard, full_state_dict DTensors, grads AVG, no 1/W.
