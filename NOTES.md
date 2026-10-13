@@ -123,6 +123,9 @@
   (mem: 39) stays; ~11 h est for 40 steps < 24 h timeout. Stale step-30
   mb=4 ckpt -> ckpt/grpo05_exercism.pre-mb2 (kept; job restarts from 1).
   Evidence: .agent-evidence/grpo05fix-tail{,-mon}.log, grpo05fix-beer{,-mon}.log.
+  10-13 merge vs master: master had re-filed the ticket (39 G issue/evidence,
+  generic plan, attempt-1 plan dropped); resolution keeps master's re-filed
+  body + this attempt-2 log. Attempt-1 plan remains in git history + lines above.
 - gpurun: scripts/gpu_run.sh = Kevin's GPU window: 2 GPU preflight, --stop-agents,
   .venv-gpu, known tests on CUDA, check_vllm_hf <0.02-nats, 1.5B GRPO, 3 evals -> results/gpu/.
 - `dist.py` FSDP2: fully_shard, full_state_dict DTensors, grads AVG, no 1/W.
