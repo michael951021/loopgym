@@ -7,6 +7,8 @@
 - RLIMIT_NPROC=64 counts ALL uid-1000 -> transient Cannot fork.
 - torch 2.14 FSDP2: fully_shard auto-inits env://; rank() pre-init 0.
 - env.grade default timeout=30 < slowest loopgym check: pass cfg.timeout=120.
+- make check: pytest ignores tests/known + tests/hidden; hidden checks are
+  worktree-scoped (they fail collection in the shared tree; pre-existing).
 
 ## Scheduling
 - `(human-only[: P])`: tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); tagged held; hostgate DONE (030ad80).
@@ -87,7 +89,7 @@
 - `train.py`: max_difficulty caps train sampler (scale 1-9; 67 of 101 train <=3);
   eval_n>0 = that many val tasks/eval, stateless draw seed+off+s, row has tasks[].
   configs/grpo05_exercism.toml (0.5B r16, diff<=3, B4 G8, 384tok, lr2e-5, b0.02,
-  40 steps, eval 20/n2, save 5). Probe: 1 step 524s, reward 0.25, tok-mean loss
+  40 steps, eval 20/n2, save 5, micro_batch 4). Probe: 1 step 524s, reward 0.25, tok-mean loss
   0.0957 vs seq-mean 0.0 (same completions) = length artifact, not a bug.
   tiny ctx 512 < exercism prompts -> tiny+exercism gen untestable.
 - `grpo.py` group_advantages/kl_k3/policy_loss(denom=None); 7/7 known.
@@ -106,15 +108,16 @@
   + rollout scores). micro_batch=8 key (TrainCfg, RESUME_CHECK, toml). 2-step run exit 0,
   peak RSS 25.1 GiB: .agent-evidence/grpomem-2step.log. grpo05 (mem: 24)->33 = peak GiB
   x1.3 rounded up. tests/test_grpomem.py 3/3: mb=1 grads == big batch 1e-5.
+- fix-grpo05 DONE: mb=8 peaked 54.9 GB parent on a fresh 10-step repro
+  (grpo05fix-repro.log) > 33 G job cap -> micro_batch 8->4 in
+  grpo05_exercism.toml. Acceptance: fresh 10-step mb=4 run (OMP 8) exit 0 at
+  step 10, PEAKMEM 29.304 GB < 33; wide steps 6-7 (876/978 s) passed; tree
+  monitor peak 29.302 (kids=0): .agent-evidence/grpo05fix-mb4{,-mon}.log.
+  Peak > 20 G -> grpo05 (mem: 33)->39 = 29.3 x1.3 rounded up (cap 48). Stale
+  mb=8 step-5 ckpt kept at ckpt/grpo05_exercism.pre-mb4; the job's
+  --resume-if-any therefore restarts fresh (metrics auto-discarded, no ckpt).
 - gpurun: scripts/gpu_run.sh = Kevin's GPU window: 2 GPU preflight, --stop-agents,
   .venv-gpu, known tests on CUDA, check_vllm_hf <0.02-nats, 1.5B GRPO, 3 evals -> results/gpu/.
-- train.py: toml+--k v; sample->gen->grade->grpo_step->jsonl->ckpt; exact resume, exit 1
-  on orphan ckpt; from_pretrained freezes ALL -> requires_grad lora_; vllm: sync_vllm
-  adapter+sync_lora, restore re-syncs, first gen unlora.
-- max_difficulty caps sampler (67 of 101 train <=3); eval_n stateless draw seed+off+s.
-  grpo05_exercism.toml (0.5B r16, diff<=3, B4 G8 384tok, lr2e-5, b0.02, 40 steps,
-  eval 20/n2, save 5, micro_batch 8); probe 524s/step, reward 0.25, tok-mean 0.0957
-  vs seq-mean 0.0 = length artifact, not a bug.
 - `dist.py` FSDP2: fully_shard, full_state_dict DTensors, grads AVG, no 1/W.
   wrap_fsdp shards Qwen2ForCausalLM as the ROOT (children embed/layers/norm/lm_head first)
   so generate + train fwd + save() gather all reach a coordinating root.

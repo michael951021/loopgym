@@ -140,7 +140,7 @@
   why: the agent-side residue of the ruling — one checker run plus the verdict note; rule 5 keeps basecheck blocked until then.
 - [x] **CPU GRPO config** — configs/grpo05_exercism.toml: 0.5B LoRA r=16, exercism train split restricted to difficulty ≤ 3 (enough signal for a 0.5B), B=4, G=8, max_new_tokens 384, lr 2e-5, β 0.02, 40 steps, eval on val (n=2) every 20 steps, save_every 5; check 1 step runs. Done when `.venv/bin/python -m loopgym.rl.train --config configs/grpo05_exercism.toml --steps 1 --out runs/grpo_probe` exits 0 and its metrics line has reward_mean and frac_groups_all_same. (id: grpocfg) (after: toyok, basecheck)
   why: a small, gated real run on CPU that validates the pipeline end to end; the real experiment is the GPU run.
-- [ ] **CPU GRPO run** — (id: grpo05) (after: grpocfg, grpomem) (run: `OMP_NUM_THREADS=12 .venv/bin/python -m loopgym.rl.train --config configs/grpo05_exercism.toml --resume-if-any`) (mem: 33) (cpus: 12) (timeout: 24h)
+- [ ] **CPU GRPO run** — (id: grpo05) (after: grpocfg, grpomem) (run: `OMP_NUM_THREADS=12 .venv/bin/python -m loopgym.rl.train --config configs/grpo05_exercism.toml --resume-if-any`) (mem: 39) (cpus: 12) (timeout: 24h)
   why: reward curve and an honest pass@1 delta on CPU scale.
 - [ ] **Eval GRPO checkpoint** — (id: evalgrpo05) (after: grpo05) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-0.5b-instruct --adapter ckpt/grpo05_exercism/last --source exercism --split val --n 4 --out results/eval/grpo05_val.json`) (mem: 12) (cpus: 8) (timeout: 8h)
   why: the before/after number on the same tasks, sampler and grader as the baseline.
@@ -174,3 +174,4 @@
 - [ ] **GPU run: GRPO 1.5B on both 3090s** — (id: gpurun1) (after: twonode, grpomem) the host GPU window as a GPU job: scripts/gpu_run.sh without --stop-agents (the job runner already paused the agents and stopped the model server): builds .venv-gpu, CUDA/Triton known tests, vLLM-vs-HF log-prob gate, GRPO 1.5B (configs/grpo15_gpu.toml), evals into results/gpu/. (run: `bash scripts/gpu_run.sh`) (gpu) (mem: 48) (cpus: 16) (timeout: 12h)
   why: the real 1.5B training run: the experiment the whole stack exists to produce, on the host GPUs for $0.
 - [ ] **Fix grpo05: OOM (ran out of memory)** — auto-filed from the job log (id: fix-grpo05-093648a6) (after: -)
+  why: the CPU GRPO run must survive its job memory cap; this unblocks grpo05 and keeps its (mem:) tag honest.
