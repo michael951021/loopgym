@@ -169,3 +169,7 @@
 - Goal: Fix grpo05: OOM (ran out of memory)
 - Approach: reproduced the task sampler (Random(1337)) to bound every step's row length without running the job, cross-checked against the known beer-song prompt length, then verified the resume/discard mechanics in train.py against the existing test suite.
 - Blockers: none — the prior session was killed mid floor-run; that run turned out to be unnecessary once the width probe closed the step-40 gap.
+## CPU GRPO run
+- Goal: CPU GRPO run
+- Approach: compute job grpo05 ran OMP_NUM_THREADS=12 .venv/bin/python -m loopgym.rl.train --config configs/grpo05_exercism.toml --resume-if-any (exit 0)
+- Blockers: none

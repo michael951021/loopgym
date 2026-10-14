@@ -140,7 +140,7 @@
   why: the agent-side residue of the ruling — one checker run plus the verdict note; rule 5 keeps basecheck blocked until then.
 - [x] **CPU GRPO config** — configs/grpo05_exercism.toml: 0.5B LoRA r=16, exercism train split restricted to difficulty ≤ 3 (enough signal for a 0.5B), B=4, G=8, max_new_tokens 384, lr 2e-5, β 0.02, 40 steps, eval on val (n=2) every 20 steps, save_every 5; check 1 step runs. Done when `.venv/bin/python -m loopgym.rl.train --config configs/grpo05_exercism.toml --steps 1 --out runs/grpo_probe` exits 0 and its metrics line has reward_mean and frac_groups_all_same. (id: grpocfg) (after: toyok, basecheck)
   why: a small, gated real run on CPU that validates the pipeline end to end; the real experiment is the GPU run.
-- [ ] **CPU GRPO run** — (id: grpo05) (after: grpocfg, grpomem) (run: `OMP_NUM_THREADS=12 .venv/bin/python -m loopgym.rl.train --config configs/grpo05_exercism.toml --resume-if-any`) (mem: 39) (cpus: 12) (timeout: 24h)
+- [x] **CPU GRPO run** — (id: grpo05) (after: grpocfg, grpomem) (run: `OMP_NUM_THREADS=12 .venv/bin/python -m loopgym.rl.train --config configs/grpo05_exercism.toml --resume-if-any`) (mem: 39) (cpus: 12) (timeout: 24h)
   why: reward curve and an honest pass@1 delta on CPU scale.
 - [ ] **Eval GRPO checkpoint** — (id: evalgrpo05) (after: grpo05) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-0.5b-instruct --adapter ckpt/grpo05_exercism/last --source exercism --split val --n 4 --out results/eval/grpo05_val.json`) (mem: 12) (cpus: 8) (timeout: 8h)
   why: the before/after number on the same tasks, sampler and grader as the baseline.
