@@ -173,3 +173,7 @@
 - Goal: CPU GRPO run
 - Approach: compute job grpo05 ran OMP_NUM_THREADS=12 .venv/bin/python -m loopgym.rl.train --config configs/grpo05_exercism.toml --resume-if-any (exit 0)
 - Blockers: none
+## Eval GRPO checkpoint
+- Goal: Eval GRPO checkpoint
+- Approach: compute job evalgrpo05 ran OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-0.5b-instruct --adapter ckpt/grpo05_exercism --source exercism --split val --n 4 --out results/eval/grpo05_val.json (exit 0)
+- Blockers: none
