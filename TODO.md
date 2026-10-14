@@ -142,7 +142,7 @@
   why: a small, gated real run on CPU that validates the pipeline end to end; the real experiment is the GPU run.
 - [x] **CPU GRPO run** — (id: grpo05) (after: grpocfg, grpomem) (run: `OMP_NUM_THREADS=12 .venv/bin/python -m loopgym.rl.train --config configs/grpo05_exercism.toml --resume-if-any`) (mem: 39) (cpus: 12) (timeout: 24h)
   why: reward curve and an honest pass@1 delta on CPU scale.
-- [ ] **Eval GRPO checkpoint** — (id: evalgrpo05) (after: grpo05) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-0.5b-instruct --adapter ckpt/grpo05_exercism/last --source exercism --split val --n 4 --out results/eval/grpo05_val.json`) (mem: 12) (cpus: 8) (timeout: 8h)
+- [ ] **Eval GRPO checkpoint** — (id: evalgrpo05) (after: grpo05) (run: `OMP_NUM_THREADS=8 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-0.5b-instruct --adapter ckpt/grpo05_exercism --source exercism --split val --n 4 --out results/eval/grpo05_val.json`) (mem: 12) (cpus: 8) (timeout: 8h)
   why: the before/after number on the same tasks, sampler and grader as the baseline.
 - [ ] **Analyse the CPU GRPO run** — extend tools/check_results.py (`--only grpo05`): reward curve slope CI, val pass@1 grpo05 vs base05 (paired by task, task-clustered bootstrap of the difference), KL and clip_frac trends, frac_groups_all_same (signal-free groups); write results/grpo05_summary.json and NOTES.md lines. A null result is a valid result: report it with its CI; a pass@1 gain with a rising frac of reward-hack-like outputs (check 20 sampled completions with grade info) is a bug. Done when `.venv/bin/python tools/check_results.py --only grpo05` exits 0. (id: grpo05ok) (after: evalgrpo05)
   why: turns the run into a claim with a CI, or into a clearly stated null.
@@ -176,4 +176,4 @@
 - [x] **Fix grpo05: OOM (ran out of memory)** — auto-filed from the job log (id: fix-grpo05-093648a6) (after: -)
   why: the CPU GRPO run must survive its job memory cap; this unblocks grpo05 and keeps its (mem:) tag honest.
 - [x] **Fix grpo05: OOM (ran out of memory)** — auto-filed from the job log (previous fix did not resolve it) (id: fix-grpo05-093648a6) (after: -)
-- [ ] **Fix evalgrpo05: ValueError in run.py** — auto-filed from the job log (id: fix-evalgrpo05-291fdab2) (after: -)
+- [x] **Fix evalgrpo05: ValueError in run.py** — auto-filed from the job log; root cause was a stale `/last` subdir in the eval `--adapter` path (the trainer saves the adapter directly to `ckpt/grpo05_exercism/`), fixed on the evalgrpo05 line by kevin (id: fix-evalgrpo05-291fdab2) (after: -)
