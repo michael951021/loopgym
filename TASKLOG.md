@@ -185,3 +185,7 @@
 - Goal: REPORT and README
 - Approach: Built the checker's claim registry from results/ and runs/grpo05_exercism, wrote the report from its --emit canonical strings, then verified exit 0 on the committed text, exit 1 on three tamper variants, and ruff + pytest green
 - Blockers: none
+## Fix cleanclone: non-zero exit (exit-code)
+- Goal: Fix cleanclone: non-zero exit (exit-code)
+- Approach: three clone repros (25→1→0 failures) each surfaced new evidence: missing .venv → bootstrap fix, absent host assets → skipif convention, missing pandas/pyarrow → extra; verified the exact job command exit 0 (194s, fresh log, no pipe) plus shared-tree make check exit 0 (330s).
+- Blockers: a false-green clone run — capture.py exits 2 on an existing --log path and my | tail pipe masked that rc; fixed by fresh log names and no pipe, and recorded in the ticket.
