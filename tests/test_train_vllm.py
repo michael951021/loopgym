@@ -5,10 +5,16 @@ from pathlib import Path
 
 import pytest
 
+from loopgym.models import REPOS
 from loopgym.rl import rollout_vllm as rv
 from loopgym.rl.train import Run, TrainCfg, ckpt_dir
 from test_vllm_api import (FakeCompletion, FakeLLM, FakeLogprob, FakeLoRARequest,
                            FakeRequestOutput, FakeSamplingParams)
+
+# one_step grades the banana toy reward, which needs the shared 0.5B model.
+NEED_MODEL = pytest.mark.skipif(
+    not REPOS["0.5b"][1].is_dir(), reason="no 0.5B model (fresh clone)"
+)
 
 
 class TinyIdsLLM(FakeLLM):
@@ -72,6 +78,7 @@ def test_unknown_backend_rejected(tmp_path):
         Run(cfg(tmp_path, backend="weird"))
 
 
+@NEED_MODEL
 def test_first_generation_unlora_then_sync(fakes, tmp_path):
     r = Run(cfg(tmp_path))
     one_step(r)
@@ -85,6 +92,7 @@ def test_first_generation_unlora_then_sync(fakes, tmp_path):
     assert req.load_inplace is True
 
 
+@NEED_MODEL
 def test_next_generation_uses_previous_step_lora(fakes, tmp_path):
     r = Run(cfg(tmp_path))
     one_step(r)

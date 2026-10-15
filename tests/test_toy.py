@@ -1,7 +1,14 @@
 """Toy rewards (planted effect + null control): known answers, by hand, no measured numbers."""
+import pytest
+
 from loopgym import env
 from loopgym.env import toy
-from loopgym.env.toy import grade
+from loopgym.env.toy import TOKENIZER_DIR, grade
+
+# Toy rewards tokenize with the shared 0.5B model's tokenizer (host asset).
+pytestmark = pytest.mark.skipif(
+    not TOKENIZER_DIR.is_dir(), reason="no 0.5B tokenizer (fresh clone)"
+)
 
 BANANA = toy.load_toy("banana")
 COINFLIP = toy.load_toy("coinflip")

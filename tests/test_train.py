@@ -12,9 +12,21 @@ import sys
 import time
 from pathlib import Path
 
+import pytest
+
+from loopgym.models import REPOS
+
 ROOT = Path(__file__).resolve().parents[1]
 DET = ["step", "reward_mean", "reward_std", "frac_groups_all_same",
        "loss", "kl", "clip_frac", "grad_norm"]
+
+# Toy runs grade the banana reward (0.5B tokenizer) and exercism evals grade
+# real exercises: both are gitignored host assets.
+NEED_MODEL = pytest.mark.skipif(
+    not REPOS["0.5b"][1].is_dir(), reason="no 0.5B model (fresh clone)")
+NEED_EXERCISES = pytest.mark.skipif(
+    not (ROOT / "data" / "raw" / "exercism-python").is_dir(),
+    reason="no data/raw exercises (fresh clone)")
 
 # every run overrides --out and --steps on the CLI, so both override paths are
 # exercised each time (a break in either would misroute output or the step count).
@@ -68,6 +80,7 @@ def eval_rows(out: str) -> list[dict]:
     return [r for r in rows(out) if r.get("kind") == "eval"]
 
 
+@NEED_MODEL
 def test_smoke_cli(tmp_path):
     cfg = write_cfg(tmp_path)
     out = str(tmp_path / "runs" / "smoke")
@@ -90,6 +103,7 @@ def test_smoke_cli(tmp_path):
     assert (ck / "opt_rng.pt").is_file()
 
 
+@NEED_MODEL
 def test_resume_matches_uninterrupted(tmp_path):
     cfg = write_cfg(tmp_path)
     full = str(tmp_path / "runs" / "full")
@@ -115,6 +129,7 @@ def test_resume_matches_uninterrupted(tmp_path):
                 f"uninterrupted={ra[f]!r} resumed={rb[f]!r}")
 
 
+@NEED_MODEL
 def test_fresh_into_existing_fails(tmp_path):
     cfg = write_cfg(tmp_path)
     out = str(tmp_path / "runs" / "c")
@@ -133,6 +148,7 @@ def test_resume_with_no_checkpoint_fails(tmp_path):
     assert "nothing to resume" in p.stderr, p.stderr
 
 
+@NEED_MODEL
 def test_resume_if_any_starts_then_continues(tmp_path):
     """The compute-job command line: one command must both start the run and continue it."""
     cfg = write_cfg(tmp_path)
@@ -155,6 +171,7 @@ def test_resume_if_any_starts_then_continues(tmp_path):
     assert rows_[1]["reward_mean"] != -1.0
 
 
+@NEED_MODEL
 def test_orphaned_checkpoint_fails_resume_if_any(tmp_path):
     """Stale ckpt with metrics lost (the toybanana2 incident): a retried job must not
     report success with no artifacts."""
@@ -168,6 +185,7 @@ def test_orphaned_checkpoint_fails_resume_if_any(tmp_path):
     assert "missing" in p.stderr, p.stderr
 
 
+@NEED_MODEL
 def test_complete_run_resume_if_any_noops(tmp_path):
     cfg = write_cfg(tmp_path)
     out = str(tmp_path / "runs" / "n")
@@ -191,6 +209,7 @@ def test_max_difficulty_filters_train_sampler(tmp_path):
         assert set(full.sampler.names) == set(splits["train"])
 
 
+@NEED_EXERCISES
 def test_eval_tasks_deterministic_and_from_val(tmp_path):
     from loopgym.rl.train import ROOT, Run, TrainCfg
     splits = json.loads((ROOT / "results" / "splits.json").read_text())
@@ -203,6 +222,7 @@ def test_eval_tasks_deterministic_and_from_val(tmp_path):
     assert set(a) <= set(splits["val"])
 
 
+@NEED_EXERCISES
 def test_exercism_eval_step_uses_val_tasks(tmp_path):
     """tiny model's 512-token context cannot take real exercism prompts, so the
     generator is stubbed; the val draw and the local grading are the real code."""

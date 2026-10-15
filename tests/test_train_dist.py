@@ -18,12 +18,19 @@ from pathlib import Path
 import pytest
 import safetensors.torch
 
+from loopgym.models import REPOS
+
 ROOT = Path(__file__).resolve().parents[1]
 PY = ROOT / ".venv" / "bin" / "python"
 DS_SRC = ROOT / ".tools" / "src" / "deepspeed-0.19.7"
 STUBS = ROOT / "tests" / "_ds_stubs"
 ATOL = 1e-5
 MTOL = 1e-6
+
+# The banana toy reward tokenizes with the shared 0.5B model (host asset).
+pytestmark = pytest.mark.skipif(
+    not REPOS["0.5b"][1].is_dir(), reason="no 0.5B model (fresh clone)"
+)
 
 # sandbox gaps that stop a DeepSpeed run before train.py code runs (import/rendezvous)
 DS_SKIP = ("No module named 'deepspeed'", "ModuleNotFoundError", "ImportError",

@@ -7,8 +7,25 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "gpu_run.sh"
+
+# gitignored host assets from REQUIRED_FILES in scripts/gpu_run.sh (keep in sync)
+HOST_ASSETS = [
+    "models/qwen2.5-coder-1.5b-instruct",
+    "models/qwen2.5-coder-0.5b-instruct",
+    "data/raw/exercism-python/exercises/practice",
+    "data/loopgym/v0/tasks.jsonl",
+    "data/loopgym/v0/checks",
+    "data/loopgym/candidates.jsonl",
+    "data/raw/repos/draftlab.git",
+    "data/raw/repos/harness.git",
+]
+NEED_HOST = pytest.mark.skipif(
+    any(not (ROOT / a).exists() for a in HOST_ASSETS),
+    reason="host model/data assets absent (fresh clone)")
 
 
 def run_script(*flags):
@@ -16,6 +33,7 @@ def run_script(*flags):
                           capture_output=True, text=True, timeout=120)
 
 
+@NEED_HOST
 def test_dry_run_ok():
     p = run_script("--dry-run")
     assert p.returncode == 0, p.stderr
@@ -35,6 +53,7 @@ def test_dry_run_without_stop_agents_does_not_stop():
     assert "./agent stop all --now" not in p.stdout
 
 
+@NEED_HOST
 def test_stop_agents_flag_shows_stop_step():
     p = run_script("--dry-run", "--stop-agents")
     assert p.returncode == 0, p.stderr
