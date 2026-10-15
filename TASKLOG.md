@@ -189,3 +189,7 @@
 - Goal: Fix cleanclone: non-zero exit (exit-code)
 - Approach: three clone repros (25→1→0 failures) each surfaced new evidence: missing .venv → bootstrap fix, absent host assets → skipif convention, missing pandas/pyarrow → extra; verified the exact job command exit 0 (194s, fresh log, no pipe) plus shared-tree make check exit 0 (330s).
 - Blockers: a false-green clone run — capture.py exits 2 on an existing --log path and my | tail pipe masked that rc; fixed by fresh log names and no pipe, and recorded in the ticket.
+## Clean-clone check
+- Goal: Clean-clone check
+- Approach: compute job cleanclone ran rm -rf /tmp/lgcc && git clone -q /work /tmp/lgcc && cd /tmp/lgcc && PATH=/work/.tools/bin:/work/.tools/cargo/bin:/work/.venv/bin:$PATH make check (exit 0)
+- Blockers: none
