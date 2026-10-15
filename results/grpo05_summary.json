@@ -1,0 +1,83 @@
+{
+ "run": "runs/grpo05_exercism",
+ "config": "configs/grpo05_exercism.toml",
+ "steps": 40,
+ "train_reward": {
+  "first5_mean": 0.2375,
+  "last5_mean": 0.05625,
+  "slope_per_step": -0.0031103424015009404,
+  "slope_ci": [
+   -0.0055610902013116074,
+   -2.1627960627495337e-05
+  ]
+ },
+ "val": {
+  "base05": {
+   "pass_at_k": 0.0763888888888889,
+   "ci": [
+    0.013888888888888888,
+    0.1527777777777778
+   ],
+   "n_per_task": 16
+  },
+  "grpo05": {
+   "pass_at_k": 0.1111111111111111,
+   "ci": [
+    0.0,
+    0.2222222222222222
+   ],
+   "n_per_task": 4
+  },
+  "paired_delta": {
+   "point": 0.034722222222222224,
+   "ci": [
+    -0.0625,
+    0.125
+   ],
+   "n_tasks": 9,
+   "method": "task-clustered bootstrap, n_boot=2000, seed=0 (loopgym.eval.stats)"
+  },
+  "verdict": "null"
+ },
+ "kl": {
+  "max": 0.00040602214767398445,
+  "first10_mean": 1.5901532793436095e-05,
+  "last10_mean": 0.00030196097031792853
+ },
+ "clip_frac": {
+  "min": 0.0,
+  "max": 0.0
+ },
+ "frac_groups_all_same": {
+  "mean": 0.675,
+  "max": 1.0
+ },
+ "eval_points": [
+  {
+   "step": 20,
+   "kind": "eval",
+   "tasks": [
+    "largest-series-product",
+    "isogram"
+   ],
+   "reward_mean": 0.25,
+   "reward_std": 0.4472135901451111
+  },
+  {
+   "step": 40,
+   "kind": "eval",
+   "tasks": [
+    "flatten-array",
+    "food-chain"
+   ],
+   "reward_mean": 0.0625,
+   "reward_std": 0.25
+  }
+ ],
+ "hack_screen": {
+  "n": 20,
+  "n_matches": 20,
+  "n_flagged": 3
+ },
+ "claim": "grpo05 (40-step LoRA GRPO, exercism, 0.5B): null on val pass@1 (paired \u0394 +0.0347, CI [-0.0625, +0.1250]); train reward declined (-0.0031/step, CI [-0.0056, -0.0000]) while 68% of groups carried zero advantage signal \u2014 no detectable learning at this scale"
+}

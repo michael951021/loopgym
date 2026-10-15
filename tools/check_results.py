@@ -13,16 +13,19 @@ rule 5); the tool applies them verbatim and cites the ruling in the table row.
 Malformed rulings fail closed.
 
 Usage: .venv/bin/python tools/check_results.py
-           [--only baselines,benches,toy] [--results-dir DIR]
+           [--only baselines,benches,toy,grpo05]
+           [--results-dir DIR] [--runs-dir DIR]
 """
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
+sys.path.insert(0, str(ROOT))  # for loopgym.eval.stats in section_grpo05
 
 # CLAUDE.md "plausible ranges written before the runs" (point estimates).
 BASELINE_RANGES = {
@@ -93,7 +96,7 @@ def check_ruling(r: object, p: float) -> tuple[bool, str, str]:
                    f"'revise', got {decision!r}"), ""
 
 
-def section_baselines(results: Path = RESULTS) -> list[dict]:
+def section_baselines(results: Path = RESULTS, runs: Path | None = None) -> list[dict]:
     rows: list[dict] = []
     docs = {}
     for fname, (label, lo, hi) in BASELINE_RANGES.items():
@@ -143,7 +146,7 @@ def section_baselines(results: Path = RESULTS) -> list[dict]:
     return rows
 
 
-def section_benches(results: Path = RESULTS) -> list[dict]:
+def section_benches(results: Path = RESULTS, runs: Path | None = None) -> list[dict]:
     rows: list[dict] = []
     b = load_json(results / "bench_logprob.json")
     if b is None:
@@ -184,7 +187,7 @@ def section_benches(results: Path = RESULTS) -> list[dict]:
     return rows
 
 
-def section_toy(results: Path = RESULTS) -> list[dict]:
+def section_toy(results: Path = RESULTS, runs: Path | None = None) -> list[dict]:
     """results/toy.json: written by the toy known-answer runs (banana + null).
 
     Expected keys: banana_early, banana_late, null_slope_ci (lo, hi)."""
@@ -203,10 +206,190 @@ def section_toy(results: Path = RESULTS) -> list[dict]:
     return rows
 
 
+# grpo05 pre-run plausible ranges (state/tickets/grpo05ok.md).
+GRPO05_RUN_NAME = "grpo05_exercism"
+GRPO05_HACK_N = 20
+
+
+def _slope_ci(steps, values, n_boot: int = 2000, seed: int = 0):
+    import numpy as np
+
+    steps = np.asarray(steps, dtype=np.float64)
+    values = np.asarray(values, dtype=np.float64)
+    slope = float(np.polyfit(steps, values, 1)[0])
+    rng = np.random.default_rng(seed)
+    n = steps.size
+    slopes = []
+    for _ in range(n_boot):
+        idx = rng.integers(0, n, n)  # case resample: keep (step, reward) pairs
+        slopes.append(float(np.polyfit(steps[idx], values[idx], 1)[0]))
+    slopes.sort()
+    lo = slopes[int(0.025 * n_boot)]
+    hi = slopes[int(0.975 * n_boot)]
+    return slope, (lo, hi)
+
+
+def section_grpo05(results: Path = RESULTS, runs: Path | None = None) -> list[dict]:
+    """Analyse the 0.5B exercism GRPO run into a claim with CIs, or a null.
+
+    Inputs: runs/grpo05_exercism/metrics.jsonl, the two val evals, and the
+    optional 20-completion hack screen. Writes results/grpo05_summary.json.
+    A null (paired CI containing 0) is a passing result; a gain whose CI
+    excludes 0 passes only with a clean hack screen; a significant val
+    regression or out-of-range trend fails."""
+    runs = runs or ROOT / "runs"
+    metrics = runs / GRPO05_RUN_NAME / "metrics.jsonl"
+    base = load_json(results / "eval" / "base05_val.json")
+    grpo = load_json(results / "eval" / "grpo05_val.json")
+    if not metrics.is_file() or base is None or grpo is None:
+        absent = [name for name, ok in (
+            ("runs/grpo05_exercism/metrics.jsonl", metrics.is_file()),
+            ("results/eval/base05_val.json", base is not None),
+            ("results/eval/grpo05_val.json", grpo is not None)) if not ok]
+        return [row("grpo05 run + val evals", "missing", "metrics.jsonl + "
+                    "base05_val.json + grpo05_val.json", None,
+                    "run/evals not complete yet: " + ", ".join(absent))]
+
+    import numpy as np
+    from loopgym.eval.stats import bootstrap_ci
+
+    rows_all = [json.loads(line) for line in metrics.read_text().splitlines()
+                if line.strip()]
+    tr = [r for r in rows_all if "kind" not in r]
+    ev = [r for r in rows_all if r.get("kind") == "eval"]
+    steps = [r["step"] for r in tr]
+    rm = [r["reward_mean"] for r in tr]
+    kl = [r["kl"] for r in tr]
+    cf = [r["clip_frac"] for r in tr]
+    fs = [r["frac_groups_all_same"] for r in tr]
+    n = len(tr)
+
+    slope, (slo, shi) = _slope_ci(steps, rm)
+
+    tb = sorted(base["per_task"])
+    tg = sorted(grpo["per_task"])
+    tasks_ok = tb == tg
+    d = np.array([grpo["per_task"][t]["pass_at_1"]
+                  - base["per_task"][t]["pass_at_1"] for t in tb]) \
+        if tasks_ok else np.array([0.0])
+    delta, dlo, dhi = (bootstrap_ci(d, groups=tb, n_boot=2000, seed=0)
+                       if tasks_ok else (0.0, 0.0, 0.0))
+    verdict = ("regression" if dhi < 0 else "gain" if dlo > 0 else "null")
+
+    hack = load_json(results / "grpo05_hackcheck.json")
+    hack_clean = (hack is not None and hack.get("n") == GRPO05_HACK_N
+                  and hack.get("n_matches") == GRPO05_HACK_N)
+
+    rows: list[dict] = []
+    if not tasks_ok:
+        rows.append(row("val task sets match",
+                        f"{sorted(set(tg) - set(tb))} vs {sorted(set(tb) - set(tg))}",
+                        "identical task sets", False,
+                        "paired comparison impossible"))
+    if tasks_ok:
+        if verdict == "null":
+            ok, note = True, "null result: CI contains 0 (valid)"
+        elif verdict == "regression":
+            ok, note = False, "significant val regression — investigate"
+        else:
+            ok = hack_clean
+            note = ("gain; hack screen clean" if hack_clean else
+                    f"gain with CI excluding 0 needs a clean "
+                    f"{GRPO05_HACK_N}-completion hack screen "
+                    "(results/grpo05_hackcheck.json: 20/20 sidecar match)")
+        rows.append(row(
+            "grpo05 vs base05 val pass@1 (paired)",
+            f"{grpo['pass_at_k']:.4f} vs {base['pass_at_k']:.4f} "
+            f"(Δ {delta:+.4f} [{dlo:+.4f}, {dhi:+.4f}])",
+            "CI contains 0 (null) or gain w/ clean hack screen", ok, note))
+    rows.append(row(
+        "train reward slope",
+        f"{slope:+.5f}/step [{slo:+.5f}, {shi:+.5f}]",
+        "in [-0.05, +0.05]/step (pre-run range)",
+        -0.05 <= slope <= 0.05,
+        "significant decline in train reward" if shi < 0 else ""))
+    kl_last10 = float(np.mean(kl[-10:])) if n >= 10 else float(np.mean(kl))
+    rows.append(row(
+        "KL trend (first10 -> last10)",
+        f"{float(np.mean(kl[:10])):.2e} -> {kl_last10:.2e}",
+        "last-10 mean < 0.5 nats (pre-run range)", kl_last10 < 0.5))
+    rows.append(row(
+        "clip_frac range", f"{min(cf):.3f}–{max(cf):.3f}", "in [0, 1]",
+        min(cf) >= 0.0 and max(cf) <= 1.0))
+    rows.append(row(
+        "frac_groups_all_same", f"{float(np.mean(fs)):.3f} mean of {n} steps",
+        "reported", True,
+        f"{100 * float(np.mean(fs)):.1f}% of groups all-same reward: "
+        f"zero advantage signal"))
+    if ev:
+        rows.append(row(
+            "in-run eval points",
+            "; ".join(f"step {e['step']}: {e['reward_mean']:.3f} "
+                      f"({','.join(e['tasks'])})" for e in ev),
+            "reported", True))
+    if hack is None:
+        rows.append(row("hack screen (20 completions)", "missing",
+                        f"{GRPO05_HACK_N}/{GRPO05_HACK_N} sidecar match",
+                        None, "run tools/grpo05_hackcheck.py"))
+    else:
+        flagged = sorted({f for c in hack.get("completions", [])
+                          for f in c.get("flags", [])})
+        rows.append(row(
+            "hack screen (20 completions)",
+            f"{hack.get('n_matches', 0)}/{hack.get('n', 0)} sidecar match, "
+            f"{hack.get('n_flagged', 0)} flagged",
+            f"{GRPO05_HACK_N}/{GRPO05_HACK_N} (determinism known answer)",
+            hack_clean,
+            f"flags for review: {flagged}" if flagged else "no mechanical flags"))
+
+    summary = {
+        "run": f"runs/{GRPO05_RUN_NAME}",
+        "config": "configs/grpo05_exercism.toml",
+        "steps": n,
+        "train_reward": {
+            "first5_mean": float(np.mean(rm[:5])),
+            "last5_mean": float(np.mean(rm[-5:])),
+            "slope_per_step": slope,
+            "slope_ci": [slo, shi],
+        },
+        "val": {
+            "base05": {"pass_at_k": base["pass_at_k"], "ci": list(base["ci"]),
+                       "n_per_task": base["n"]},
+            "grpo05": {"pass_at_k": grpo["pass_at_k"], "ci": list(grpo["ci"]),
+                       "n_per_task": grpo["n"]},
+            "paired_delta": {"point": delta, "ci": [dlo, dhi],
+                             "n_tasks": len(tb),
+                             "method": "task-clustered bootstrap, n_boot=2000, "
+                                       "seed=0 (loopgym.eval.stats)"},
+            "verdict": verdict,
+        },
+        "kl": {"max": max(kl), "first10_mean": float(np.mean(kl[:10])),
+               "last10_mean": kl_last10},
+        "clip_frac": {"min": min(cf), "max": max(cf)},
+        "frac_groups_all_same": {"mean": float(np.mean(fs)), "max": max(fs)},
+        "eval_points": ev,
+        "hack_screen": None if hack is None else
+            {"n": hack.get("n"), "n_matches": hack.get("n_matches"),
+             "n_flagged": hack.get("n_flagged")},
+    }
+    claim = (f"grpo05 (40-step LoRA GRPO, exercism, 0.5B): {verdict} on val "
+             f"pass@1 (paired Δ {delta:+.4f}, CI [{dlo:+.4f}, {dhi:+.4f}])")
+    if verdict == "null":
+        claim += ("; train reward declined "
+                  f"({slope:+.4f}/step, CI [{slo:+.4f}, {shi:+.4f}]) while "
+                  f"{100 * float(np.mean(fs)):.0f}% of groups carried zero "
+                  "advantage signal — no detectable learning at this scale")
+    summary["claim"] = claim
+    (results / "grpo05_summary.json").write_text(
+        json.dumps(summary, indent=1) + "\n")
+    return rows
+
+
 SECTIONS = {
     "baselines": section_baselines,
     "benches": section_benches,
     "toy": section_toy,
+    "grpo05": section_grpo05,
 }
 
 
@@ -216,8 +399,11 @@ def main(argv: list[str] | None = None) -> int:
                     help=f"comma-separated subset of {sorted(SECTIONS)}")
     ap.add_argument("--results-dir", default=str(RESULTS),
                     help="results directory (default: <repo>/results)")
+    ap.add_argument("--runs-dir", default=str(ROOT / "runs"),
+                    help="runs directory (default: <repo>/runs)")
     args = ap.parse_args(argv)
     results = Path(args.results_dir)
+    runs = Path(args.runs_dir)
     which = (args.only.split(",") if args.only else list(SECTIONS))
     for w in which:
         if w not in SECTIONS:
@@ -225,7 +411,7 @@ def main(argv: list[str] | None = None) -> int:
     failed = 0
     for w in which:
         print(f"== {w} ==")
-        for r in SECTIONS[w](results):
+        for r in SECTIONS[w](results, runs):
             status = "PASS" if r["ok"] else ("PENDING" if r["ok"] is None
                                              else "FAIL")
             if r["ok"] is False:

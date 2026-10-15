@@ -118,6 +118,13 @@
   aside) -> --resume-if-any discards metrics, fresh from 1 (train.py:517-521,
   tested); dispatcher merges master (mb=2) into job branch (precedent 12f92b7).
   Evidence: grpo05fix-{repro,mb4,tail,beer}{,-mon}.log.
+- grpo05ok: run analysis (check_results.py --only grpo05 ->
+  results/grpo05_summary.json): NULL — paired val Δ +0.0347 [-0.0625,+0.1250]
+  contains 0; train reward slope -0.00311/step [-0.00556,-0.00002] (declining);
+  kl max 4.1e-4 + clip 0 = policy barely moved; 67.5% of groups zero-advantage.
+  Hack screen 20/20 sidecar match; 3 flags = `test_cases` var in demo blocks,
+  clean. Obs: step-0 loss 0.083 vs "<0.05 (β=0)" range — length-weighted
+  token-mean (config β=0.02, k3≈0 at step 0); not in ticket's check list.
 - gpurun: scripts/gpu_run.sh = Kevin's GPU window: 2 GPU preflight, --stop-agents,
   .venv-gpu, known tests on CUDA, check_vllm_hf <0.02-nats, 1.5B GRPO, 3 evals -> results/gpu/.
 - `dist.py` FSDP2: fully_shard, full_state_dict DTensors, grads AVG, no 1/W.
