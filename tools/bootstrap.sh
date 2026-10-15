@@ -41,14 +41,18 @@ fi
 echo "   $(.venv/bin/python --version 2>&1) at .venv"
 
 echo "== python deps (uv sync; torch from the CPU index)"
-"$B/uv" sync -q
+# --extra draftlab: the mined draftlab/harness code (and its hidden checks) imports
+# jax/polars/duckdb/pandas+pyarrow; a plain sync prunes them from the shared venv and breaks grading.
+"$B/uv" sync -q --extra draftlab
 if .venv/bin/python -c "import nvidia" 2>/dev/null; then
   echo "FATAL: nvidia packages in .venv — torch did not come from the CPU index" >&2
   exit 1
 fi
 .venv/bin/python - <<'EOF'
 import importlib
-for m in ("torch", "transformers", "safetensors", "accelerate", "peft", "numpy", "pydantic", "httpx", "tomli_w"):
+for m in ("torch", "transformers", "safetensors", "accelerate", "peft", "numpy",
+          "pydantic", "httpx", "tomli_w", "jax", "polars", "duckdb", "pandas",
+          "pyarrow"):
     importlib.import_module(m)
 print("   imports ok:", __import__("torch").__version__)
 EOF

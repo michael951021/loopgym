@@ -26,6 +26,20 @@ fails for a different reason (e.g. network, disk).
 - Reproduction (observed, this run): job log is host-side; local clone reproduced at
   `.agent-evidence/cleanclone-*.log`. Facts vs guesses: the .venv absence is certain
   (gitignore); the rest were inferred from code and must be confirmed by the run.
+- Shared-tree regression was red on exactly 1 test:
+  `test_reference_scores_1[draftlab-7074368-07efa48]` — its hidden check
+  `import pandas` (ModuleNotFoundError), then, with pandas installed, failed on a
+  missing parquet engine (`to_parquet`/`read_parquet`). Import scan of all of
+  tests/hidden: pandas was the only third-party module absent from the venv;
+  `pyarrow` is the pandas parquet engine. Mined code (`draftlab/sweep.py`) also
+  imports pandas, so it belongs in the `draftlab` extra (comment at pyproject:23).
+  `sweep.py`'s `import ray` is never imported by the check -> not added (scope).
+  Of the 5 hidden dirs that import pandas, only this task is loaded (26 verified);
+  the others are unrepresented candidates, never graded in the suite.
+- Fix (scope add, recorded here): pyproject `draftlab` += pandas, pyarrow;
+  `uv lock` + `uv sync --extra draftlab` (uv.lock was stale vs the extra);
+  bootstrap smoke import += pandas, pyarrow.
+- test_loopgym_env.py 106/106 in 173s (.agent-evidence/loopgym-env-full.log).
 
 ## Done when
 Exact job command exits 0:
@@ -40,11 +54,14 @@ Exact job command exits 0:
 - Regression: `make check` still exits 0 in the shared tree (run before finishing).
 
 ## Stop when
-Scope: Makefile, tools/bootstrap.sh, tools/fetch_src.sh, skip logic in
-tests/test_rollout.py, tests/test_loopgym_env.py, tests/test_freeze.py,
-tests/test_vllm_api.py. No changes to tests/known, grading, RL code, or the
-cleanclone job line itself. Stop/split after two reproduction attempts without new
-evidence; record blocker in NOTES.md.
+Scope (final): Makefile, tools/bootstrap.sh, tools/fetch_src.sh, skip logic in
+tests/test_{vllm_api,rollout,loopgym_env,freeze,eval_run,mine,toy,train,
+train_dist,train_vllm,gpu_run}.py (all the same absent-asset convention),
+NOTES.md condensation (<4 KB, required by the harness). No changes to
+tests/known, grading, RL code, or the cleanclone job line itself.
+Stop/split after two reproduction attempts without new evidence; record blocker in
+NOTES.md. (Each of the 3 clone attempts here found new evidence: 25 -> 1 -> 0
+failures.)
 
 ## Plan
 1. Makefile: `check: bootstrap` (bootstrap is idempotent).
@@ -53,3 +70,5 @@ evidence; record blocker in NOTES.md.
 4. Add skipif (absent-asset) guards to the four test files above, matching the
    test_exercism.py convention.
 5. Reproduce the job command verbatim; iterate until exit 0; re-run shared-tree check.
+6. draftlab extra += pandas+pyarrow (lock, sync, smoke import); rerun the clone
+   job command on the committed tree; final shared-tree `make check`.

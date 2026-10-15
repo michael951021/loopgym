@@ -14,11 +14,13 @@
 - `(human-only[: P])`: tools/sched_guard.py --line <id> (0 ok/1 skip/2 unknown); tagged held; hostgate DONE (030ad80).
 
 ## Cleanclone (make check in a fresh clone)
-- `check: bootstrap` (idempotent no-op when warm); bootstrap: `mkdir -p .venv` +
-  tools/fetch_src.sh (pins from versions.txt; unpinned -> PyPI latest; no rewrite).
-- Convention: tests reading gitignored host assets (models/, data/, .tools/src)
-  skipif-when-absent. Module-level asset READS break collection -> guard first.
+- `check: bootstrap` (idempotent); bootstrap: `mkdir -p .venv` + fetch_src.sh
+  (pins from versions.txt; unpinned -> PyPI latest).
+- Skip convention: tests reading gitignored host assets (models/, data/,
+  .tools/src) skipif-when-absent; module-level reads break collection -> guard.
   Evidence: .agent-evidence/cleanclone-fix-{1..4}.log.
+- draftlab extra += pandas+pyarrow (hidden check does to_parquet); uv.lock was
+  stale vs extras, sync rewrote it.
 
 ## Eval / Models / Env / Kernel
 - `pass_at_k` (Chen 2021) + `bootstrap_ci(values,groups)`: CI over tasks.

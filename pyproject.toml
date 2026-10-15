@@ -21,7 +21,7 @@ dependencies = [
 
 [project.optional-dependencies]
 # What the mined draftlab/harness code imports, so a candidate's worktree imports cleanly.
-draftlab = ["numpy", "jax[cpu]", "transformers", "polars", "duckdb"]
+draftlab = ["numpy", "jax[cpu]", "transformers", "polars", "duckdb", "pandas", "pyarrow"]
 
 [build-system]
 requires = ["setuptools>=68"]
