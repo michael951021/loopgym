@@ -181,3 +181,7 @@
 - Goal: Analyse the CPU GRPO run
 - Approach: ticket first (state/tickets/grpo05ok.md) with pre-run ranges; extended check_results.py with the grpo05 section (slope CI via one-index case resampling — caught a decoupled-resample bug that faked a null slope CI by comparing tool vs an independent probe; paired Δ via loopgym.eval.stats.bootstrap_ci, hand-verified +0.0347 = (3×1/16 − 1/4)/9); new tools/grpo05_hackcheck.py regenerates + re-grades the first 20 val completions with mechanical flags; 4 new tests (null/gain-gate/regression/missing, hand-checked deltas); make check green (278 passed; .agent-evidence/grpo05ok-makecheck.log). Committed 12b4917; git merge master already up to date. Out-of-ticket observation recorded in NOTES.md: step-0 loss 0.083 vs the CLAUDE.md "<0.05 at step 0 (β=0)" range — length-weighted token-mean with β=0.02 (k3≈0 at step 0); not a check this ticket pins, flagged for review, not explained away.
 - Blockers: none.
+## REPORT and README
+- Goal: REPORT and README
+- Approach: Built the checker's claim registry from results/ and runs/grpo05_exercism, wrote the report from its --emit canonical strings, then verified exit 0 on the committed text, exit 1 on three tamper variants, and ruff + pytest green
+- Blockers: none
