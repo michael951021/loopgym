@@ -40,6 +40,12 @@ fails for a different reason (e.g. network, disk).
   `uv lock` + `uv sync --extra draftlab` (uv.lock was stale vs the extra);
   bootstrap smoke import += pandas, pyarrow.
 - test_loopgym_env.py 106/106 in 173s (.agent-evidence/loopgym-env-full.log).
+- OP gotcha: capture.py exits 2 when the --log path exists (O_EXCL); piping its
+  output (`| tail`) masks that rc (pipeline returns tail's 0) -> a colliding log
+  name looked like a green run. Always use a fresh log name and no pipe.
+- FINAL: exact job command exit 0 in 194s on e27879b (130 passed, 49 skipped,
+  cargo/hadolint/terraform ok); shared-tree make check exit 0 in 330s.
+  Evidence: .agent-evidence/cleanclone-fix-6.log, makecheck-shared-5.log.
 
 ## Done when
 Exact job command exits 0:

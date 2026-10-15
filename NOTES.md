@@ -18,7 +18,7 @@
   (pins from versions.txt; unpinned -> PyPI latest).
 - Skip convention: tests reading gitignored host assets (models/, data/,
   .tools/src) skipif-when-absent; module-level reads break collection -> guard.
-  Evidence: .agent-evidence/cleanclone-fix-{1..4}.log.
+  Evidence: .agent-evidence/cleanclone-fix-{1..6}.log.
 - draftlab extra += pandas+pyarrow (hidden check does to_parquet); uv.lock was
   stale vs extras, sync rewrote it.
 
