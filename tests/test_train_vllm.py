@@ -104,6 +104,7 @@ def test_next_generation_uses_previous_step_lora(fakes, tmp_path):
     assert req2.lora_name == "step_2" and req2.lora_int_id == 2
 
 
+@NEED_MODEL
 def test_resume_resyncs_lora(fakes, tmp_path):
     c = cfg(tmp_path)
     r = Run(c)
