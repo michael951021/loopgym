@@ -4,6 +4,8 @@
 The auto-queued job `cleanclone` (TODO.md:167) clones /work to /tmp/lgcc and runs
 `make check`; it exits non-zero, so the repo's claim "a fresh clone passes the full
 check" is false. Clean clone is the reproducibility gate for the whole stack.
+The job exited non-zero (`exit-code`, exit 2) with no Python traceback — a failing
+command, not a crash in the training code. Blocks its dependents.
 
 ## Question
 Why does `make check` fail in a git-only clone, and can it exit 0 there?
@@ -13,6 +15,17 @@ in a clone) and several tests load gitignored assets (`.tools/src`, `models/`,
 fails for a different reason (e.g. network, disk).
 
 ## Evidence
+- Original job failure (as filed): exit `exit-code`, code 2; memory cap 12.0 GB;
+  peak not recorded (systemd MemoryPeak, host-side). Failing command:
+  `rm -rf /tmp/lgcc && git clone -q /work /tmp/lgcc && cd /tmp/lgcc && PATH=/work/.tools/bin:/work/.tools/cargo/bin:/work/.venv/bin:$PATH make check`.
+  Last console output (the UI does not show this):
+  ```
+  /tmp/lgcc/.venv/bin/python -m ruff check .
+  /bin/bash: line 1: /tmp/lgcc/.venv/bin/python: No such file or directory
+  make: *** [Makefile:11: check] Error 127
+  ```
+  (the two failing lines repeat twice in the log). Full log:
+  /home/kevin/Documents/coders/loop/logs/jobs/loopgym-cleanclone.log
 - Makefile:2 `PY := $(CURDIR)/.venv/bin/python`; `.venv/`, `.tools/` are gitignored.
 - bootstrap.sh:36 `find .venv -mindepth 1 -delete` → fails when `.venv` dir absent.
 - tests/test_vllm_api.py:18 `next(...glob("vllm-*"))` → StopIteration at import
@@ -57,7 +70,8 @@ Exact job command exits 0:
   toy null control, GRPO hand cases, SHA-1 split vector, reference-solution reward
   (where data present), rollout vs trainer logp 1e-4 (where model present).
 - Plausible: full run 10–60 min (downloads + CPU suite) — inside the job's 2 h.
-- Regression: `make check` still exits 0 in the shared tree (run before finishing).
+- A fast check that covers the fixed path, plus: `make check` still exits 0 in
+  the shared tree (run before finishing).
 
 ## Stop when
 Scope (final): Makefile, tools/bootstrap.sh, tools/fetch_src.sh, skip logic in
@@ -66,8 +80,9 @@ train_dist,train_vllm,gpu_run}.py (all the same absent-asset convention),
 NOTES.md condensation (<4 KB, required by the harness). No changes to
 tests/known, grading, RL code, or the cleanclone job line itself.
 Stop/split after two reproduction attempts without new evidence; record blocker in
-NOTES.md. (Each of the 3 clone attempts here found new evidence: 25 -> 1 -> 0
-failures.)
+NOTES.md (the signature then escalates to a human card). Reproduce cheaply first
+(tiny config / small input), not by re-running the whole job. (Each of the 3 clone
+attempts here found new evidence: 25 -> 1 -> 0 failures.)
 
 ## Plan
 1. Makefile: `check: bootstrap` (bootstrap is idempotent).
@@ -78,3 +93,4 @@ failures.)
 5. Reproduce the job command verbatim; iterate until exit 0; re-run shared-tree check.
 6. draftlab extra += pandas+pyarrow (lock, sync, smoke import); rerun the clone
    job command on the committed tree; final shared-tree `make check`.
+7. Make sure the fix reaches the job's branch so its retry picks it up.
