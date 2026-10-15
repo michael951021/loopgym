@@ -12,20 +12,22 @@ import triton.language as tl
 
 
 @triton.jit
-def _fwd(H, W, T_idx, Out, LSE, V, d, C: tl.constexpr, DC: tl.constexpr):
+def _fwd(H, W, T_idx, Out, LSE, V, d, C: tl.constexpr, DC: tl.constexpr, ACC: tl.constexpr):
     row = tl.program_id(0)
     dc = tl.arange(0, DC)
     h = tl.load(H + row * d + dc, mask=dc < d, other=0.0)
     tv = tl.load(T_idx + row)
-    m = float("-inf")
-    S = 0.0
-    targ = float("-inf")
+    # Loop-carried state needs one fixed dtype (compiled Triton rejects fp32 -> fp64):
+    # fp64 for fp64 inputs (gradcheck), fp32 otherwise.
+    m = tl.full([], float("-inf"), ACC)
+    S = tl.full([], 0.0, ACC)
+    targ = tl.full([], float("-inf"), ACC)
     for c in range(0, V, C):
         offs = c + tl.arange(0, C)
         mask = offs < V
         w_c = tl.load(W + offs[:, None] * d + dc[None, :],
                       mask=mask[:, None] & (dc[None, :] < d), other=0.0)
-        s = tl.where(mask, tl.sum(w_c * h[None, :], axis=1), float("-inf"))
+        s = tl.where(mask, tl.sum(w_c * h[None, :], axis=1).to(ACC), float("-inf"))
         m_new = tl.maximum(m, tl.max(s))
         S = S * tl.exp(m - m_new) + tl.sum(tl.exp(s - m_new))
         m = m_new
@@ -85,7 +87,8 @@ class _TritonLogprob(torch.autograd.Function):
         lse = torch.empty(T, dtype=h.dtype, device=h.device)
         if T > 0:
             _fwd[(T,)](h, w, t, out, lse, V, h.shape[1], C=chunk,
-                       DC=triton.next_power_of_2(h.shape[1]))
+                       DC=triton.next_power_of_2(h.shape[1]),
+                       ACC=tl.float64 if h.dtype == torch.float64 else tl.float32)
         ctx.save_for_backward(h, w, t, lse)
         ctx.chunk = chunk
         return out
@@ -111,8 +114,11 @@ class _TritonLogprob(torch.autograd.Function):
 def triton_impl(h, w, t, chunk):
     """Same contract as the torch impl; V-tile size rounded down to a power of two."""
     c = 2 ** (max(1, chunk).bit_length() - 1)
+    # A [C, DC] weight tile is one block: Triton caps a block at 1048576 elements
+    # (the interpreter and the compiler alike), and a tile that size spills registers.
+    # The real lm_head (d=1536 -> DC=2048) with the default chunk 8192 was 16M.
+    c = max(1, min(c, 2 ** 16 // triton.next_power_of_2(h.shape[1])))
     if os.environ.get("TRITON_INTERPRET") == "1":
-        # interpreter caps one block at 1048576 elements (triton/_utils.py)
         c = min(c, 1024)
     return _TritonLogprob.apply(h, w, t, c)
 
