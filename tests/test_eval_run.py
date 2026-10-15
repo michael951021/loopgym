@@ -1,8 +1,16 @@
 """Eval CLI: reference mode is a known answer (pass@1 1.0 on usable exercises)
 and the sidecar makes reruns resume (no duplicate samples)."""
 import json
+from pathlib import Path
+
+import pytest
 
 from loopgym.eval import run as evalrun
+
+# Data assets are gitignored host files; skip the eval runs that read them.
+ROOT = Path(__file__).resolve().parents[1]
+EXERCISES = ROOT / "data" / "raw" / "exercism-python"
+LG_DATA = ROOT / "data" / "loopgym"
 
 
 def _run(out, extra=None):
@@ -12,6 +20,7 @@ def _run(out, extra=None):
     return json.loads(out.read_text()), out.with_name(out.stem + ".samples.jsonl")
 
 
+@pytest.mark.skipif(not EXERCISES.is_dir(), reason="no data/raw exercises (fresh clone)")
 def test_reference_limit2_pass_at_1(tmp_path):
     out = tmp_path / "ref.json"
     doc, side = _run(out)
@@ -24,6 +33,7 @@ def test_reference_limit2_pass_at_1(tmp_path):
     assert all(r["reward"] == 1.0 for r in recs)
 
 
+@pytest.mark.skipif(not EXERCISES.is_dir(), reason="no data/raw exercises (fresh clone)")
 def test_reference_resume_appends_nothing(tmp_path):
     out = tmp_path / "ref.json"
     _run(out)
@@ -32,6 +42,7 @@ def test_reference_resume_appends_nothing(tmp_path):
     assert len(lines) == 8  # second run skipped both completed tasks
 
 
+@pytest.mark.skipif(not LG_DATA.is_dir(), reason="no data/loopgym (fresh clone)")
 def test_loopgym_reference_limit2_n1_pass_at_1(tmp_path):
     """v0 known answer: the good commit's fix (unified diff) grades 1.0 on real
     tasks, and the bad commit (no patch) grades 0.0."""

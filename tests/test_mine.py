@@ -87,6 +87,8 @@ def test_ticket_message_fallback(tmp_path):
     assert next(iter(recs.values()))["ticket"] == "TODO: do a thing"
 
 
+@pytest.mark.skipif(not all(p.is_dir() for p in mine.REPOS.values()),
+                    reason="no data/raw/repos (fresh clone)")
 def test_seed_recall_real_repos():
     """The 3 human-confirmed seed defects are all paired by the automatic rules."""
     hits = {}
