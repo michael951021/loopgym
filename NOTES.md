@@ -167,6 +167,16 @@
   arn:aws:automate terminate; budgets 50/80 actual + 100 forecast e-mail, 100
   actual -> deny-RunInstances on launch role (LAGGING backstop).
 
+## Report
+- report: REPORT.md (question, sources, method, results w/ CIs, failed, GPU
+  PENDING plan, Corrections citing base05 ruling) + README (mermaid, quickstart
+  verified against real CLIs, skills map) + tools/check_report.py: claim
+  registry computed from results/, substring contract, 8 structural sections,
+  GPU section switches PENDING-marker -> scale_* recompute when results/gpu/
+  lands. check_report exit 0 on committed text; perturb 0.1111 / drop
+  Corrections / perturb 141 candidates each -> exit 1 (3/3 tamper cases).
+  Evidence: .agent-evidence/report-{check,check-results,pytest}.log.
+
 ## Data
 - `freeze.py`: v0 = 26 verified (draftlab 22/harness 4), train 13/test 13; `--check`
   exit 1 on drift; public draftlab/harness only. `data/verify.py`: 3x/side pristine
