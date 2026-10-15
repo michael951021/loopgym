@@ -16,6 +16,11 @@ from loopgym.rl.rollout import HFBackend
 
 MODEL = os.environ.get("LOOPGYM_MODEL", "models/qwen2.5-coder-0.5b-instruct")
 
+# The policy model is a shared host asset (gitignored); skip on a fresh clone.
+pytestmark = pytest.mark.skipif(
+    not os.path.isdir(MODEL), reason=f"no model at {MODEL} (fresh clone)"
+)
+
 PROMPTS = [
     [{"role": "user", "content": "Reply with one word: banana."}],
     [

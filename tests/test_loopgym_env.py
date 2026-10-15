@@ -4,10 +4,16 @@ hidden test scores 0. Plus: prompts stay inside the token budget and parse
 round-trips the reference reply."""
 import pytest
 
+from loopgym.data import verify as V
 import loopgym.env.loopgym as lg
 from loopgym.env import grade as env_grade
 
-TASKS = lg.load_tasks()
+# data/ is a shared host asset (gitignored); load_tasks reads it at import time,
+# so guard before calling (fresh clone -> skip the whole module).
+HAVE_DATA = V.CANDIDATES.exists() and V.OUT.exists()
+pytestmark = pytest.mark.skipif(not HAVE_DATA, reason="no data/loopgym (fresh clone)")
+
+TASKS = lg.load_tasks() if HAVE_DATA else []
 BY_NAME = {t.name: t for t in TASKS}
 NAMES = sorted(BY_NAME)
 

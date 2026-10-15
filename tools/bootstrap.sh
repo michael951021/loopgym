@@ -33,6 +33,8 @@ echo "== python venv (.venv, 3.12)"
 venv_ok() { .venv/bin/python -c 'import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 12) else 1)' 2>/dev/null; }
 if ! venv_ok; then
   # .venv is a bind mount shared between agents (host layout): clear contents, never rm the dir.
+  # In a fresh clone the dir does not exist at all; create it (bootstrap must be self-contained).
+  mkdir -p .venv
   find .venv -mindepth 1 -delete
   "$B/uv" venv -p 3.12 .venv
 fi
@@ -103,5 +105,8 @@ if [ "$have" != "$TFLINT" ]; then
 else
   echo "   already installed"
 fi
+
+echo "== pinned third-party sources (.tools/src, for API checking)"
+bash tools/fetch_src.sh
 
 echo "bootstrap done"

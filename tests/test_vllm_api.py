@@ -15,7 +15,10 @@ import sys
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-VLLM_DIR = next((ROOT / ".tools" / "src").glob("vllm-*"))
+VLLM_DIR = next(((ROOT / ".tools" / "src").glob("vllm-*")), None)
+pytestmark = pytest.mark.skipif(
+    VLLM_DIR is None, reason="no pinned vllm source at .tools/src (run make bootstrap)"
+)
 SRC = (ROOT / "loopgym" / "rl" / "rollout_vllm.py").read_text()
 BACKEND_TREE = ast.parse(SRC, filename="rollout_vllm.py")
 

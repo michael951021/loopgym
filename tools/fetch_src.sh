@@ -28,11 +28,14 @@ fi
 
 for name in vllm deepspeed trl; do
   echo "== $name"
+  # Honor the pin in tools/versions.txt so a fresh clone fetches the exact pinned
+  # version (CLAUDE.md rule 6: pinned versions only); latest is only a first-run fallback.
+  PIN=$(sed -n "s/^$name=//p" tools/versions.txt | head -1)
   work=$S/.stage-$name
   rm -rf "$work"
   mkdir -p "$work"
   fetch "https://pypi.org/pypi/$name/json" -o "$work/meta.json"
-  line=$(python3 - "$work/meta.json" <<'EOF'
+  line=$(python3 - "$work/meta.json" "${PIN:-}" <<'EOF'
 import json, re, sys
 d = json.load(open(sys.argv[1]))
 def pre(v):
@@ -42,7 +45,13 @@ if not cands:
     sys.exit('no stable release for ' + d['info']['name'])
 def key(v):
     return (tuple(int(x) for x in re.match(r'\d+(?:\.\d+)*', v).group(0).split('.')), v)
-ver = max(cands, key=key)
+pin = sys.argv[2] if len(sys.argv) > 2 else ''
+if pin:
+    if pin not in d['releases']:
+        sys.exit(f"pinned {d['info']['name']}=={pin} not found on PyPI")
+    ver = pin
+else:
+    ver = max(cands, key=key)
 def score(f):
     n = f['filename']
     if f['packagetype'] == 'bdist_wheel':

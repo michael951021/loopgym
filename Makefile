@@ -7,7 +7,8 @@ CARGO_ENV := CARGO_HOME=$(CURDIR)/.tools/cargo RUSTUP_HOME=$(CURDIR)/.tools/rust
 bootstrap:
 	bash tools/bootstrap.sh
 
-check:
+# bootstrap is idempotent (pin-checked no-op in a warm tree); makes `check` work in a fresh clone.
+check: bootstrap
 	$(PY) -m ruff check .
 	$(PY) -m pytest -q tests --ignore=tests/known --ignore=tests/hidden
 	@if [ -d lgbox ]; then \
