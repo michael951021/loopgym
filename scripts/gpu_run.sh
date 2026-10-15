@@ -297,8 +297,17 @@ fi
 step "3/8 .venv-gpu"
 ensure_venv_gpu
 
+# No system CUDA on the-box: nvcc and headers come from the pip nvidia-cuda-nvcc wheel in .venv-gpu,
+# which ships libcudart.so.13 but not the libcudart.so the linker asks for.
+cu=.venv-gpu/lib/python3.12/site-packages/nvidia/cu13
+export CUDA_HOME="$PWD/$cu" PATH="$PWD/$cu/bin:$PWD/.venv-gpu/bin:$PATH" LOOPGYM_BUILD_VERBOSE=1
+[ -e "$cu/lib/libcudart.so" ] || ln -s libcudart.so.13 "$cu/lib/libcudart.so"
+# A JIT build killed mid-way leaves torch's lock behind and the next build waits on it forever, silently
+# (gpurun1 was stall-killed twice this way). The GPU job owns the machine, so no build is live.
+rm -f .tools/build/lock
+
 step "4/8 kernel preflight (cuda + triton in IMPLS)"
-CUDA_VISIBLE_DEVICES=0 .venv-gpu/bin/python - <<'PY'
+CUDA_VISIBLE_DEVICES=0,1 .venv-gpu/bin/python - <<'PY'
 import torch
 from loopgym import kernels
 missing = {"cuda", "triton"} - set(kernels.IMPLS)

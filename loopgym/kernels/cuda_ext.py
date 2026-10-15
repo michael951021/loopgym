@@ -32,7 +32,7 @@ def _load_cuda():
                 with_cuda=True,
                 extra_cflags=["-O3"],
                 extra_cuda_cflags=["-O3"],
-                verbose=False,
+                verbose=os.environ.get("LOOPGYM_BUILD_VERBOSE") == "1",  # gpu_run.sh: build output keeps the stall watchdog fed
             )
         except Exception as e:
             _CUDA_ERROR = e

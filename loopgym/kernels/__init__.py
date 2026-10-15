@@ -98,7 +98,7 @@ def _load_cpp():
                 build_directory=build,
                 extra_cflags=["-O3", "-fopenmp"],
                 extra_ldflags=["-fopenmp"],
-                verbose=False,
+                verbose=os.environ.get("LOOPGYM_BUILD_VERBOSE") == "1",  # gpu_run.sh: build output keeps the stall watchdog fed
             )
         except Exception as e:
             _CPP_ERROR = e
