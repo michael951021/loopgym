@@ -252,6 +252,8 @@ def _grpo_section(tag: str, base_tag: str, run_name: str, config: str, desc: str
                   results: Path, runs: Path | None) -> list[dict]:
     runs = runs or ROOT / "runs"
     metrics = runs / run_name / "metrics.jsonl"
+    if not metrics.is_file():  # runs/ is gitignored; results/train/ is the committed copy
+        metrics = results / "train" / f"{run_name}.metrics.jsonl"
     base = load_json(results / "eval" / f"{base_tag}_val.json")
     grpo = load_json(results / "eval" / f"{tag}_val.json")
     if not metrics.is_file() or base is None or grpo is None:

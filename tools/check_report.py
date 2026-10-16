@@ -153,6 +153,12 @@ def section_toy(rep: str) -> list[dict]:
     return [row("toy", c, w, w in rep, ok, n) for c, w, ok, n in checks]
 
 
+def run_metrics(run: str) -> Path:
+    """runs/ is gitignored; results/train/ holds a committed copy for a clean clone."""
+    live = ROOT / "runs" / run / "metrics.jsonl"
+    return live if live.is_file() else RESULTS / "train" / f"{run}.metrics.jsonl"
+
+
 def _contains_zero(ci: list[float]) -> bool:
     return ci[0] <= 0.0 <= ci[1]
 
@@ -164,7 +170,7 @@ def section_grpo05(rep: str) -> list[dict]:
     b = load_json(RESULTS / "eval" / "base05_val.json")
     hack = load_json(RESULTS / "grpo05_hackcheck.json")
     cfg = tomllib.loads((ROOT / "configs" / "grpo05_exercism.toml").read_text())
-    metrics = ROOT / "runs" / "grpo05_exercism" / "metrics.jsonl"
+    metrics = run_metrics("grpo05_exercism")
     if None in (s, g, b, hack) or not metrics.is_file():
         return [row("grpo05", "run + summary files present",
                     "grpo05_summary.json, evals, metrics.jsonl", False, False,
@@ -219,6 +225,70 @@ def section_grpo05(rep: str) -> list[dict]:
     cfgstr = f"batch {cfg['batch']}, group {cfg['group']}, {cfg['steps']} steps"
     rows.append(row("grpo05", "config (batch/group/steps)", cfgstr,
                     cfgstr in rep, len(steps_rows) == cfg["steps"], ""))
+    return rows
+
+
+def section_grpo15(rep: str, results: Path) -> list[dict]:
+    """The 1.5B GPU run: claims live in the GPU section."""
+    sec = _section_text(rep, "GPU")
+    s = load_json(results / "grpo15_summary.json")
+    g = load_json(results / "eval" / "grpo15_val.json")
+    lg = load_json(results / "eval" / "grpo15_loopgym.json")
+    hack = load_json(results / "grpo15_hackcheck.json")
+    chk = load_json(results / "gpu" / "vllm_hf_check.json")
+    cfg = tomllib.loads((ROOT / "configs" / "grpo15_gpu.toml").read_text())
+    metrics = run_metrics("grpo15_gpu")
+    if None in (s, g, lg, hack, chk) or not metrics.is_file():
+        return [row("grpo15", "GPU run + summary files present",
+                    "grpo15_summary.json, evals, vllm_hf_check.json, metrics", False, False,
+                    "missing results file")]
+    rows: list[dict] = []
+    gate = chk["fp32"]
+    w = f"{gate['mean_abs_delta']:.5f}"
+    rows.append(row("grpo15", "vLLM-vs-HF fp32 mean |Δ| (nats)", w, w in sec,
+                    gate["mean_abs_delta"] < chk["gate_nats"], f"gate < {chk['gate_nats']}"))
+    w = f"{gate['tokens_compared']} tokens"
+    rows.append(row("grpo15", "vLLM-vs-HF tokens compared", w, w in sec, None))
+    for name, e in (("val n=16", g), ("loopgym test n=4", lg)):
+        w = f"{e['pass_at_k']:.4f} {ci_str(e['ci'])}"
+        rows.append(row("grpo15", f"grpo15 {name} pass@1", w, w in sec, None))
+    for split in ("exercism_val", "exercism_test", "loopgym_test"):
+        e = load_json(results / "gpu" / f"eval_{split}.json")
+        w = f"{e['pass_at_k']:.4f} {ci_str(e['ci'])}"
+        rows.append(row("grpo15", f"in-job eval {split} (n=1)", w, w in sec, None))
+    d = s["val"]["paired_delta"]
+    dstr = f"Δ {d['point']:+.4f} [{d['ci'][0]:+.4f}, {d['ci'][1]:+.4f}]"
+    ok = True if _contains_zero(d["ci"]) else hack["n_matches"] == hack["n"]
+    rows.append(row("grpo15", "paired val delta vs base15", dstr, dstr in sec, ok,
+                    "null" if _contains_zero(d["ci"]) else "gain/loss needs a clean hack screen"))
+    ts = s["train_reward"]
+    sstr = (f"{ts['slope_per_step']:+.5f}/step "
+            f"[{ts['slope_ci'][0]:+.5f}, {ts['slope_ci'][1]:+.5f}]")
+    rows.append(row("grpo15", "train reward slope", sstr, sstr in sec,
+                    -0.05 <= ts["slope_per_step"] <= 0.05, "pre-run range"))
+    kl = s["kl"]
+    klstr = f"{kl['first10_mean']:.2e} → {kl['last10_mean']:.2e}"
+    rows.append(row("grpo15", "KL first10 -> last10", klstr, klstr in sec,
+                    kl["last10_mean"] < 0.5, "last-10 mean < 0.5 nats"))
+    fs = f"{s['frac_groups_all_same']['mean']:.3f}"
+    rows.append(row("grpo15", "frac_groups_all_same", fs, fs in sec, None))
+    hs = f"{hack['n_matches']}/{hack['n']}"
+    rows.append(row("grpo15", "hack screen sidecar match", hs, hs in sec,
+                    hack["n_matches"] == hack["n"], "determinism known answer"))
+    steps_rows = [json.loads(ln) for ln in metrics.read_text().splitlines()
+                  if ln.strip() and json.loads(ln).get("kind") != "eval"]
+    step_min = [r["step_s"] / 60 for r in steps_rows]
+    med = f"{statistics.median(step_min):.2f} min"
+    rng = f"[{min(step_min):.2f}, {max(step_min):.2f}]"
+    rows.append(row("grpo15", "GPU step time median", med, med in sec, None))
+    rows.append(row("grpo15", "GPU step time range", rng, rng in sec, None))
+    hours = f"{sum(r['step_s'] for r in steps_rows) / 3600:.1f} h"
+    rows.append(row("grpo15", "GPU training time", hours, hours in sec, None))
+    cfgstr = f"batch {cfg['batch']}, group {cfg['group']}, {cfg['steps']} steps"
+    rows.append(row("grpo15", "config (batch/group/steps)", cfgstr, cfgstr in sec,
+                    len(steps_rows) == cfg["steps"]
+                    and len({r["step"] for r in steps_rows}) == cfg["steps"],
+                    "one row per step across the resume"))
     return rows
 
 
@@ -291,9 +361,9 @@ def section_gpu(rep: str, results: Path) -> list[dict]:
     gpu = results / "gpu"
     files = sorted(gpu.glob("scale_*.json")) if gpu.is_dir() else []
     if not files:
-        rows.append(row("gpu", "results/gpu/ absent -> PENDING marker",
+        rows.append(row("gpu", "no scale_*.json -> PENDING marker",
                         "PENDING", "PENDING" in sec, "PENDING" in sec,
-                        "plan only; results land with the host GPU run"))
+                        "scaling study not run yet"))
         return rows
     for f in files:
         doc = json.loads(f.read_text())
@@ -344,7 +414,8 @@ def main(argv: list[str] | None = None) -> int:
     rows = (section_structure(text) + section_sources(text)
             + section_baselines(text) + section_toy(text)
             + section_grpo05(text) + section_lgbox(text)
-            + section_logprob(text) + section_gpu(text, results))
+            + section_logprob(text) + section_gpu(text, results)
+            + section_grpo15(text, results))
     if a.emit:
         for r in rows:
             print(r["want"])
