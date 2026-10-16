@@ -12,10 +12,12 @@ split = "train"
 max_difficulty = 0
 batch = 4
 group = 8
-# rows per policy/ref forward (gradient accumulation; same math). The default 8 OOMed the
-# trainer 3090 on the first step, and 2 was already at the edge (OOM warning at step 2):
-# fp32 activations are ~340 MB per ~1.9k-token row per layer, x28 layers, on top of 6 GB weights.
-micro_batch = 1
+# Trainer memory on one 3090 (fp32 1.5B = 6 GB of weights): saving activations for backward
+# OOMed at micro_batch 8 (step 1), warned at 2, and OOMed at 1 by step 7. Gradient
+# checkpointing recomputes them in backward (same gradients), which leaves room for 4 rows
+# per forward (gradient accumulation; same update).
+grad_ckpt = true
+micro_batch = 4
 max_new_tokens = 384
 temperature = 1.0
 top_p = 1.0

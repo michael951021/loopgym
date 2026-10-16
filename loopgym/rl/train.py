@@ -65,6 +65,7 @@ class TrainCfg:
     max_grad_norm: float = 1.0
     chunk: int = 8192
     micro_batch: int = 8  # rows per rollout/logp chunk; sized to fit the 24 GB job cap
+    grad_ckpt: bool = False  # recompute decoder activations in backward (same grads, less memory)
     logprob_impl: str = "torch"
     runner: str = "local"  # local | http (lgbox)
     backend: str = "hf"  # hf | vllm (rollout backend; vllm is host-only)
@@ -119,8 +120,15 @@ def build_base(cfg: TrainCfg) -> Qwen2ForCausalLM:
     """Fresh base model, deterministically initialized from cfg.seed."""
     torch.manual_seed(cfg.seed)
     if cfg.model == "tiny":
-        return Qwen2ForCausalLM(tiny_config())
-    return Qwen2ForCausalLM.from_pretrained(str(model_dir(cfg)), torch_dtype=torch.float32)
+        m = Qwen2ForCausalLM(tiny_config())
+    else:
+        m = Qwen2ForCausalLM.from_pretrained(str(model_dir(cfg)), torch_dtype=torch.float32)
+    if cfg.grad_ckpt:
+        # fp32 1.5B on one 3090: one ~2k-token row's saved activations plus 6 GB of
+        # weights hit OOM at step 7 even at micro_batch 1
+        m.config.use_cache = False
+        m.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    return m
 
 
 def load_tokenizer(cfg: TrainCfg):
