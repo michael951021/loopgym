@@ -13,7 +13,7 @@ rule 5); the tool applies them verbatim and cites the ruling in the table row.
 Malformed rulings fail closed.
 
 Usage: .venv/bin/python tools/check_results.py
-           [--only baselines,benches,toy,grpo05]
+           [--only baselines,benches,toy,grpo05,grpo15]
            [--results-dir DIR] [--runs-dir DIR]
 """
 from __future__ import annotations
@@ -237,17 +237,30 @@ def section_grpo05(results: Path = RESULTS, runs: Path | None = None) -> list[di
     A null (paired CI containing 0) is a passing result; a gain whose CI
     excludes 0 passes only with a clean hack screen; a significant val
     regression or out-of-range trend fails."""
+    return _grpo_section("grpo05", "base05", GRPO05_RUN_NAME, "configs/grpo05_exercism.toml",
+                         "40-step LoRA GRPO, exercism, 0.5B", results, runs)
+
+
+def section_grpo15(results: Path = RESULTS, runs: Path | None = None) -> list[dict]:
+    """The 1.5B GPU run (scripts/gpu_run.sh), same analysis as grpo05: paired val
+    pass@1 against base15 at the baseline protocol (evalgrpo15: n=16, T=0.8)."""
+    return _grpo_section("grpo15", "base15", "grpo15_gpu", "configs/grpo15_gpu.toml",
+                         "100-step LoRA GRPO, exercism, 1.5B, 2x3090", results, runs)
+
+
+def _grpo_section(tag: str, base_tag: str, run_name: str, config: str, desc: str,
+                  results: Path, runs: Path | None) -> list[dict]:
     runs = runs or ROOT / "runs"
-    metrics = runs / GRPO05_RUN_NAME / "metrics.jsonl"
-    base = load_json(results / "eval" / "base05_val.json")
-    grpo = load_json(results / "eval" / "grpo05_val.json")
+    metrics = runs / run_name / "metrics.jsonl"
+    base = load_json(results / "eval" / f"{base_tag}_val.json")
+    grpo = load_json(results / "eval" / f"{tag}_val.json")
     if not metrics.is_file() or base is None or grpo is None:
         absent = [name for name, ok in (
-            ("runs/grpo05_exercism/metrics.jsonl", metrics.is_file()),
-            ("results/eval/base05_val.json", base is not None),
-            ("results/eval/grpo05_val.json", grpo is not None)) if not ok]
-        return [row("grpo05 run + val evals", "missing", "metrics.jsonl + "
-                    "base05_val.json + grpo05_val.json", None,
+            (f"runs/{run_name}/metrics.jsonl", metrics.is_file()),
+            (f"results/eval/{base_tag}_val.json", base is not None),
+            (f"results/eval/{tag}_val.json", grpo is not None)) if not ok]
+        return [row(f"{tag} run + val evals", "missing", "metrics.jsonl + "
+                    f"{base_tag}_val.json + {tag}_val.json", None,
                     "run/evals not complete yet: " + ", ".join(absent))]
 
     import numpy as np
@@ -276,7 +289,7 @@ def section_grpo05(results: Path = RESULTS, runs: Path | None = None) -> list[di
                        if tasks_ok else (0.0, 0.0, 0.0))
     verdict = ("regression" if dhi < 0 else "gain" if dlo > 0 else "null")
 
-    hack = load_json(results / "grpo05_hackcheck.json")
+    hack = load_json(results / f"{tag}_hackcheck.json")
     hack_clean = (hack is not None and hack.get("n") == GRPO05_HACK_N
                   and hack.get("n_matches") == GRPO05_HACK_N)
 
@@ -296,9 +309,9 @@ def section_grpo05(results: Path = RESULTS, runs: Path | None = None) -> list[di
             note = ("gain; hack screen clean" if hack_clean else
                     f"gain with CI excluding 0 needs a clean "
                     f"{GRPO05_HACK_N}-completion hack screen "
-                    "(results/grpo05_hackcheck.json: 20/20 sidecar match)")
+                    f"(results/{tag}_hackcheck.json: 20/20 sidecar match)")
         rows.append(row(
-            "grpo05 vs base05 val pass@1 (paired)",
+            f"{tag} vs {base_tag} val pass@1 (paired)",
             f"{grpo['pass_at_k']:.4f} vs {base['pass_at_k']:.4f} "
             f"(Δ {delta:+.4f} [{dlo:+.4f}, {dhi:+.4f}])",
             "CI contains 0 (null) or gain w/ clean hack screen", ok, note))
@@ -330,7 +343,7 @@ def section_grpo05(results: Path = RESULTS, runs: Path | None = None) -> list[di
     if hack is None:
         rows.append(row("hack screen (20 completions)", "missing",
                         f"{GRPO05_HACK_N}/{GRPO05_HACK_N} sidecar match",
-                        None, "run tools/grpo05_hackcheck.py"))
+                        None, f"run tools/grpo05_hackcheck.py for {tag}"))
     else:
         flagged = sorted({f for c in hack.get("completions", [])
                           for f in c.get("flags", [])})
@@ -343,8 +356,8 @@ def section_grpo05(results: Path = RESULTS, runs: Path | None = None) -> list[di
             f"flags for review: {flagged}" if flagged else "no mechanical flags"))
 
     summary = {
-        "run": f"runs/{GRPO05_RUN_NAME}",
-        "config": "configs/grpo05_exercism.toml",
+        "run": f"runs/{run_name}",
+        "config": config,
         "steps": n,
         "train_reward": {
             "first5_mean": float(np.mean(rm[:5])),
@@ -353,9 +366,9 @@ def section_grpo05(results: Path = RESULTS, runs: Path | None = None) -> list[di
             "slope_ci": [slo, shi],
         },
         "val": {
-            "base05": {"pass_at_k": base["pass_at_k"], "ci": list(base["ci"]),
+            base_tag: {"pass_at_k": base["pass_at_k"], "ci": list(base["ci"]),
                        "n_per_task": base["n"]},
-            "grpo05": {"pass_at_k": grpo["pass_at_k"], "ci": list(grpo["ci"]),
+            tag: {"pass_at_k": grpo["pass_at_k"], "ci": list(grpo["ci"]),
                        "n_per_task": grpo["n"]},
             "paired_delta": {"point": delta, "ci": [dlo, dhi],
                              "n_tasks": len(tb),
@@ -372,7 +385,7 @@ def section_grpo05(results: Path = RESULTS, runs: Path | None = None) -> list[di
             {"n": hack.get("n"), "n_matches": hack.get("n_matches"),
              "n_flagged": hack.get("n_flagged")},
     }
-    claim = (f"grpo05 (40-step LoRA GRPO, exercism, 0.5B): {verdict} on val "
+    claim = (f"{tag} ({desc}): {verdict} on val "
              f"pass@1 (paired Δ {delta:+.4f}, CI [{dlo:+.4f}, {dhi:+.4f}])")
     if verdict == "null":
         claim += ("; train reward declined "
@@ -380,7 +393,7 @@ def section_grpo05(results: Path = RESULTS, runs: Path | None = None) -> list[di
                   f"{100 * float(np.mean(fs)):.0f}% of groups carried zero "
                   "advantage signal — no detectable learning at this scale")
     summary["claim"] = claim
-    (results / "grpo05_summary.json").write_text(
+    (results / f"{tag}_summary.json").write_text(
         json.dumps(summary, indent=1) + "\n")
     return rows
 
@@ -390,6 +403,7 @@ SECTIONS = {
     "benches": section_benches,
     "toy": section_toy,
     "grpo05": section_grpo05,
+    "grpo15": section_grpo15,
 }
 
 
