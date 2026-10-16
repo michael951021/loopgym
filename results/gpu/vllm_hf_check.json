@@ -1,0 +1,80 @@
+{
+ "model": "models/qwen2.5-coder-1.5b-instruct",
+ "n_prompts": 4,
+ "max_new_tokens": 128,
+ "gate_nats": 0.02,
+ "fp32": {
+  "mean_abs_delta": 0.0001625955610586316,
+  "min_prefix": 128,
+  "tokens_compared": 512,
+  "prompts": [
+   {
+    "prompt": "def is_palindrome(s: str) -> bool:\n    \"\"\"Return True iff s ",
+    "prefix": 128,
+    "hf_tokens": 128,
+    "vllm_tokens": 128,
+    "mean_abs_delta": 0.00012131217433686281
+   },
+   {
+    "prompt": "Write a Python function `merge_intervals(intervals)` that ta",
+    "prefix": 128,
+    "hf_tokens": 128,
+    "vllm_tokens": 128,
+    "mean_abs_delta": 0.0001622315470690694
+   },
+   {
+    "prompt": "def longest_common_prefix(strs: list[str]) -> str:\n    \"\"\"Re",
+    "prefix": 128,
+    "hf_tokens": 128,
+    "vllm_tokens": 128,
+    "mean_abs_delta": 0.00019371436987913881
+   },
+   {
+    "prompt": "Write a Python function `two_sum(nums, target)` returning th",
+    "prefix": 128,
+    "hf_tokens": 128,
+    "vllm_tokens": 128,
+    "mean_abs_delta": 0.00017312415294945538
+   }
+  ]
+ },
+ "bf16": {
+  "mean_abs_delta": 0.004631575670220001,
+  "min_prefix": 11,
+  "tokens_compared": 304,
+  "prompts": [
+   {
+    "prompt": "def is_palindrome(s: str) -> bool:\n    \"\"\"Return True iff s ",
+    "prefix": 128,
+    "hf_tokens": 128,
+    "vllm_tokens": 128,
+    "mean_abs_delta": 0.0033776280183974716
+   },
+   {
+    "prompt": "Write a Python function `merge_intervals(intervals)` that ta",
+    "prefix": 37,
+    "hf_tokens": 128,
+    "vllm_tokens": 128,
+    "mean_abs_delta": 0.007061263932907447
+   },
+   {
+    "prompt": "def longest_common_prefix(strs: list[str]) -> str:\n    \"\"\"Re",
+    "prefix": 128,
+    "hf_tokens": 128,
+    "vllm_tokens": 128,
+    "mean_abs_delta": 0.005332682367018116
+   },
+   {
+    "prompt": "Write a Python function `two_sum(nums, target)` returning th",
+    "prefix": 11,
+    "hf_tokens": 128,
+    "vllm_tokens": 128,
+    "mean_abs_delta": 0.0028920462632826952
+   }
+  ]
+ },
+ "gate": {
+  "pass": true,
+  "reason": "fp32 mean |\u0394| < 0.02 and greedy prefix complete"
+ }
+}
