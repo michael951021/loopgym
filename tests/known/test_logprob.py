@@ -53,3 +53,19 @@ def test_real_model_matches_hf_loss(impl):
         h = out.hidden_states[-1][0]                     # final hidden states (after the last norm)
         lp = kernels.token_logprobs(h[:-1], m.get_output_embeddings().weight, ids[0, 1:], impl=impl)
     assert abs(float(-lp.mean()) - float(out.loss)) < 1e-3
+
+
+@pytest.mark.skipif(not torch.cuda.is_available() or torch.cuda.device_count() < 2, reason="needs 2 GPUs")
+@pytest.mark.parametrize("impl", [i for i in kernels.IMPLS if i != "torch"])
+def test_runs_on_a_non_current_gpu(impl):
+    """The GRPO trainer lives on cuda:1 while cuda:0 is current; kernels must follow the tensors."""
+    g = torch.Generator().manual_seed(3)
+    h = torch.randn(5, 64, generator=g).to("cuda:1").requires_grad_()
+    w = torch.randn(300, 64, generator=g).to("cuda:1").requires_grad_()
+    t = torch.randint(0, 300, (5,), generator=g).to("cuda:1")
+    assert torch.cuda.current_device() == 0
+    lp = kernels.token_logprobs(h, w, t, impl=impl, chunk=64)
+    ref = kernels.token_logprobs(h, w, t, impl="torch", chunk=64)
+    assert torch.allclose(lp, ref, atol=1e-4)
+    lp.sum().backward()
+    assert h.grad is not None and h.grad.device == h.device
