@@ -129,7 +129,8 @@ def main(argv: list[str] | None = None) -> int:
         plan(args)
         return 0
 
-    prompts = [{"role": "user", "content": p} for p in PROMPTS[:args.n_prompts]]
+    # one conversation (a list of messages) per prompt, as RolloutBackend.generate expects
+    prompts = [[{"role": "user", "content": p}] for p in PROMPTS[:args.n_prompts]]
     fp32 = check_dtype(args.model, "float32", prompts, args.max_new_tokens)
     bf16 = check_dtype(args.model, "bfloat16", prompts, args.max_new_tokens)
     gate = (fp32["mean_abs_delta"] < args.gate

@@ -339,6 +339,18 @@ def test_float32_check_engine_has_no_lora(monkeypatch):
     assert rv.engine_args("m")["enable_lora"] is True
 
 
+def test_check_main_passes_conversations(monkeypatch, tmp_path):
+    """Each prompt must be a list of messages: the chat template indexes messages[0]."""
+    import loopgym.rl.check_vllm_hf as chk
+    seen = []
+    def fake(model, dtype, prompts, max_new_tokens):
+        seen.append(prompts)
+        return {"mean_abs_delta": 0.0, "min_prefix": max_new_tokens, "rows": []}
+    monkeypatch.setattr(chk, "check_dtype", fake)
+    chk.main(["--model", "m", "--out", str(tmp_path / "o.json"), "--n-prompts", "2"])
+    assert all(isinstance(p, list) and p[0]["role"] == "user" for p in seen[0])
+
+
 def test_engine_args_defaults():
     a = rv.engine_args("models/qwen2.5-coder-1.5b-instruct")
     assert a["model"] == "models/qwen2.5-coder-1.5b-instruct"
