@@ -179,3 +179,4 @@
 - [x] **Fix evalgrpo05: ValueError in run.py** — auto-filed from the job log; root cause was a stale `/last` subdir in the eval `--adapter` path (the trainer saves the adapter directly to `ckpt/grpo05_exercism/`), fixed on the evalgrpo05 line by kevin (id: fix-evalgrpo05-291fdab2) (after: -)
 - [x] **Fix cleanclone: non-zero exit (exit-code)** — auto-filed from the job log (id: fix-cleanclone-34bae3da) (after: -)
 - [x] **Fix gpurun1: RuntimeError in rollout_vllm.py** — auto-filed from the job log (id: fix-gpurun1-c76382a8) (after: -)
+- [x] **Fix gpurun1: torch.OutOfMemoryError in __init__.py** — auto-filed from the job log (id: fix-gpurun1-c315bcff) (after: -)

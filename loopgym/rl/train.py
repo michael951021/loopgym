@@ -444,6 +444,8 @@ class Run:
         policy = PeftModel.from_pretrained(build_base(self.cfg), str(d))
         for n, p in policy.named_parameters():  # from_pretrained leaves all frozen
             p.requires_grad = "lora_" in n
+        if self.cfg.trainer_device:  # from_pretrained builds on the CPU, like __init__ does
+            policy = policy.to(self.cfg.trainer_device)
         if self.dist == "fsdp" and self.world > 1:
             D.wrap_fsdp(policy)
         optimizer = torch.optim.AdamW(
