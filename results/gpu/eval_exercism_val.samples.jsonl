@@ -1,0 +1,9 @@
+{"task": "flatten-array", "sample": 0, "seed": 0, "reward": 0.0, "timed_out": false}
+{"task": "food-chain", "sample": 0, "seed": 100, "reward": 0.0, "timed_out": false}
+{"task": "isogram", "sample": 0, "seed": 200, "reward": 0.0, "timed_out": false}
+{"task": "largest-series-product", "sample": 0, "seed": 300, "reward": 0.0, "timed_out": false}
+{"task": "point-mutations", "sample": 0, "seed": 400, "reward": 0.0, "timed_out": false}
+{"task": "resistor-color-duo", "sample": 0, "seed": 500, "reward": 0.0, "timed_out": false}
+{"task": "scrabble-score", "sample": 0, "seed": 600, "reward": 1.0, "timed_out": false}
+{"task": "sieve", "sample": 0, "seed": 700, "reward": 1.0, "timed_out": false}
+{"task": "variable-length-quantity", "sample": 0, "seed": 800, "reward": 0.0, "timed_out": false}

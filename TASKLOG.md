@@ -193,3 +193,7 @@
 - Goal: Clean-clone check
 - Approach: compute job cleanclone ran rm -rf /tmp/lgcc && git clone -q /work /tmp/lgcc && cd /tmp/lgcc && PATH=/work/.tools/bin:/work/.tools/cargo/bin:/work/.venv/bin:$PATH make check (exit 0)
 - Blockers: none
+## GPU run: GRPO 1.5B on both 3090s
+- Goal: GPU run: GRPO 1.5B on both 3090s
+- Approach: compute job gpurun1 ran bash scripts/gpu_run.sh (exit 0)
+- Blockers: none

@@ -1,0 +1,154 @@
+{
+ "model": "models/qwen2.5-coder-1.5b-instruct",
+ "adapter": "ckpt/grpo15_gpu",
+ "source": "exercism",
+ "split": "test",
+ "n": 1,
+ "temperature": 0.8,
+ "max_new_tokens": 512,
+ "seed": 0,
+ "k": 1,
+ "pass_at_k": 0.18518518518518517,
+ "ci": [
+  0.07407407407407407,
+  0.3333333333333333
+ ],
+ "n_tasks": 27,
+ "per_task": {
+  "all-your-base": {
+   "n": 1,
+   "correct": 1,
+   "pass_at_1": 1.0
+  },
+  "anagram": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "atbash-cipher": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "bob": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "bowling": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "camicia": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "clock": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "connect": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "custom-set": {
+   "n": 1,
+   "correct": 1,
+   "pass_at_1": 1.0
+  },
+  "diamond": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "hamming": {
+   "n": 1,
+   "correct": 1,
+   "pass_at_1": 1.0
+  },
+  "kindergarten-garden": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "linked-list": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "poker": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "queen-attack": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "relative-distance": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "resistor-color-expert": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "robot-name": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "rotational-cipher": {
+   "n": 1,
+   "correct": 1,
+   "pass_at_1": 1.0
+  },
+  "scale-generator": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "spiral-matrix": {
+   "n": 1,
+   "correct": 1,
+   "pass_at_1": 1.0
+  },
+  "sublist": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "sum-of-multiples": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "triangle": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "twelve-days": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "wordy": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "yacht": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  }
+ }
+}

@@ -1,0 +1,64 @@
+{
+ "model": "models/qwen2.5-coder-1.5b-instruct",
+ "adapter": "ckpt/grpo15_gpu",
+ "source": "exercism",
+ "split": "val",
+ "n": 1,
+ "temperature": 0.8,
+ "max_new_tokens": 512,
+ "seed": 0,
+ "k": 1,
+ "pass_at_k": 0.2222222222222222,
+ "ci": [
+  0.0,
+  0.5555555555555556
+ ],
+ "n_tasks": 9,
+ "per_task": {
+  "flatten-array": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "food-chain": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "isogram": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "largest-series-product": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "point-mutations": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "resistor-color-duo": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "scrabble-score": {
+   "n": 1,
+   "correct": 1,
+   "pass_at_1": 1.0
+  },
+  "sieve": {
+   "n": 1,
+   "correct": 1,
+   "pass_at_1": 1.0
+  },
+  "variable-length-quantity": {
+   "n": 1,
+   "correct": 0,
+   "pass_at_1": 0.0
+  }
+ }
+}
