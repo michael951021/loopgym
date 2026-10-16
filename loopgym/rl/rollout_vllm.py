@@ -44,8 +44,12 @@ def build_llm(engine_args: dict):
 
 def engine_args(model: str, *, lora_rank: int = 16, dtype: str = "bfloat16",
                 gpu_memory_utilization: float = 0.9, seed: int = 0,
-                max_model_len: int = 8192, tensor_parallel_size: int = 1) -> dict:
-    """Exact vllm.LLM(...) kwargs for the GPU run: base model + LoRA adapters."""
+                max_model_len: int = 8192, tensor_parallel_size: int = 1,
+                enable_lora: bool = True) -> dict:
+    """Exact vllm.LLM(...) kwargs for the GPU run: base model + LoRA adapters.
+
+    vLLM's LoRA kernels take fp16/bf16 only, so a float32 engine must pass
+    enable_lora=False (the base-model logprob check does)."""
     return {
         "model": model,
         "trust_remote_code": False,
@@ -54,7 +58,7 @@ def engine_args(model: str, *, lora_rank: int = 16, dtype: str = "bfloat16",
         "max_model_len": max_model_len,
         "tensor_parallel_size": tensor_parallel_size,
         "gpu_memory_utilization": gpu_memory_utilization,
-        "enable_lora": True,
+        "enable_lora": enable_lora,
         "max_loras": 1,
         "max_lora_rank": lora_rank,
     }

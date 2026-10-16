@@ -325,6 +325,20 @@ def test_lora_sync(backend, tmp_path):
     assert be._lora.lora_int_id == req.lora_int_id + 1
 
 
+def test_float32_check_engine_has_no_lora(monkeypatch):
+    """vLLM's LoRA kernels assert fp16/bf16; the fp32 HF-vs-vLLM check must not enable LoRA."""
+    seen = []
+    import loopgym.rl.check_vllm_hf as chk
+    monkeypatch.setattr(rv, "build_llm", lambda args: seen.append(args) or (_ for _ in ()).throw(StopIteration))
+    monkeypatch.setattr("transformers.AutoTokenizer.from_pretrained", lambda *a, **k: None)
+    monkeypatch.setattr("transformers.AutoModelForCausalLM.from_pretrained",
+                        lambda *a, **k: type("M", (), {"to": lambda self, d: self, "eval": lambda self: self})())
+    with pytest.raises(StopIteration):
+        chk.check_dtype("m", "float32", [], 8)
+    assert seen[0]["dtype"] == "float32" and seen[0]["enable_lora"] is False
+    assert rv.engine_args("m")["enable_lora"] is True
+
+
 def test_engine_args_defaults():
     a = rv.engine_args("models/qwen2.5-coder-1.5b-instruct")
     assert a["model"] == "models/qwen2.5-coder-1.5b-instruct"

@@ -95,8 +95,9 @@ def check_dtype(model: str, dtype: str, prompts, max_new_tokens: int) -> dict:
     m = m.to("cuda:0").eval()
     hf = HFBackend(m, tok)
     # the check needs room for the HF copy on the same 3090: small KV budget
+    # base model only: no adapter is loaded, and vLLM's LoRA kernels reject float32
     args = rv.engine_args(model, dtype=dtype, gpu_memory_utilization=0.35,
-                          max_model_len=2048)
+                          max_model_len=2048, enable_lora=False)
     llm = rv.build_llm(args)
     res = _compare_one(hf, rv.VLLMBackend(llm, tok), prompts, max_new_tokens)
     _teardown(llm, m)
