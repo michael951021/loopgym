@@ -5,8 +5,8 @@
 Does GRPO post-training lift the pass@1 of Qwen2.5-Coder on coding tasks made
 from real bugs agents shipped (loopgym) and from Exercism, with confidence
 intervals, hack-proof grading, and every number recomputable from `results/`
-by `tools/check_report.py`? What works, what does not, and what is the GPU run
-for?
+by `tools/check_report.py`? What works, what does not, and what does a 1.5B
+run on two 3090s show?
 
 ## Task sources
 
@@ -105,7 +105,8 @@ compiled host-only: real-GPU timings land with the host GPU run.
   carrying zero advantage gave no detectable val lift (paired Δ CI contains
   0) and train reward declined. The pipeline is not broken (KL bounded, no
   clipping, hack screen clean, toy controls pass) — this scale simply does
-  not move the metric. The scale question is what the 1.5B GPU run is for.
+  not move the metric. The 1.5B GPU run below asks the same question with a
+  3× larger model and 2.5× the steps.
 - **base05 val 0.0764 sat below the pre-run floor 0.10.** Ten pipeline causes
   were ruled out (atk1-10) and the range author ruled it accepted; the range
   itself was never widened (Corrections).
@@ -114,24 +115,68 @@ compiled host-only: real-GPU timings land with the host GPU run.
 - **loopgym v0 test at n=4 shows 0.0000 for both base models** — in range,
   but too little data to say anything beyond "base models do not fix these
   bugs"; a post-GRPO loopgym eval needs the GPU run.
-- **Triton and CUDA kernel paths are untested on real GPUs** in the sandbox
-  (interpret / compile-only, per rule 2).
+- **Triton and CUDA kernel paths were untested on real GPUs** in the sandbox
+  (interpret / compile-only, per rule 2). The GPU run's known tests now cover
+  both, and the 1.5B run trained with the Triton kernel.
 
-## GPU / AWS plan (results: PENDING)
+## GPU run: GRPO 1.5B on two 3090s
 
-- **Host 3090s** (`scripts/gpu_run.sh`, Kevin runs): vLLM rollouts on GPU0,
-  trainer on GPU1; GRPO 1.5B (configs/grpo15_gpu.toml: B4 G8, 384 tokens,
-  lr 2e-5, β 0.02, 100 steps); known tests on CUDA/Triton and the
-  vLLM-vs-HF log-prob gate (< 0.02 nats) first; three evals with the final
-  adapter into `results/gpu/`.
-- **Scaling study:** `--two-node-local` rehearses 2 torchrun "nodes" on the
-  host (free) → `results/gpu/scale_local_{fsdp,deepspeed}.json`; the AWS run
-  is 2× spot g4dn.xlarge (T4), 0.5B, 3 configs × 50 steps, spot-cap + $10
-  budget alert + auto-terminate, refusing any plan estimated over $10
-  → `results/gpu/scale_aws_*.json`.
-- `results/gpu/` does not exist at the time of writing: every GPU number is
-  PENDING. The host GPU window runs after this report; `tools/check_report.py`
-  will recompute them from the scale files when they land.
+`scripts/gpu_run.sh`, configs/grpo15_gpu.toml: LoRA r16/α32 on q/k/v/o over an
+fp32 base, batch 4, group 8, 100 steps, 384 new tokens, T=1.0, lr 2e-5,
+β=0.02. vLLM generates on GPU0 (bf16, the LoRA re-synced every step); the
+trainer runs on GPU1 with the Triton log-prob kernel. Gates before training:
+CUDA and Triton known tests, then vLLM vs HF log-probs on the same tokens,
+fp32 mean |Δ| 0.00016 nats over 512 tokens (gate < 0.02), so the rollout
+engine's log-probs can stand in for the trainer's.
+
+**Training.** 100/100 steps (batch 4, group 8, 100 steps); step time median 7.12 min, range
+[4.06, 22.11] min; 13.3 h of training over two tries (the 12 h job timeout
+cut the first at step 90, the second resumed from the step-90 checkpoint).
+Train reward slope +0.00082/step [-0.00019, +0.00188]; first-20 mean 0.175 → last-20 mean 0.263.
+KL first10 → last10: 3.50e-06 → 5.06e-04; clip_frac 0.0 throughout. Groups with all 8
+rewards equal (zero advantage, no gradient): 0.693 of groups on average,
+about the same as grpo05 (0.675). The in-run validation checks (8 val tasks,
+a different 8 each time) read 0.250, 0.219, 0.266, 0.297, 0.391 at steps
+20–100.
+
+**Evals.** The job's own evals use n=1 per task (adapter at step 100):
+Exercism val 0.2222 [0.000, 0.556], test 0.1852 [0.074, 0.333], loopgym test 0.0000 [0.000, 0.000]. n=1 is not
+comparable to the n=16 baseline, so `evalgrpo15` re-scores the adapter with
+base15's protocol (T=0.8, 512 tokens, same seeds):
+
+| model | Exercism val (n=16) | loopgym test (n=4) |
+|---|---|---|
+| 1.5B base | 0.3056 [0.132, 0.486] | 0.0000 [0.000, 0.000] |
+| 1.5B GRPO, 100 steps | 0.3542 [0.167, 0.556] | 0.0000 [0.000, 0.000] |
+
+Paired over the 9 val tasks: Δ +0.0486 [+0.0000, +0.1042] → **null (the CI reaches 0, so the +0.05 is not a detected gain)**. Hack screen
+(20 regenerated completions): 20/20 sidecar match.
+
+**What it took to run.** Each fix is a commit with a test where the sandbox
+allows one:
+
+- vLLM's LoRA kernel asserts fp16/bf16, and the fp32 check engine was built
+  with LoRA on; the check compares base-model log-probs, so it now builds
+  without LoRA (79d33f0). It also passes one conversation per prompt, as both
+  backends expect (b31b8f1).
+- FlashInfer's sampler JIT-builds on first use, and the pip nvcc (cu13) is
+  incompatible with its bundled headers; `VLLM_USE_FLASHINFER_SAMPLER=0` uses
+  vLLM's PyTorch sampler (7888448).
+- Triton and the C++/CUDA extension launch on the *current* device; the
+  trainer's tensors live on cuda:1 while cuda:0 stays current, so the kernels
+  now launch under `torch.cuda.device(h.device)`, with a 2-GPU test (fd1bbd9).
+- The trainer ran out of memory on GPU1: an fp32 1.5B is 6 GB of weights, and
+  saved activations for one 2k-token row filled the rest by step 7 even at
+  micro_batch 1. Gradient checkpointing recomputes them in backward (gradients
+  identical, `tests/test_grad_ckpt.py`) and leaves room for micro_batch 4
+  (6a126b3, e27b21d).
+- Resuming rebuilt the policy on the CPU and never moved it back to the
+  trainer GPU, so the retry pushed every batch onto vLLM's GPU and ran out of
+  memory (37fb800, `tests/test_resume_device.py`).
+
+**Scaling study (two-node / AWS): PENDING.** `--two-node-local` and the AWS
+spot run (deploy/aws, $10 cap) are written and tested offline but have not
+run; there are no `results/gpu/scale_*.json` files.
 
 ## Corrections
 

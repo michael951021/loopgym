@@ -1,9 +1,25 @@
 # loopgym
 
-RL post-training (GRPO) of a small coding model on tasks made from bugs that autonomous coding agents actually
-shipped, plus the systems around it: a Rust sandbox server for grading, a fused log-prob kernel (C++/CUDA/Triton),
-FSDP2 / DeepSpeed training checked against single-process math, vLLM rollouts, and host / AWS scripts for GPU runs.
-Built by local agents from TODO.md; see CLAUDE.md for the rules and the known answers every number is checked against.
+GRPO post-training of Qwen2.5-Coder on coding tasks, including tasks mined from bugs that my own autonomous
+coding agents shipped, plus the systems around it: a Rust sandbox server for grading, a fused log-prob kernel
+(C++/CUDA/Triton), FSDP2 / DeepSpeed training checked against single-process math, vLLM rollouts, and host / AWS
+scripts for GPU runs. The code was written by local agents working from TODO.md under the rules in CLAUDE.md;
+[REPORT.md](REPORT.md) is the write-up, and `tools/check_report.py` recomputes every number in it from `results/`.
+
+## Results
+
+- **Real agent bugs are hard.** 141 fix commits mined from my agents' repos gave 26 tasks that fail 3/3 runs
+  before the fix and pass 3/3 after. Neither base model fixes any of the 13 held-out ones (0 of 52 attempts
+  each), and the 1.5B model still fixes none of them after GRPO.
+- **GRPO at this scale is starved of signal.** On Exercism, about 70% of groups (8 samples of one task) get
+  identical rewards, so they carry no advantage and no gradient. 0.5B on CPU, 40 steps: no detectable change
+  (paired Δ +0.0347 [−0.0625, +0.1250]). 1.5B on two 3090s, 100 steps: pass@1 0.306 → 0.354, paired Δ +0.0486 [+0.0000, +0.1042]: pointing up, but the CI reaches zero, so it is not a detected gain.
+- **The systems parts check out.** vLLM and HF log-probs agree to 0.00016 nats; log-probs for a 2k-token
+  sequence over the 152k vocabulary take 201 MB with the chunked path and 180 KB with the fused C++ kernel,
+  instead of 2.49 GB; the Rust grading server adds no measurable overhead per grade; a planted reward is
+  learned and a coin-flip reward is not, before any real run.
+- **Fitting 1.5B GRPO on two 24 GB cards** took six fixes (kernels launching on the wrong GPU, trainer memory,
+  a resume bug, three vLLM setup issues). Each is a commit, most with a test, listed in REPORT.md.
 
 ## Architecture
 
@@ -91,8 +107,9 @@ bash tools/lgbox_smoke.sh
 .venv/bin/python tools/check_report.py
 ```
 
-GPU runs are host-only (Kevin): `bash scripts/gpu_run.sh --dry-run` prints the plan; the real window runs
-CUDA/Triton known tests, the vLLM-vs-HF gate, the 1.5B GRPO run and the scale rehearsals.
+GPU runs are host-only: `bash scripts/gpu_run.sh --dry-run` prints the plan; the real window runs the CUDA/Triton
+known tests, the vLLM-vs-HF gate, the 1.5B GRPO run (configs/grpo15_gpu.toml, about 13 hours on two 3090s) and
+the evals into `results/gpu/`. The two-node and AWS scale rehearsals are written but have not run.
 
 ## Skills map
 
