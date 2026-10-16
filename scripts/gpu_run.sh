@@ -302,6 +302,10 @@ ensure_venv_gpu
 cu=.venv-gpu/lib/python3.12/site-packages/nvidia/cu13
 export CUDA_HOME="$PWD/$cu" PATH="$PWD/$cu/bin:$PWD/.venv-gpu/bin:$PATH" LOOPGYM_BUILD_VERBOSE=1
 [ -e "$cu/lib/libcudart.so" ] || ln -s libcudart.so.13 "$cu/lib/libcudart.so"
+# vLLM JIT-builds FlashInfer's top-k/top-p sampler with that nvcc, and FlashInfer's bundled CCCL headers
+# reject it ("CUDA compiler and CUDA toolkit headers are incompatible"). Use vLLM's PyTorch sampler;
+# attention already runs on the Triton backend.
+export VLLM_USE_FLASHINFER_SAMPLER=0
 # A JIT build killed mid-way leaves torch's lock behind and the next build waits on it forever, silently
 # (gpurun1 was stall-killed twice this way). The GPU job owns the machine, so no build is live.
 rm -f .tools/build/lock
