@@ -103,7 +103,13 @@ class _TritonLogprob(torch.autograd.Function):
         dc = triton.next_power_of_2(d)
         grad_h = torch.empty_like(h) if h.requires_grad else None
         grad_w = torch.empty_like(w) if w.requires_grad else None
-        if T > 0:
+        if T > 0 and h.is_cuda:
+            with torch.cuda.device(h.device):  # Triton launches on the current device
+                if grad_h is not None:
+                    _bwd_h[(T,)](h, w, g, lse, t, grad_h, V, d, C=chunk, DC=dc)
+                if grad_w is not None:
+                    _bwd_w[(triton.cdiv(V, chunk),)](h, w, g, lse, t, grad_w, T, V, d, C=chunk, DC=dc)
+        elif T > 0:
             if grad_h is not None:
                 _bwd_h[(T,)](h, w, g, lse, t, grad_h, V, d, C=chunk, DC=dc)
             if grad_w is not None:

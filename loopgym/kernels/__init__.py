@@ -143,6 +143,12 @@ def _host_shim(fn):
         if h.device.type == "cpu" and torch.cuda.is_available():
             out = fn(h.to("cuda"), w.to("cuda"), t.to("cuda"), chunk)
             return out.to(h.device)
+        if h.is_cuda:
+            # Triton and the extension launch on the *current* device; the GRPO trainer
+            # runs on cuda:1 while cuda:0 stays current, which fails ("Pointer argument
+            # cannot be accessed from Triton").
+            with torch.cuda.device(h.device):
+                return fn(h, w, t, chunk)
         return fn(h, w, t, chunk)
     return wrapped
 
