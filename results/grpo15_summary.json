@@ -1,0 +1,143 @@
+{
+ "run": "runs/grpo15_gpu",
+ "config": "configs/grpo15_gpu.toml",
+ "steps": 100,
+ "train_reward": {
+  "first5_mean": 0.175,
+  "last5_mean": 0.275,
+  "slope_per_step": 0.0008164566456645666,
+  "slope_ci": [
+   -0.000185866228870373,
+   0.0018797193040052532
+  ]
+ },
+ "val": {
+  "base15": {
+   "pass_at_k": 0.3055555555555556,
+   "ci": [
+    0.13194444444444445,
+    0.48628472222222124
+   ],
+   "n_per_task": 16
+  },
+  "grpo15": {
+   "pass_at_k": 0.3541666666666667,
+   "ci": [
+    0.16666666666666666,
+    0.5557291666666657
+   ],
+   "n_per_task": 16
+  },
+  "paired_delta": {
+   "point": 0.04861111111111111,
+   "ci": [
+    0.0,
+    0.10416666666666667
+   ],
+   "n_tasks": 9,
+   "method": "task-clustered bootstrap, n_boot=2000, seed=0 (loopgym.eval.stats)"
+  },
+  "verdict": "null"
+ },
+ "kl": {
+  "max": 0.002510866408260524,
+  "first10_mean": 3.495590994109354e-06,
+  "last10_mean": 0.000506072135528674
+ },
+ "clip_frac": {
+  "min": 0.0,
+  "max": 0.0
+ },
+ "frac_groups_all_same": {
+  "mean": 0.6925,
+  "max": 1.0
+ },
+ "eval_points": [
+  {
+   "step": 20,
+   "kind": "eval",
+   "tasks": [
+    "largest-series-product",
+    "isogram",
+    "resistor-color-duo",
+    "sieve",
+    "point-mutations",
+    "flatten-array",
+    "food-chain",
+    "variable-length-quantity"
+   ],
+   "reward_mean": 0.25,
+   "reward_std": 0.4364357888698578
+  },
+  {
+   "step": 40,
+   "kind": "eval",
+   "tasks": [
+    "flatten-array",
+    "food-chain",
+    "isogram",
+    "point-mutations",
+    "variable-length-quantity",
+    "scrabble-score",
+    "largest-series-product",
+    "resistor-color-duo"
+   ],
+   "reward_mean": 0.21875,
+   "reward_std": 0.4166666567325592
+  },
+  {
+   "step": 60,
+   "kind": "eval",
+   "tasks": [
+    "variable-length-quantity",
+    "largest-series-product",
+    "food-chain",
+    "resistor-color-duo",
+    "point-mutations",
+    "flatten-array",
+    "isogram",
+    "sieve"
+   ],
+   "reward_mean": 0.265625,
+   "reward_std": 0.44515693187713623
+  },
+  {
+   "step": 80,
+   "kind": "eval",
+   "tasks": [
+    "isogram",
+    "sieve",
+    "flatten-array",
+    "resistor-color-duo",
+    "scrabble-score",
+    "variable-length-quantity",
+    "food-chain",
+    "largest-series-product"
+   ],
+   "reward_mean": 0.296875,
+   "reward_std": 0.4604927599430084
+  },
+  {
+   "step": 100,
+   "kind": "eval",
+   "tasks": [
+    "resistor-color-duo",
+    "food-chain",
+    "sieve",
+    "flatten-array",
+    "point-mutations",
+    "variable-length-quantity",
+    "isogram",
+    "scrabble-score"
+   ],
+   "reward_mean": 0.390625,
+   "reward_std": 0.4917473793029785
+  }
+ ],
+ "hack_screen": {
+  "n": 20,
+  "n_matches": 20,
+  "n_flagged": 0
+ },
+ "claim": "grpo15 (100-step LoRA GRPO, exercism, 1.5B, 2x3090): null on val pass@1 (paired \u0394 +0.0486, CI [+0.0000, +0.1042]); train reward declined (+0.0008/step, CI [-0.0002, +0.0019]) while 69% of groups carried zero advantage signal \u2014 no detectable learning at this scale"
+}

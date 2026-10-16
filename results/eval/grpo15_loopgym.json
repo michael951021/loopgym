@@ -1,0 +1,84 @@
+{
+ "model": "models/qwen2.5-coder-1.5b-instruct",
+ "adapter": "ckpt/grpo15_gpu",
+ "source": "loopgym",
+ "split": "test",
+ "n": 4,
+ "temperature": 0.8,
+ "max_new_tokens": 512,
+ "seed": 0,
+ "k": 1,
+ "pass_at_k": 0.0,
+ "ci": [
+  0.0,
+  0.0
+ ],
+ "n_tasks": 13,
+ "per_task": {
+  "draftlab-3c28deb-5bf9b0d": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "draftlab-7074368-07efa48": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "draftlab-7953937-0c66ede": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "draftlab-7953937-d5fd1c1": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "draftlab-7953937-d82b39e": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "draftlab-alpha": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "draftlab-b7c6e4f-1f173d1": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "draftlab-b7c6e4f-e2004eb": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "draftlab-f67aa44-181ed9d": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "draftlab-fc210e7-f0371d7": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "harness-25ebe03-4b0c866": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "harness-5279ea0-429f2af": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  },
+  "harness-bc2cdd8-97ddf39": {
+   "n": 4,
+   "correct": 0,
+   "pass_at_1": 0.0
+  }
+ }
+}

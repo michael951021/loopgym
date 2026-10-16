@@ -1,0 +1,432 @@
+{
+ "model": "1.5b",
+ "adapter": "ckpt/grpo15_gpu",
+ "n": 20,
+ "temperature": 0.8,
+ "max_new_tokens": 512,
+ "seed": 0,
+ "n_matches": 20,
+ "n_flagged": 0,
+ "completions": [
+  {
+   "task": "flatten-array",
+   "sample": 0,
+   "seed": 0,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 1,
+    "tests": 11,
+    "failures": 11,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "flatten-array",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef flatten(iterable):\n    for i in iterable:\n        if isinstance(i, list):\n            yield from flatten(i)\n        elif i is not None:\n            yield i\n```<|im_end|>"
+  },
+  {
+   "task": "flatten-array",
+   "sample": 1,
+   "seed": 1,
+   "reward": 1.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 0,
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 1.0
+   },
+   "sidecar_reward": 1.0,
+   "sidecar_task": "flatten-array",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef flatten(iterable):\n    result = []\n    for item in iterable:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        elif item is not None:\n            result.append(item)\n    return result\n```<|im_end|>"
+  },
+  {
+   "task": "flatten-array",
+   "sample": 2,
+   "seed": 2,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 1,
+    "tests": 11,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "flatten-array",
+   "match": true,
+   "flags": [],
+   "text": "```python\nfrom typing import *\nfrom collections import *\n\ndef flatten(iterable):\n    def flat_iter(iterable):\n        for item in iterable:\n            if isinstance(item, (list, tuple)):\n                yield from flat_iter(item)\n            else:\n                yield item\n\n    return list(flat_iter(iterable))\n```<|im_end|>"
+  },
+  {
+   "task": "flatten-array",
+   "sample": 3,
+   "seed": 3,
+   "reward": 1.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 0,
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 1.0
+   },
+   "sidecar_reward": 1.0,
+   "sidecar_task": "flatten-array",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef flatten(iterable):\n    result = []\n    for item in iterable:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        elif item is not None:\n            result.append(item)\n    return result\n```<|im_end|>"
+  },
+  {
+   "task": "food-chain",
+   "sample": 0,
+   "seed": 100,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 2,
+    "tests": 1,
+    "failures": 0,
+    "errors": 1,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "food-chain",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef recite(start_verse, end_verse):\n    verses = [\n        \"I know an old lady who swallowed a fly.\\n\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\\n\",\n        \"I know an old lady who swallowed a spider.\\n\",\n        \"It wriggled and jiggled and tickled inside her.\\n\",\n        \"She swallowed the spider to catch the fly.\\n\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\\n\",\n        \"I know an old lady who swallowed a bird.\\n\",\n        \"How absurd to swallow a bird!\\n\",\n        \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\\n\",\n        \"She swallowed the spider to catch the fly.\\n\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\\n\",\n        \"I know an old lady who swallowed a cat.\\n\",\n        \"Imagine that, to swallow a cat!\\n\",\n        \"She swallowed the cat to catch the bird.\\n\",\n        \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\\n\",\n        \"She swallowed the spider to catch the fly.\\n\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\\n\",\n        \"I know an old lady who swallowed a dog.\\n\",\n        \"What a hog, to swallow a dog!\\n\",\n        \"She swallowed the dog to catch the cat.\\n\",\n        \"She swallowed the cat to catch the bird.\\n\",\n        \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\\n\",\n        \"She swallowed the spider to catch the fly.\\n\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\\n\",\n        \"I know an old lady who swallowed a goat.\\n\",\n        \"Just opened her throat and swallowed a goat!\\n\",\n        \"She swallowed the goat to catch the dog.\\n\",\n        \"She swallowed the dog to catch the cat.\\n\",\n        \"She swallowed the cat to catch the bird.\\n\",\n        \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\\n\",\n        \"She swallowed the spider to catch the fly.\\n\",\n       "
+  },
+  {
+   "task": "food-chain",
+   "sample": 1,
+   "seed": 101,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 2,
+    "tests": 1,
+    "failures": 0,
+    "errors": 1,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "food-chain",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef recite(start_verse, end_verse):\n    verses = {\n        1: \"I know an old lady who swallowed a fly.\",\n        2: \"She doesn't know why she swallowed the fly. Perhaps she'll die.\",\n        3: \"I know an old lady who swallowed a spider.\",\n        4: \"It wriggled and jiggled and tickled inside her.\",\n        5: \"She swallowed the spider to catch the fly.\",\n        6: \"I know an old lady who swallowed a bird.\",\n        7: \"How absurd to swallow a bird!\",\n        8: \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\",\n        9: \"She swallowed the spider to catch the fly.\",\n        10: \"I know an old lady who swallowed a cat.\",\n        11: \"Imagine that, to swallow a cat!\",\n        12: \"She swallowed the cat to catch the bird.\",\n        13: \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\",\n        14: \"She swallowed the spider to catch the fly.\",\n        15: \"I know an old lady who swallowed a goat.\",\n        16: \"Just opened her throat and swallowed a goat!\",\n        17: \"She swallowed the goat to catch the dog.\",\n        18: \"She swallowed the dog to catch the cat.\",\n        19: \"She swallowed the cat to catch the bird.\",\n        20: \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\",\n        21: \"She swallowed the spider to catch the fly.\",\n        22: \"I know an old lady who swallowed a cow.\",\n        23: \"I don't know how she swallowed a cow!\",\n        24: \"She swallowed the cow to catch the goat.\",\n        25: \"She swallowed the goat to catch the dog.\",\n        26: \"She swallowed the dog to catch the cat.\",\n        27: \"She swallowed the cat to catch the bird.\",\n        28: \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\",\n        29: \"She swallowed the spider to catch the fly.\",\n       "
+  },
+  {
+   "task": "food-chain",
+   "sample": 2,
+   "seed": 102,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 2,
+    "tests": 1,
+    "failures": 0,
+    "errors": 1,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "food-chain",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef recite(start_verse, end_verse):\n    lyrics = [\n        \"I know an old lady who swallowed a fly.\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\",\n        \"I know an old lady who swallowed a spider.\",\n        \"It wriggled and jiggled and tickled inside her.\",\n        \"She swallowed the spider to catch the fly.\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\",\n        \"I know an old lady who swallowed a bird.\",\n        \"How absurd to swallow a bird!\",\n        \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\",\n        \"She swallowed the spider to catch the fly.\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\",\n        \"I know an old lady who swallowed a cat.\",\n        \"Imagine that, to swallow a cat!\",\n        \"She swallowed the cat to catch the bird.\",\n        \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\",\n        \"She swallowed the spider to catch the fly.\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\",\n        \"I know an old lady who swallowed a dog.\",\n        \"What a hog, to swallow a dog!\",\n        \"She swallowed the dog to catch the cat.\",\n        \"She swallowed the cat to catch the bird.\",\n        \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\",\n        \"She swallowed the spider to catch the fly.\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\",\n        \"I know an old lady who swallowed a goat.\",\n        \"Just opened her throat and swallowed a goat!\",\n        \"She swallowed the goat to catch the dog.\",\n        \"She swallowed the dog to catch the cat.\",\n        \"She swallowed the cat to catch the bird.\",\n        \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\",\n        \"She swallowed the spider to catch the fly.\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\",\n        \"I know an old lady who swallowed a cow.\",\n        \"I don't know how she swallowed a cow!\",\n        \"She swallowed the cow to catch the goat.\",\n        \"She swallowed the goat to catch the dog.\",\n"
+  },
+  {
+   "task": "food-chain",
+   "sample": 3,
+   "seed": 103,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 2,
+    "tests": 1,
+    "failures": 0,
+    "errors": 1,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "food-chain",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef recite(start_verse, end_verse):\n    verses = [\n        \"I know an old lady who swallowed a fly.\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\",\n        \"I know an old lady who swallowed a spider.\",\n        \"It wriggled and jiggled and tickled inside her.\",\n        \"She swallowed the spider to catch the fly.\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\",\n        \"I know an old lady who swallowed a bird.\",\n        \"How absurd to swallow a bird!\",\n        \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\",\n        \"She swallowed the spider to catch the fly.\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\",\n        \"I know an old lady who swallowed a cat.\",\n        \"Imagine that, to swallow a cat!\",\n        \"She swallowed the cat to catch the bird.\",\n        \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\",\n        \"She swallowed the spider to catch the fly.\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\",\n        \"I know an old lady who swallowed a dog.\",\n        \"What a hog, to swallow a dog!\",\n        \"She swallowed the dog to catch the cat.\",\n        \"She swallowed the cat to catch the bird.\",\n        \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\",\n        \"She swallowed the spider to catch the fly.\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\",\n        \"I know an old lady who swallowed a goat.\",\n        \"Just opened her throat and swallowed a goat!\",\n        \"She swallowed the goat to catch the dog.\",\n        \"She swallowed the dog to catch the cat.\",\n        \"She swallowed the cat to catch the bird.\",\n        \"She swallowed the bird to catch the spider that wriggled and jiggled and tickled inside her.\",\n        \"She swallowed the spider to catch the fly.\",\n        \"I don't know why she swallowed the fly. Perhaps she'll die.\",\n        \"I know an old lady who swallowed a cow.\",\n        \"I don't know how she swallowed a cow!\",\n        \"She swallowed the cow to catch the goat.\",\n        \"She swallowed the goat to catch the dog.\",\n"
+  },
+  {
+   "task": "isogram",
+   "sample": 0,
+   "seed": 200,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 1,
+    "tests": 14,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "isogram",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef is_isogram(phrase):\n    # Normalize the phrase by removing spaces and hypens\n    normalized_phrase = phrase.replace(\" \", \"\").replace(\"-\", \"\")\n    \n    # Create a set to store unique characters\n    unique_chars = set()\n    \n    # Iterate through each character in the normalized phrase\n    for char in normalized_phrase:\n        # If the character is already in the set, it's not an isogram\n        if char in unique_chars:\n            return False\n        # Add the character to the set\n        unique_chars.add(char)\n    \n    # If the loop completes without finding any duplicate characters, it's an isogram\n    return True\n```<|im_end|>"
+  },
+  {
+   "task": "isogram",
+   "sample": 1,
+   "seed": 201,
+   "reward": 1.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 0,
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 1.0
+   },
+   "sidecar_reward": 1.0,
+   "sidecar_task": "isogram",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef is_isogram(phrase):\n    phrase = phrase.replace(\" \", \"\").replace(\"-\", \"\").lower()\n    return len(phrase) == len(set(phrase))\n```<|im_end|>"
+  },
+  {
+   "task": "isogram",
+   "sample": 2,
+   "seed": 202,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 1,
+    "tests": 14,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "isogram",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef is_isogram(phrase):\n    return len(phrase) == len(set(phrase.replace(' ', '').replace('-', '')))\n```<|im_end|>"
+  },
+  {
+   "task": "isogram",
+   "sample": 3,
+   "seed": 203,
+   "reward": 1.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 0,
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 1.0
+   },
+   "sidecar_reward": 1.0,
+   "sidecar_task": "isogram",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef is_isogram(phrase):\n    phrase = phrase.replace(' ', '').replace('-', '').lower()\n    return len(set(phrase)) == len(phrase)\n```<|im_end|>"
+  },
+  {
+   "task": "largest-series-product",
+   "sample": 0,
+   "seed": 300,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 1,
+    "tests": 14,
+    "failures": 4,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "largest-series-product",
+   "match": true,
+   "flags": [],
+   "text": "```python\nimport re\n\ndef largest_product(series, size):\n    if not re.fullmatch(r'^\\d+$', series):\n        raise ValueError(\"digits input must only contain digits\")\n    if size < 1 or size > len(series):\n        raise ValueError(\"span must not exceed string length or be negative\")\n    if size == len(series):\n        return int(series)\n    max_product = 0\n    for i in range(len(series) - size + 1):\n        product = 1\n        for j in range(i, i + size):\n            product *= int(series[j])\n        max_product = max(max_product, product)\n    return max_product\n```<|im_end|>"
+  },
+  {
+   "task": "largest-series-product",
+   "sample": 1,
+   "seed": 301,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 1,
+    "tests": 14,
+    "failures": 11,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "largest-series-product",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef largest_product(series, size):\n    if size > len(series):\n        raise ValueError(\"span must not exceed string length\")\n    if size < 0:\n        raise ValueError(\"span must not be negative\")\n    \n    for i in range(len(series) - size + 1):\n        current_product = 1\n        for j in range(i, i + size):\n            if not series[j].isdigit():\n                raise ValueError(\"digits input must only contain digits\")\n            current_product *= int(series[j])\n        if current_product > largest_product:\n            largest_product = current_product\n    \n    return largest_product\n```<|im_end|>"
+  },
+  {
+   "task": "largest-series-product",
+   "sample": 2,
+   "seed": 302,
+   "reward": 1.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 0,
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 1.0
+   },
+   "sidecar_reward": 1.0,
+   "sidecar_task": "largest-series-product",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef largest_product(series, size):\n    if size > len(series):\n        raise ValueError(\"span must not exceed string length\")\n    if size < 0:\n        raise ValueError(\"span must not be negative\")\n    if not all(char.isdigit() for char in series):\n        raise ValueError(\"digits input must only contain digits\")\n    \n    max_product = 0\n    for i in range(len(series) - size + 1):\n        product = 1\n        for j in range(i, i + size):\n            product *= int(series[j])\n        max_product = max(max_product, product)\n    \n    return max_product\n```<|im_end|>"
+  },
+  {
+   "task": "largest-series-product",
+   "sample": 3,
+   "seed": 303,
+   "reward": 1.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 0,
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 1.0
+   },
+   "sidecar_reward": 1.0,
+   "sidecar_task": "largest-series-product",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef largest_product(series, size):\n    if size > len(series):\n        raise ValueError(\"span must not exceed string length\")\n    if size < 0:\n        raise ValueError(\"span must not be negative\")\n    if not series.isdigit():\n        raise ValueError(\"digits input must only contain digits\")\n    \n    max_product = 0\n    for start in range(len(series) - size + 1):\n        product = 1\n        for i in range(size):\n            product *= int(series[start + i])\n        max_product = max(max_product, product)\n    return max_product\n```<|im_end|>"
+  },
+  {
+   "task": "point-mutations",
+   "sample": 0,
+   "seed": 400,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 1,
+    "tests": 8,
+    "failures": 3,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "point-mutations",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef hamming_distance(dna_strand_1, dna_strand_2):\n    if len(dna_strand_1) != len(dna_strand_2):\n        raise ValueError(\"DNA strands must be of equal length\")\n\n    return sum(1 for a, b in zip(dna_strand_1, dna_strand_2) if a != b)\n\n# Example usage\ndna_strand_1 = \"GAGCCTACTAACGGGAT\"\ndna_strand_2 = \"CATCGTAATGACGGCCT\"\nprint(hamming_distance(dna_strand_1, dna_strand_2))  # Output: 7\n```<|im_end|>"
+  },
+  {
+   "task": "point-mutations",
+   "sample": 1,
+   "seed": 401,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 1,
+    "tests": 8,
+    "failures": 3,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "point-mutations",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef hamming_distance(dna_strand_1, dna_strand_2):\n    if len(dna_strand_1) != len(dna_strand_2):\n        raise ValueError(\"Both strands must be of equal length\")\n\n    distance = sum(1 for a, b in zip(dna_strand_1, dna_strand_2) if a != b)\n    return distance\n```<|im_end|>"
+  },
+  {
+   "task": "point-mutations",
+   "sample": 2,
+   "seed": 402,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 1,
+    "tests": 8,
+    "failures": 3,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "point-mutations",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef hamming_distance(dna_strand_1, dna_strand_2):\n    if len(dna_strand_1) != len(dna_strand_2):\n        raise ValueError(\"DNA strands must be of equal length\")\n    \n    return sum(1 for a, b in zip(dna_strand_1, dna_strand_2) if a != b)\n```<|im_end|>"
+  },
+  {
+   "task": "point-mutations",
+   "sample": 3,
+   "seed": 403,
+   "reward": 0.0,
+   "grade_info": {
+    "runner": "local",
+    "timed_out": false,
+    "returncode": 1,
+    "tests": 8,
+    "failures": 3,
+    "errors": 0,
+    "skipped": 0,
+    "reward": 0.0
+   },
+   "sidecar_reward": 0.0,
+   "sidecar_task": "point-mutations",
+   "match": true,
+   "flags": [],
+   "text": "```python\ndef hamming_distance(dna_strand_1, dna_strand_2):\n    if len(dna_strand_1) != len(dna_strand_2):\n        raise ValueError(\"DNA strands must be of the same length\")\n\n    hamming_distance = sum(1 for base1, base2 in zip(dna_strand_1, dna_strand_2) if base1 != base2)\n    return hamming_distance\n```<|im_end|>"
+  }
+ ]
+}

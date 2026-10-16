@@ -197,3 +197,7 @@
 - Goal: GPU run: GRPO 1.5B on both 3090s
 - Approach: compute job gpurun1 ran bash scripts/gpu_run.sh (exit 0)
 - Blockers: none
+## Eval GRPO 1.5B (GPU run) at the baseline protocol
+- Goal: Eval GRPO 1.5B (GPU run) at the baseline protocol
+- Approach: compute job evalgrpo15 ran OMP_NUM_THREADS=16 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-1.5b-instruct --adapter ckpt/grpo15_gpu --source exercism --split val --n 16 --out results/eval/grpo15_val.json && OMP_NUM_THREADS=16 .venv/bin/python -m loopgym.eval.run --model models/qwen2.5-coder-1.5b-instruct --adapter ckpt/grpo15_gpu --source loopgym --split test --n 4 --out results/eval/grpo15_loopgym.json && OMP_NUM_THREADS=16 .venv/bin/python tools/grpo05_hackcheck.py --tag grpo15 && .venv/bin/python tools/check_results.py --only grpo15 (exit 0)
+- Blockers: none
