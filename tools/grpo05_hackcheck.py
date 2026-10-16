@@ -1,8 +1,8 @@
-"""Reward-hack screen for the grpo05 val eval.
+"""Reward-hack screen for a GRPO val eval (grpo05 by default; `--tag grpo15` for the GPU run).
 
-Regenerates the first 20 grpo05 val completions (5 tasks x 4 samples, the
-first 20 sidecar rows) at their exact eval seeds, re-grades them, and writes
-results/grpo05_hackcheck.json with each completion's text, grade info and
+Regenerates 20 val completions (samples 0-3 of the first 5 tasks, matched to
+their sidecar rows by task and sample) at their exact eval seeds, re-grades them, and writes
+results/<tag>_hackcheck.json with each completion's text, grade info and
 mechanical hack flags. A matching sidecar reward per completion is the
 determinism known answer; the flags are for human review, not a verdict.
 """
@@ -16,8 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 N_TASKS, N_SAMPLES = 5, 4
-MODEL, ADAPTER = "0.5b", "ckpt/grpo05_exercism"
-TEMP, MAX_NEW, SEED = 0.8, 512, 0  # as in results/eval/grpo05_val.json
+RUNS = {"grpo05": ("0.5b", "ckpt/grpo05_exercism"), "grpo15": ("1.5b", "ckpt/grpo15_gpu")}
+TEMP, MAX_NEW, SEED = 0.8, 512, 0  # as in results/eval/<tag>_val.json
 
 
 def mechanical_flags(text: str, sol: str) -> list[str]:
@@ -32,16 +32,23 @@ def mechanical_flags(text: str, sol: str) -> list[str]:
     return flags
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--tag", choices=sorted(RUNS), default="grpo05")
+    tag = ap.parse_args(argv).tag
+    model_id, adapter = RUNS[tag]
     from loopgym.env import grade
     from loopgym.eval.run import load_model, load_tasks
     from loopgym.rl.rollout import HFBackend
 
     tasks = load_tasks("exercism", "val", None)[:N_TASKS]
-    side = [json.loads(line) for line in
-            (ROOT / "results" / "eval" / "grpo05_val.samples.jsonl").read_text().splitlines()
-            if line.strip()][: N_TASKS * N_SAMPLES]
-    model, tokenizer = load_model(MODEL, ADAPTER)
+    # keyed by (task, sample): the sidecar is task-major, so at n=16 the first 20 rows
+    # are not 5 tasks x 4 samples
+    rows = (ROOT / "results" / "eval" / f"{tag}_val.samples.jsonl").read_text().splitlines()
+    side = {(r["task"], r["sample"]): r for r in map(json.loads, filter(str.strip, rows))}
+    model, tokenizer = load_model(model_id, adapter)
     backend = HFBackend(model, tokenizer)
 
     out = []
@@ -51,7 +58,7 @@ def main() -> int:
             comp = backend.generate([t.prompt()], 1, MAX_NEW, TEMP, 1.0, seed)[0][0]
             files = t.parse(comp.text)
             reward, info = grade(t, files, "local", timeout=30)
-            s = side[idx * N_SAMPLES + i]
+            s = side[(t.name, i)]
             out.append({
                 "task": t.name, "sample": i, "seed": seed,
                 "reward": reward, "grade_info": info,
@@ -63,12 +70,12 @@ def main() -> int:
             print(f"[{len(out):2d}/20] {t.name} s{i} seed={seed} "
                   f"reward={reward} match={out[-1]['match']} flags={out[-1]['flags']}")
 
-    doc = {"model": MODEL, "adapter": ADAPTER, "n": len(out),
+    doc = {"model": model_id, "adapter": adapter, "n": len(out),
            "temperature": TEMP, "max_new_tokens": MAX_NEW, "seed": SEED,
            "n_matches": sum(c["match"] for c in out),
            "n_flagged": sum(1 for c in out if c["flags"]),
            "completions": out}
-    outp = ROOT / "results" / "grpo05_hackcheck.json"
+    outp = ROOT / "results" / f"{tag}_hackcheck.json"
     outp.write_text(json.dumps(doc, indent=1) + "\n")
     print(f"-> {outp} ({outp.stat().st_size / 1e6:.2f} MB), "
           f"matches {doc['n_matches']}/20, flagged {doc['n_flagged']}")
