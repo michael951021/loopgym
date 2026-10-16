@@ -12,6 +12,9 @@ split = "train"
 max_difficulty = 0
 batch = 4
 group = 8
+# rows per policy/ref forward (gradient accumulation; same math). The default 8 OOMed the
+# trainer 3090 on the first step: fp32 activations for 8 x ~1.9k-token rows exceed 24 GB.
+micro_batch = 2
 max_new_tokens = 384
 temperature = 1.0
 top_p = 1.0
